@@ -28,6 +28,9 @@
 #include "data/writer.h"
 #include "data/reader.h"
 #include "graphics/particle_engine.h"
+
+#include "paint_log.h"
+#include "graphics/drawcall.h"
 #include "graphics/shader_code.h"
 #include "graphics/shader_source.h"
 #include "graphics/geometry.h"
@@ -290,34 +293,16 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
     return true;
 }
 
-bool ParticleEngineClass::Construct(const Environment& env, const InstanceState& state, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
+bool ParticleEngineClass::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program) const
 {
-    InstanceBuffer buffer;
-    buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
-    buffer.Resize(draw.instances.size());
-
-    for (size_t i=0; i<draw.instances.size(); ++i)
+    if (const auto* instanced_draw = draw.Get<GenericInstancedDraw>())
     {
-        const auto& instance = draw.instances[i];
-        InstanceAttribute ia;
-        ia.iaModelVectorX = ToVec(instance.model_to_world[0]);
-        ia.iaModelVectorY = ToVec(instance.model_to_world[1]);
-        ia.iaModelVectorZ = ToVec(instance.model_to_world[2]);
-        ia.iaModelVectorW = ToVec(instance.model_to_world[3]);
-        buffer.SetInstanceData(ia, i);
+        auto instance_data = PrepareDrawCall(*instanced_draw, device, env.editing_mode);
+        if (!instance_data)
+            GFX_PAINT_ERROR("Failed to prepare instanced drawing instance data.");
+        program.SetInstanceData(std::move(instance_data));
     }
 
-    // we're not making any contribution to the instance data here, therefore
-    // the hash and usage are exactly what the caller specified.
-    args.usage = draw.usage;
-    args.content_hash = draw.content_hash;
-    args.content_name = draw.content_name;
-    args.buffer = std::move(buffer);
-    return true;
-}
-
-bool ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState& program) const
-{
     if (mParams->coordinate_space == CoordinateSpace::Global)
     {
         // when the coordinate space is global the particles are spawn directly
@@ -1205,11 +1190,11 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, const Params& p
     return true;
 }
 
-bool ParticleEngineInstance::ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& state) const
+bool ParticleEngineInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
 {
     // state.line_width = 1.0; // don't change the line width
     state.culling    = Culling::None;
-    return mClass->ApplyDynamicState(env, program);
+    return mClass->ApplyDynamicState(env, draw, device, program);
 }
 
 ShaderSource ParticleEngineInstance::GetShader(const Environment& env, const Device& device) const
@@ -1232,11 +1217,6 @@ std::string ParticleEngineInstance::GetGeometryId(const Environment& env) const
 bool ParticleEngineInstance::Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const
 {
     return mClass->Construct(env, *mState, create);
-}
-
-bool ParticleEngineInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
-{
-    return mClass->Construct(env, *mState, draw, args);
 }
 
 void ParticleEngineInstance::Update(const Environment& env, float dt)

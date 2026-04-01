@@ -24,7 +24,6 @@
 #include "base/utility.h"
 #include "data/fwd.h"
 #include "graphics/geometry.h"
-#include "graphics/instance_data.h"
 
 namespace gfx
 {
@@ -38,36 +37,18 @@ namespace gfx
           , mCmdStart(0)
           , mCmdCount(geometry.GetNumDrawCmds())
         {}
-        GeometryDrawCommand(const Geometry& geometry, const InstanceDataPtr& instance) noexcept
-          : mGeometry(&geometry)
-          , mCmdStart(0)
-          , mCmdCount(geometry.GetNumDrawCmds())
-          , mInstance(instance)
-        {}
-
         GeometryDrawCommand(const Geometry& geometry, size_t cmd_start, size_t cmd_count)
           : mGeometry(&geometry)
           , mCmdStart(cmd_start)
           , mCmdCount(ResolveCount(geometry, cmd_count))
         {}
-        GeometryDrawCommand(const Geometry& geometry, size_t cmd_start, size_t cmd_count,
-                            const InstanceDataPtr& instance)
-          : mGeometry(&geometry)
-          , mCmdStart(cmd_start)
-          , mCmdCount(ResolveCount(geometry, cmd_count))
-          , mInstance(instance)
-        {}
 
-        inline size_t GetNumDrawCmds() const noexcept
+        size_t GetNumDrawCmds() const noexcept
         { return mCmdCount; }
-        inline DrawCommand GetDrawCmd(size_t index) const noexcept
+        DrawCommand GetDrawCmd(size_t index) const noexcept
         { return mGeometry->GetDrawCmd(mCmdStart + index); }
-        inline const Geometry* GetGeometry() const noexcept
+        const Geometry* GetGeometry() const noexcept
         { return mGeometry;}
-        inline const InstanceData* GetInstance() const noexcept
-        { return mInstance.get(); }
-        inline bool UsesInstancing() const noexcept
-        { return mInstance != nullptr; }
 
         static size_t ResolveCount(const Geometry& geometry, size_t count) noexcept
         {
@@ -75,12 +56,10 @@ namespace gfx
                 return geometry.GetNumDrawCmds();
             return count;
         }
-
     private:
         const Geometry* mGeometry = nullptr;
         const size_t mCmdStart = 0;
         const size_t mCmdCount = 0;
-        const InstanceDataPtr mInstance;
     };
 
     class CommandStream

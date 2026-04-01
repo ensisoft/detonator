@@ -23,7 +23,7 @@ namespace test
     class TestDrawable : public gfx::Drawable
     {
     public:
-        bool ApplyDynamicState(const Environment& env, gfx::Device& device, gfx::ProgramState& program, RasterState& state) const override
+        bool ApplyDynamicState(const Environment& env, const gfx::DrawCall& draw, gfx::Device& device, gfx::ProgramState& program, RasterState& state) const override
         {
             return true;
         }

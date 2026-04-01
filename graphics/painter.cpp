@@ -73,15 +73,11 @@ void Painter::Prime(DrawItemList& cmds) const
         Drawable::Environment drawable_env;
         drawable_env.editing_mode   = mEditingMode;
         drawable_env.pixel_ratio    = mPixelRatio;
-        drawable_env.use_instancing = cmd.instanced_draw.has_value();
+        drawable_env.use_instancing = cmd.draw_call.IsInstanced();
         drawable_env.view_matrix    = cmd.view       ? cmd.view       : &mViewMatrix;
         drawable_env.proj_matrix    = cmd.projection ? cmd.projection : &mProjMatrix;
         drawable_env.model_matrix   = cmd.model      ? cmd.model      : &Identity;
-
         cmds.mStateList[i].geometry_gpu_ptr = GetGpuGeometry(*cmd.drawable, drawable_env);
-
-        if (cmd.instanced_draw.has_value())
-            cmds.mStateList[i].instanced_draw_gpu_ptr = GetGpuInstanceData(cmd.instanced_draw.value(), *cmd.drawable, drawable_env);
     }
 }
 
@@ -116,7 +112,7 @@ bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const
         drawable_env.editing_mode   = mEditingMode;
         drawable_env.pixel_ratio    = mPixelRatio;
         drawable_env.render_pass    = render_pass_state.render_pass;
-        drawable_env.use_instancing = draw.instanced_draw.has_value();
+        drawable_env.use_instancing = draw.draw_call.IsInstanced();
         drawable_env.view_matrix    = draw.view       ? draw.view       : &mViewMatrix;
         drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
@@ -127,14 +123,6 @@ bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const
 
         if (!geometry)
             continue;
-
-        InstanceDataPtr instanced_draw;
-        if (draw.instanced_draw.has_value())
-        {
-            instanced_draw = list.GetInstanceDataPtr(i);
-            if (instanced_draw == nullptr)
-                instanced_draw = GetGpuInstanceData(draw.instanced_draw.value(), *draw.drawable, drawable_env);
-        }
 
         Material::Environment material_env;
         material_env.editing_mode   = mEditingMode;
@@ -159,7 +147,7 @@ bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const
             Drawable::RasterState drawable_raster_state;
             drawable_raster_state.culling    = draw.culling;
             drawable_raster_state.line_width = draw.line_width;
-            state_ok &= draw.drawable->ApplyDynamicState(drawable_env, *mDevice, gpu_program_state, drawable_raster_state);
+            state_ok &= draw.drawable->ApplyDynamicState(drawable_env, draw.draw_call, *mDevice, gpu_program_state, drawable_raster_state);
 
             device_state.blending      = material_raster_state.blending;
             device_state.premulalpha   = material_raster_state.premultiplied_alpha;
@@ -195,8 +183,7 @@ bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const
                       gpu_program_state,
                       GeometryDrawCommand(*geometry,
                           cmd_params.draw_cmd_start,
-                          cmd_params.draw_cmd_count,
-                          instanced_draw),
+                          cmd_params.draw_cmd_count),
                       device_state, mFrameBuffer));
 
         // we supposedly rendered something, mark this as success.
@@ -585,68 +572,6 @@ GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::En
         return geom;
 
     } else BUG("Missing geometry usage handling.");
-}
-
-InstanceDataPtr Painter::GetGpuInstanceData(const InstancedDraw& draw, const gfx::Drawable& drawable, const Drawable::Environment& env) const
-{
-    const auto& id = drawable.GetInstanceId(env, draw);
-    const auto usage = drawable.GetInstanceUsage(draw);
-
-    if (usage == BufferUsage::Stream)
-    {
-        gfx::InstanceData::CreateArgs args;
-        if (!drawable.Construct(env, *mDevice, draw, args))
-            return nullptr;
-
-        return mDevice->CreateInstanceData(id, std::move(args));
-    }
-    else if (usage == BufferUsage::Dynamic)
-    {
-        auto foo = mDevice->FindInstanceData(id);
-        if (foo == nullptr)
-        {
-            gfx::InstanceData::CreateArgs args;
-            if (!drawable.Construct(env, *mDevice, draw, args))
-                return nullptr;
-
-            return mDevice->CreateInstanceData(draw.gpu_id, std::move(args));
-        }
-        if (foo->GetContentHash() == drawable.GetInstanceHash(draw))
-            return foo;
-
-        gfx::InstanceData::CreateArgs args;
-        if (!drawable.Construct(env, *mDevice, draw, args))
-            return nullptr;
-
-        return mDevice->CreateInstanceData(id, std::move(args));
-    }
-    else if (usage == BufferUsage::Static)
-    {
-        auto foo = mDevice->FindInstanceData(id);
-        if (foo == nullptr)
-        {
-            gfx::InstanceData::CreateArgs args;
-            if (!drawable.Construct(env, *mDevice, draw, args))
-                return nullptr;
-
-            return mDevice->CreateInstanceData(id, std::move(args));
-        }
-
-        if (!mEditingMode)
-            return foo;
-
-        if (foo->GetContentHash() == drawable.GetInstanceHash(draw))
-            return foo;
-
-        gfx::InstanceData::CreateArgs args;
-        if (!drawable.Construct(env, *mDevice, draw, args))
-            return nullptr;
-
-        return mDevice->CreateInstanceData(id, std::move(args));
-    }
-
-
-    return nullptr;
 }
 
 IRect Painter::MapToDevice(const IRect& rect) const noexcept

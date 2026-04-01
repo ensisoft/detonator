@@ -52,7 +52,7 @@ namespace gfx
             return base::TestFlag(mFlags, flag);
         }
 
-        bool ApplyDynamicState(const Environment &env, Device &device, ProgramState &program, RasterState &state) const override;
+        bool ApplyDynamicState(const Environment &env, const DrawCall& draw, Device &device, ProgramState &program, RasterState &state) const override;
         bool Construct(const Environment &env, Device &device, Geometry::CreateArgs &geometry) const override;
         ShaderSource GetShader(const Environment &env, const Device &device) const override;
         std::string GetShaderId(const Environment &env) const override;

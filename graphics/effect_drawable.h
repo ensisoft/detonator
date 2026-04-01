@@ -65,13 +65,12 @@ namespace gfx
         void SetEffectArgs(EffectArgs args)
         { mArgs = args; }
 
-        bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState&  state) const override;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState&  state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
         std::string GetGeometryId(const Environment& env) const override;
         bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& create) const override;
-        bool Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const override;
         void Update(const Environment& env, float dt) override;
         void Restart(const Environment& env) override;
         size_t GetGeometryHash() const override;
@@ -80,9 +79,6 @@ namespace gfx
         SpatialMode GetSpatialMode() const override;
         bool IsAlive() const override;
         Type GetType() const override;
-        Usage GetInstanceUsage(const InstancedDraw& draw) const override;
-        size_t GetInstanceHash(const InstancedDraw& draw) const override;
-        std::string GetInstanceId(const Environment& env, const InstancedDraw& draw) const override;
         void Execute(const Environment& env, const Command& command) override;
         DrawCmd GetDrawCmd() const override;
 

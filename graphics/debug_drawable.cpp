@@ -27,9 +27,9 @@
 namespace gfx
 {
 
-bool DebugDrawableBase::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
+bool DebugDrawableBase::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
 {
-    return mDrawable->ApplyDynamicState(env, device, program, state);
+    return mDrawable->ApplyDynamicState(env, draw, device, program, state);
 }
 
 ShaderSource DebugDrawableBase::GetShader(const Environment& env, const Device& device) const

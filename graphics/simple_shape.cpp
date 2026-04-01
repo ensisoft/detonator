@@ -29,12 +29,14 @@
 #include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
+#include "graphics/drawcall.h"
 #include "graphics/simple_shape.h"
 #include "graphics/shader_source.h"
 #include "graphics/vertex.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 #include "graphics/geometry_algo.h"
+#include "graphics/paint_log.h"
 
 namespace {
 float HalfRound(float value)
@@ -1456,8 +1458,16 @@ float SimpleShapeClass::GetShapeAttribute(ShapeAttribute attribute) const noexce
     return 0.0f;
 }
 
-bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
+bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
 {
+    if (const auto* instanced_draw = draw.Get<GenericInstancedDraw>())
+    {
+        auto instance_data = PrepareDrawCall(*instanced_draw, device, env.editing_mode);
+        if (!instance_data)
+            GFX_PAINT_ERROR("Failed to prepare instanced drawing instance data.");
+        program.SetInstanceData(std::move(instance_data));
+    }
+
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
@@ -1498,32 +1508,6 @@ bool SimpleShapeInstance::Construct(const Environment& env, Device& device, Geom
 
     if (Is3DShape(mClass->GetShapeType()))
         ASSERT(ComputeTangents(geometry.buffer));
-    return true;
-}
-
-bool SimpleShapeInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
-{
-    InstanceBuffer buffer;
-    buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
-    buffer.Resize(draw.instances.size());
-
-    for (size_t i=0; i<draw.instances.size(); ++i)
-    {
-        const auto& instance = draw.instances[i];
-        InstanceAttribute ia;
-        ia.iaModelVectorX = ToVec(instance.model_to_world[0]);
-        ia.iaModelVectorY = ToVec(instance.model_to_world[1]);
-        ia.iaModelVectorZ = ToVec(instance.model_to_world[2]);
-        ia.iaModelVectorW = ToVec(instance.model_to_world[3]);
-        buffer.SetInstanceData(ia, i);
-    }
-
-    // we're not making any contribution to the instance data here, therefore
-    // the hash and usage are exactly what the caller specified
-    args.usage = draw.usage;
-    args.content_name = draw.content_name;
-    args.content_hash = draw.content_hash;
-    args.buffer = std::move(buffer);
     return true;
 }
 
@@ -1599,8 +1583,16 @@ bool SimpleShapeInstance::ConstructShardMesh(const Environment& env, Device& dev
     return true;
 }
 
-bool SimpleShape::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
+bool SimpleShape::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
 {
+    if (const auto* instanced_draw = draw.Get<GenericInstancedDraw>())
+    {
+        auto instance_data = PrepareDrawCall(*instanced_draw, device, env.editing_mode);
+        if (!instance_data)
+            GFX_PAINT_ERROR("Failed to prepare instanced drawing instance data.");
+        program.SetInstanceData(std::move(instance_data));
+    }
+
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
@@ -1656,31 +1648,6 @@ bool SimpleShape::Construct(const Environment& env, Device& device, Geometry::Cr
     return true;
 }
 
-bool SimpleShape::Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
-{
-    InstanceBuffer buffer;
-    buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
-    buffer.Resize(draw.instances.size());
-
-    for (size_t i=0; i<draw.instances.size(); ++i)
-    {
-        const auto& instance = draw.instances[i];
-        InstanceAttribute ia;
-        ia.iaModelVectorX = ToVec(instance.model_to_world[0]);
-        ia.iaModelVectorY = ToVec(instance.model_to_world[1]);
-        ia.iaModelVectorZ = ToVec(instance.model_to_world[2]);
-        ia.iaModelVectorW = ToVec(instance.model_to_world[3]);
-        buffer.SetInstanceData(ia, i);
-    }
-
-    // we're not making any contribution to the instance data here, therefore
-    // the hash and usage are exactly what the caller specified.
-    args.usage = draw.usage;
-    args.content_hash = draw.content_hash;
-    args.content_name = draw.content_name;
-    args.buffer = std::move(buffer);
-    return true;
-}
 
 Drawable::Type SimpleShape::GetType() const
 {

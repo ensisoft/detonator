@@ -360,6 +360,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/device_shader.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/device_texture.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/drawable.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../graphics/drawcall.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/drawcmd.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/drawing.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/generic_shader_program.cpp

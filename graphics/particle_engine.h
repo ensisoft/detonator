@@ -288,14 +288,12 @@ namespace gfx
         {}
 
         bool Construct(const Environment& env, const InstanceState& state, Geometry::CreateArgs& create) const;
-        bool Construct(const Environment& env, const InstanceState& state, const InstancedDraw& draw,
-                       gfx::InstanceData::CreateArgs& args) const;
         ShaderSource GetShader(const Environment& env, const Device& device) const;
         std::string GetShaderId(const Environment& env) const;
         std::string GetShaderName(const Environment& env) const;
         std::string GetGeometryId(const Environment& env) const;
 
-        bool ApplyDynamicState(const Environment& env, ProgramState& program) const;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program) const;
         void Update(const Environment& env, InstanceStatePtr state, float dt) const;
         void Restart(const Environment& env, InstanceStatePtr state) const;
         bool IsAlive(const InstanceStatePtr& state) const;
@@ -389,13 +387,12 @@ namespace gfx
           : mClass(std::make_shared<ParticleEngineClass>(params))
           , mState(std::make_shared<ParticleEngineClass::InstanceState>())
         {}
-        bool ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment&  env) const override;
         std::string GetShaderName(const Environment& env) const override;
         std::string GetGeometryId(const Environment& env) const override;
         bool Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const override;
-        bool Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const override;
         void Update(const Environment& env, float dt) override;
         bool IsAlive() const override;
         void Restart(const Environment& env) override;

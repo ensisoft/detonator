@@ -438,7 +438,7 @@ void GraphicsDevice::Draw(const gfx::Program& program,
 
     const auto* myprog = static_cast<const gfx::DeviceProgram*>(&program);
     const auto* mygeom = static_cast<const gfx::DeviceGeometry*>(geometry.GetGeometry());
-    const auto* myinst = static_cast<const gfx::DeviceInstanceData*>(geometry.GetInstance());
+    const auto* myinst = static_cast<const gfx::DeviceInstanceData*>(program_state.GetInstanceData());
     myprog->SetFrameStamp(mFrameNumber);
     mygeom->SetFrameStamp(mFrameNumber);
     if (myinst)

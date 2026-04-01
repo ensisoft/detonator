@@ -2407,11 +2407,13 @@ void main() {
         args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
         auto geom = dev->CreateGeometry("geom", std::move(args));
 
-        const gfx::GeometryDrawCommand draw(*geom, inst);
+        const gfx::GeometryDrawCommand draw(*geom);
+        gfx::ProgramState ps;
+        ps.SetInstanceData(inst);
 
         dev->BeginFrame();
            dev->ClearColor(gfx::Color::DarkRed);
-           dev->Draw(*program, gfx::ProgramState(), draw, state);
+           dev->Draw(*program, ps, draw, state);
         dev->EndFrame();
 
         const auto& bmp = dev->ReadColorBuffer(200, 200);
@@ -2439,11 +2441,13 @@ void main() {
         args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
         auto geom = dev->CreateGeometry("geom", std::move(args));
 
-        const gfx::GeometryDrawCommand draw(*geom, inst);
+        const gfx::GeometryDrawCommand draw(*geom);
+        gfx::ProgramState ps;
+        ps.SetInstanceData(inst);
 
         dev->BeginFrame();
-        dev->ClearColor(gfx::Color::DarkRed);
-        dev->Draw(*program, gfx::ProgramState(), draw, state);
+          dev->ClearColor(gfx::Color::DarkRed);
+          dev->Draw(*program, ps, draw, state);
         dev->EndFrame();
 
         const auto& bmp = dev->ReadColorBuffer(200, 200);

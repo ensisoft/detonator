@@ -39,6 +39,7 @@ namespace gfx
     class ProgramState;
     class CommandBuffer;
     class ShaderSource;
+    class DrawCall;
 
     // Drawable interface represents some kind of drawable object
     // or shape such as quad/rectangle/mesh/particle engine.
@@ -59,9 +60,6 @@ namespace gfx
         using Usage                 = DrawableClass::Usage;
         using DrawCmd               = DrawableClass::DrawCmd;
         using DrawPrimitive         = DrawableClass::DrawPrimitive;
-        using DrawInstance          = DrawableClass::DrawInstance;
-        using DrawInstanceArray     = DrawableClass::DrawInstanceArray;
-        using InstancedDraw         = DrawableClass::InstancedDraw;
         using MeshType              = DrawableClass::MeshType;
         using MeshArgs              = DrawableClass::MeshArgs;
         using ShardedEffectMeshArgs = DrawableClass::ShardedEffectMeshArgs;
@@ -89,7 +87,7 @@ namespace gfx
         virtual bool TestFlag(Flags flag) const noexcept { return false; }
 
         // Apply the drawable's state (if any) on the program and set the rasterizer state.
-        virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const = 0;
+        virtual bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const = 0;
         // Get the device specific shader source applicable for this drawable, its state
         // and the given environment in which it should execute.
         // Should return an empty string on any error.
@@ -106,9 +104,6 @@ namespace gfx
         // Construct geometry object create args.
         // Returns true if successful or false if geometry is unavailable.
         virtual bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const = 0;
-        // Construct geometry instance buffer.
-        // Returns true if successful or false if geometry is unavailable.
-        virtual bool Construct(const Environment& env, Device& device, const InstancedDraw& draw, InstanceData::CreateArgs& args) const { return false; }
         // Update the state of the drawable object. dt is the
         // elapsed (delta) time in seconds.
         virtual void Update(const Environment& env, float dt) {}
@@ -133,27 +128,6 @@ namespace gfx
         { return true; }
         // Restart the drawable, if applicable. See IsAlive
         virtual void Restart(const Environment& env) {}
-
-        // Instanced rendering support.
-        // If the geometry has instance specific data then it should implement
-        // GetInstanceUsage, GetInstanceHash and GetInstanceId and account for
-        // both the client side per instance data and the geometry side per
-        // instance data. So for example the instance hash should be a combination
-        // of this data.
-
-        // Get the instance buffer usage based on the combination of the usage
-        // coming from the client for the client side instance data and the
-        // geometry specific instance data.
-        virtual Usage GetInstanceUsage(const InstancedDraw& draw) const
-        { return draw.usage; }
-
-        // Get the hash value based on the client instance data combined
-        // with the per instance geometry data.
-        virtual size_t GetInstanceHash(const InstancedDraw& draw) const
-        { return draw.content_hash; }
-
-        virtual std::string GetInstanceId(const Environment& env, const InstancedDraw& draw) const
-        { return draw.gpu_id; }
 
         // Execute drawable commands coming from the scripting environment.
         // The commands can be used to change the drawable, alter its parameters

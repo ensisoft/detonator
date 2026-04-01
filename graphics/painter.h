@@ -26,6 +26,7 @@
 #include <memory>
 #include <vector>
 #include <optional>
+#include <variant>
 
 #include "graphics/types.h"
 #include "graphics/color4f.h"
@@ -35,6 +36,7 @@
 #include "graphics/material.h"
 #include "graphics/instance_data.h"
 #include "graphics/enum.h"
+#include "graphics/drawcall.h"
 
 #include "base/snafu.h"
 
@@ -198,9 +200,12 @@ namespace gfx
             float line_width = 1.0f;
         };
 
-        using InstancedDraw = Drawable::InstancedDraw;
-
         struct DrawItem {
+            // Draw call encapsulates the details of the draw call itself  and can
+            // carry arbitrary geometry/drawable specific details  and state that is
+            // only relevant to that particular draw for that particular type.
+            DrawCall draw_call;
+
             // Optional projection matrix that will override the painter's projection matrix.
             const glm::mat4* projection = nullptr;
             // Optional view matrix that will override the painter's view matrix.
@@ -234,8 +239,6 @@ namespace gfx
             // in pixels and typically has a limit around 10px AND there's
             // no scaling to go from logical units to pixels.
             float line_width = 1.0f;
-
-            std::optional<InstancedDraw> instanced_draw;
         };
 
         class DrawItemList {
@@ -276,16 +279,8 @@ namespace gfx
                     return nullptr;
                 return mStateList[i].geometry_gpu_ptr;
             }
-            InstanceDataPtr GetInstanceDataPtr(size_t i) const noexcept
-            {
-                if (i >= mStateList.size())
-                    return nullptr;
-
-                return mStateList[i].instanced_draw_gpu_ptr;
-            }
 
             struct ItemState {
-                InstanceDataPtr instanced_draw_gpu_ptr;
                 GeometryPtr geometry_gpu_ptr;
             };
             std::vector<DrawItem> mItems;
@@ -361,8 +356,6 @@ namespace gfx
                               const Material::Environment& material_environment) const;
 
         GeometryPtr GetGpuGeometry(const Drawable& drawable, const Drawable::Environment& env) const;
-        InstanceDataPtr GetGpuInstanceData(const InstancedDraw& inst,
-                const Drawable& drawable, const Drawable::Environment& env) const;
 
     private:
         std::shared_ptr<Device> mDeviceInst;

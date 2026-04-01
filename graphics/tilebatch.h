@@ -55,7 +55,7 @@ namespace gfx
           : mTiles(std::move(tiles))
         {}
 
-        bool ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& raster) const override;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState& raster) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;

@@ -28,7 +28,7 @@
 namespace gfx
 {
 
-bool LineBatch2D::ApplyDynamicState(const Environment &environment, Device&, ProgramState &program, RasterState &state) const
+bool LineBatch2D::ApplyDynamicState(const Environment &environment, const DrawCall& draw, Device&, ProgramState &program, RasterState &state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
@@ -104,7 +104,7 @@ Drawable::Type LineBatch2D::GetType() const
     return Type::LineBatch2D;
 }
 
-bool LineBatch3D::ApplyDynamicState(const Environment& environment, Device&, ProgramState& program, RasterState& state) const
+bool LineBatch3D::ApplyDynamicState(const Environment& environment, const DrawCall& draw, Device&, ProgramState& program, RasterState& state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);

@@ -30,6 +30,7 @@
 #include "data/writer.h"
 #include "data/json.h"
 #include "base/json.h"
+#include "graphics/drawcall.h"
 #include "graphics/polygon_mesh.h"
 #include "geometry_algo.h"
 #include "graphics/drawcmd.h"
@@ -815,7 +816,7 @@ std::size_t PolygonMeshInstance::GetSubMeshIndex() const noexcept
     return 0;
 }
 
-bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
+bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
 {
     unsigned flags = mFlags;
 
@@ -832,6 +833,14 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& devi
     program.SetUniform("kTime", static_cast<float>(mTime));
     program.SetUniform("kRandom", mRandom);
     program.SetUniform("kDrawableFlags", flags);
+
+    if (const auto* instanced_draw = draw.Get<GenericInstancedDraw>())
+    {
+        auto instance_data = PrepareDrawCall(*instanced_draw, device, env.editing_mode);
+        if (!instance_data)
+            GFX_PAINT_ERROR("Failed to prepare instanced drawing instance data.");
+        program.SetInstanceData(std::move(instance_data));
+    }
 
     const auto type = GetMeshType();
     if (type == MeshType::Dimetric2DRenderMesh || type == MeshType::Isometric2DRenderMesh)
@@ -858,32 +867,6 @@ std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
 bool PolygonMeshInstance::Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const
 {
     return mClass->Construct(env, create);
-}
-
-bool PolygonMeshInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
-{
-    InstanceBuffer buffer;
-    buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
-    buffer.Resize(draw.instances.size());
-
-    for (size_t i=0; i<draw.instances.size(); ++i)
-    {
-        const auto& instance = draw.instances[i];
-        InstanceAttribute ia;
-        ia.iaModelVectorX = ToVec(instance.model_to_world[0]);
-        ia.iaModelVectorY = ToVec(instance.model_to_world[1]);
-        ia.iaModelVectorZ = ToVec(instance.model_to_world[2]);
-        ia.iaModelVectorW = ToVec(instance.model_to_world[3]);
-        buffer.SetInstanceData(ia, i);
-    }
-
-    // we're not making any contribution to the instance data here, therefore
-    // the hash and usage are exactly what the caller specified.
-    args.usage = draw.usage;
-    args.content_hash = draw.content_hash;
-    args.content_name = draw.content_name;
-    args.buffer = std::move(buffer);
-    return true;
 }
 
 void PolygonMeshInstance::Update(const Environment& env, float dt)

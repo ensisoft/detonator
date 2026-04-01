@@ -28,7 +28,7 @@
 namespace gfx
 {
 
-bool Grid::ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& state) const
+bool Grid::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
