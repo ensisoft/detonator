@@ -325,6 +325,7 @@ add_library(GfxLib
     graphics/shader_program.cpp
     graphics/shader_source.cpp
     graphics/simple_shape.cpp
+    graphics/simple_shape_base.cpp
     graphics/text_buffer.cpp
     graphics/text_font.cpp
     graphics/text_material.cpp
