@@ -380,6 +380,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/shader_code.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/shader_program.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/shader_source.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../graphics/simple_shape_base.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/simple_shape.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/text_buffer.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/text_font.cpp
