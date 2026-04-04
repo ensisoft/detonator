@@ -259,6 +259,7 @@ gfx::GeometryPtr GraphicsDevice::CreateGeometry(const std::string& id, gfx::Geom
     geometry->SetAsFallback(args.fallback);
     geometry->SetDataHash(args.content_hash);
     geometry->SetUsage(args.usage);
+    geometry->SetProperties(std::move(args.properties));
     if (args.buffer_ptr)
         geometry->SetBuffer(args.buffer_ptr);
     else geometry->SetBuffer(std::make_shared<gfx::GeometryBuffer>(std::move(args.buffer)));
