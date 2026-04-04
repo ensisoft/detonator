@@ -31,6 +31,7 @@
 #include "graphics/geometry_buffer.h"
 #include "graphics/simple_shape_base.h"
 #include "graphics/vertex.h"
+#include "graphics/vertex_buffer.h"
 
 namespace {
 float HalfRound(float value)
@@ -155,7 +156,8 @@ void CapsuleGeometry::GenerateVertical(const SimpleShapeEnvironment& env, Style 
         w = h / (rect_width/rect_height);
     else h = w / (rect_height/rect_width);
 
-    std::vector<Vertex2D> vs;
+    TypedVertexBuffer<Vertex2D> vs;
+    vs.SetVertexLayout(GetVertexLayout<Vertex2D>());
     auto offset = 0;
 
     // semi-circle at the top end.
@@ -270,7 +272,8 @@ void CapsuleGeometry::GenerateHorizontal(const SimpleShapeEnvironment& env, Styl
         w = h / (rect_width/rect_height);
     else h = w / (rect_height/rect_width);
 
-    std::vector<Vertex2D> vs;
+    TypedVertexBuffer<Vertex2D> vs;
+    vs.SetVertexLayout(GetVertexLayout<Vertex2D>());
     auto offset = 0;
 
     // semi-circle at the left end.
@@ -372,7 +375,8 @@ void SemiCircleGeometry::Generate(const SimpleShapeEnvironment& env, Style style
     // some kind of "LOD" value for figuring out how many slices we should have.
     const auto slices = 50;
 
-    std::vector<Vertex2D> vs;
+    TypedVertexBuffer<Vertex2D> vs;
+    vs.SetVertexLayout(GetVertexLayout<Vertex2D>());
 
     // center point for triangle fan.
     Vertex2D center;
@@ -417,9 +421,11 @@ void CircleGeometry::Generate(const SimpleShapeEnvironment& env, Style style, Ge
     // todo: we could use some information here about the
     // eventual transform on the screen and use that to compute
     // some kind of "LOD" value for figuring out how many slices we should have.
-    const auto slices = 100;
+    constexpr auto Slices = 100;
+    constexpr auto Increment = static_cast<float>(math::Pi * 2.0f) / Slices;
 
-    std::vector<Vertex2D> vs;
+    TypedVertexBuffer<Vertex2D> vs;
+    vs.SetVertexLayout(GetVertexLayout<Vertex2D>());
 
     // center point for triangle fan.
     Vertex2D center;
@@ -432,10 +438,10 @@ void CircleGeometry::Generate(const SimpleShapeEnvironment& env, Style style, Ge
         vs.push_back(center);
     }
 
-    const float angle_increment = (float)(math::Pi * 2.0f) / slices;
+
     float angle = 0.0f;
 
-    for (unsigned i=0; i<=slices; ++i)
+    for (unsigned i=0; i<=Slices; ++i)
     {
         const auto x = std::cos(angle) * 0.5f;
         const auto y = std::sin(angle) * 0.5f;
@@ -446,7 +452,7 @@ void CircleGeometry::Generate(const SimpleShapeEnvironment& env, Style style, Ge
         v.aTexCoord.y = 1.0 - (y + 0.5f);
         vs.push_back(v);
 
-        angle += angle_increment;
+        angle += Increment;
     }
     geometry.SetVertexBuffer(&vs[0], vs.size());
     geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
@@ -624,7 +630,8 @@ void ParallelogramGeometry::Generate(const SimpleShapeEnvironment& env, Style st
 // static
 void SectorGeometry::Generate(const SimpleShapeEnvironment& env, Style style, GeometryBuffer& geometry, float fill_percentage)
 {
-    std::vector<Vertex2D> vs;
+    TypedVertexBuffer<Vertex2D> vs;
+    vs.SetVertexLayout(GetVertexLayout<Vertex2D>());
 
     // center point for triangle fan.
     Vertex2D center;
@@ -939,7 +946,9 @@ void CylinderGeometry::Generate(const SimpleShapeEnvironment& env, Style style, 
 {
     const auto vertex_count = slices + 1;
 
-    std::vector<Vertex3D> vertices;
+    TypedVertexBuffer<Vertex3D> vertices;
+    vertices.SetVertexLayout(GetVertexLayout<Vertex3D>());
+
     std::vector<Index16> indices;
 
     for (unsigned i=0; i<slices; ++i)
@@ -1081,7 +1090,8 @@ void ConeGeometry::Generate(const SimpleShapeEnvironment& env, Style style, Geom
 {
     const auto vertex_count = slices + 1;
 
-    std::vector<Vertex3D> vertices;
+    TypedVertexBuffer<Vertex3D> vertices;
+    vertices.SetVertexLayout(GetVertexLayout<Vertex3D>());
 
     Vertex3D apex;
     apex.aPosition = Vec3{0.0f, 0.5f, 0.0f};
@@ -1170,7 +1180,9 @@ void SphereGeometry::Generate(const SimpleShapeEnvironment& env, Style style, Ge
     const int numIndices   = numParallels * slices * 6;
     const float angleStep  = math::Circle / slices;
 
-    std::vector<Vertex3D> vertices;
+    TypedVertexBuffer<Vertex3D> vertices;
+    vertices.SetVertexLayout(GetVertexLayout<Vertex3D>());
+
     std::vector<Index16> indices;
 
     for (int i=0; i<numParallels+1; ++i)
