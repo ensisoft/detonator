@@ -369,6 +369,12 @@ namespace gfx
         auto TransferRawBuffer() noexcept
         { return std::move(mBuffer.TransferBuffer()); }
 
+        void push_back(const T& vertex)
+        { mBuffer.PushBack(&vertex); }
+
+        auto size() const noexcept
+        { return mBuffer.GetCount(); }
+
     private:
         VertexBuffer mBuffer;
     };
