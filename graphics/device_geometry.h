@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <memory>
 
+#include "base/utility.h"
 #include "device/enum.h"
 #include "device/vertex.h"
 #include "device/graphics.h"
@@ -52,6 +53,8 @@ namespace gfx
         { return mErrorLog; }
         bool IsFallback() const override
         { return mFallback; }
+        const Property* GetProperty(const std::string& key) const override
+        { return base::SafeFind(mProperties, key); }
 
         void SetBuffer(std::shared_ptr<const GeometryBuffer> buffer) noexcept
         { mPendingUpload = std::move(buffer); }
@@ -65,8 +68,11 @@ namespace gfx
         { mErrorLog = std::move(log); }
         void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
-        void SetAsFallback(bool fallback)
+        void SetAsFallback(bool fallback) noexcept
         { mFallback = fallback; }
+        void SetProperties(std::unordered_map<std::string, Property> properties) noexcept
+        { mProperties = std::move(properties); }
+
         size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
 
@@ -114,6 +120,7 @@ namespace gfx
         std::size_t mHash = 0;
         std::string mName;
         std::string mErrorLog;
+        std::unordered_map<std::string, Property> mProperties;
         bool mFallback = false;
 
         mutable std::size_t mFrameNumber = 0;

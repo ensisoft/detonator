@@ -18,10 +18,17 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec3.hpp>
+#include "warnpop.h"
+
 #include <cstddef>
 #include <string>
 #include <memory>
+#include <variant>
+#include <unordered_map>
 
+#include "base/assert.h"
 #include "graphics/geometry_buffer.h"
 
 namespace gfx
@@ -37,8 +44,10 @@ namespace gfx
         using DrawType    = GeometryBuffer::DrawType;
         using DrawCommand = GeometryBuffer::DrawCommand;
         using IndexType   = GeometryBuffer::IndexType;
+        using Property    = std::variant<float, glm::vec2, glm::vec3, glm::vec4>;
 
         struct CreateArgs {
+            std::unordered_map<std::string, Property> properties;
             // This is the geometry data buffer with vertex and index data
             // and the draw commands. Use this or the buffer as an alternative.
             std::shared_ptr<const GeometryBuffer> buffer_ptr;
@@ -63,6 +72,9 @@ namespace gfx
 
         virtual ~Geometry() = default;
 
+        virtual const Property* GetProperty(const std::string& key) const
+        { return nullptr; }
+
         // Get the error log (if any) why the geometry failed.
         virtual std::string GetErrorLog() const { return ""; }
         // Get the human-readable geometry name.
@@ -77,6 +89,18 @@ namespace gfx
         virtual DrawCommand GetDrawCmd(size_t index) const = 0;
         // Check whether the geometry is designated as a fallback geometry.
         virtual bool IsFallback() const { return false; }
+
+        template<typename T>
+        const T* GetProperty(const std::string& key) const
+        {
+            if (const auto* prop = GetProperty(key))
+            {
+                ASSERT(std::holds_alternative<T>(*prop));
+                return std::get_if<T>(prop);
+            }
+            return nullptr;
+        }
+
     private:
     };
 
