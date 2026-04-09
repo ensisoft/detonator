@@ -30,6 +30,8 @@ namespace gfx
     using DrawType = dev::DrawType;
     using IndexType = dev::IndexType;
 
+    using TextureFormat = dev::TextureFormat;
+
     enum class MeshEffectType : uint32_t {
         ShardedMeshExplosion = 1
     };

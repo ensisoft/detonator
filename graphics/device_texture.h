@@ -95,6 +95,8 @@ namespace gfx {
         { return mHasMips; }
 
         // internal
+        void SetFlags(base::bitflag<Flags> flags) noexcept
+        { mFlags = flags; }
         bool WarnOnce() const
         {
             auto ret = mWarnOnce;
@@ -107,12 +109,12 @@ namespace gfx {
             return mTexture;
         }
 
-        inline void SetFrameStamp(size_t frame_number) const noexcept
+        void SetFrameStamp(size_t frame_number) const noexcept
         {
             mFrameNumber = frame_number;
         }
 
-        inline std::size_t GetFrameStamp() const noexcept
+        std::size_t GetFrameStamp() const noexcept
         {
             return mFrameNumber;
         }

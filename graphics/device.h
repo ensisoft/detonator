@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <string>
 
+#include "texture.h"
 #include "device/types.h"
 #include "device/graphics.h"
 #include "graphics/types.h"
@@ -105,7 +106,8 @@ namespace gfx
         virtual InstanceDataPtr CreateInstanceData(const std::string& id, InstanceData::CreateArgs args) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;
         virtual const Texture* FindTexture(const std::string& name) const = 0;
-        virtual Texture* MakeTexture(const std::string& name) = 0;
+        virtual Texture* MakeTexture(const std::string& id) = 0;
+        virtual Texture* MakeTexture(const std::string& id, Texture::CreateArgs args) = 0;
         virtual Framebuffer* FindFramebuffer(const std::string& name) = 0;
         virtual Framebuffer* MakeFramebuffer(const std::string& name) = 0;
         // Resource deletion APIs
