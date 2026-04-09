@@ -66,6 +66,7 @@ public:
     gfx::InstanceDataPtr CreateInstanceData(const std::string& id, gfx::InstanceData::CreateArgs args) override;
     gfx::Texture* FindTexture(const std::string& name) override;
     gfx::Texture* MakeTexture(const std::string& name) override;
+    gfx::Texture* MakeTexture(const std::string& id, gfx::Texture::CreateArgs args) override;
     gfx::Framebuffer* FindFramebuffer(const std::string& name) override;
     gfx::Framebuffer* MakeFramebuffer(const std::string& name) override;
 
@@ -311,6 +312,29 @@ gfx::Texture* GraphicsDevice::MakeTexture(const std::string& name)
     // that is not used will get immediately cleaned away when the current
     // device frame number exceeds the maximum number of idle frames.
     ret->SetFrameStamp(mFrameNumber);
+    return ret;
+}
+
+gfx::Texture* GraphicsDevice::MakeTexture(const std::string& id, gfx::Texture::CreateArgs args)
+{
+    auto texture = std::make_unique<gfx::DeviceTexture>(mDevice, id);
+    texture->Upload(args.buffer.GetBufferPtr(),
+        args.buffer.GetWidth(), args.buffer.GetHeight(),
+        args.buffer.GetFormat());
+    texture->SetContentHash(args.texture_hash);
+    texture->SetWrapX(args.x_wrap);
+    texture->SetWrapY(args.y_wrap);
+    texture->SetFilter(args.min_filter);
+    texture->SetFilter(args.mag_filter);
+    texture->SetName(args.texture_name);
+    texture->SetGroup(args.group_name);
+    texture->SetFlags(args.flags);
+    texture->SetFrameStamp(mFrameNumber);
+    if (args.generate_mips)
+        texture->GenerateMips();
+
+    auto* ret = texture.get();
+    mTextures[id] = std::move(texture);
     return ret;
 }
 

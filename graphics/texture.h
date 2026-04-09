@@ -19,16 +19,17 @@
 #include "config.h"
 
 #include <string>
+#include <cstddef>
 
+#include "base/bitflag.h"
 #include "device/enum.h"
+#include "graphics/texture_buffer.h"
 
 namespace gfx
 {
     class Texture
     {
     public:
-        virtual ~Texture() = default;
-
         // Flags controlling texture usage and lifetime.
         enum class Flags {
             // Transient textures are used temporarily for a short period
@@ -46,6 +47,19 @@ namespace gfx
         using MinFilter = dev::TextureMinFilter;
         using MagFilter = dev::TextureMagFilter;
         using Wrapping = dev::TextureWrapping;
+
+        struct CreateArgs {
+            TextureBuffer buffer;
+            MinFilter min_filter = MinFilter::Default;
+            MagFilter mag_filter = MagFilter::Default;
+            Wrapping x_wrap = Wrapping::Clamp;
+            Wrapping y_wrap = Wrapping::Clamp;
+            std::size_t texture_hash = 0;
+            std::string texture_name;
+            std::string group_name;
+            base::bitflag<Flags> flags;
+            bool generate_mips = false;
+        };
 
         // Identify texture format based on the bit depth
         static Format DepthToFormat(unsigned bit_depth, bool srgb)
@@ -67,6 +81,7 @@ namespace gfx
             BUG("Unexpected bit depth.");
         }
 
+        virtual ~Texture() = default;
         // Set a texture flag to control texture behaviour.
         virtual void SetFlag(Flags flag, bool on_off) = 0;
         // Set texture minification filter.
@@ -172,10 +187,8 @@ namespace gfx
             return GetWidth() && GetHeight();
         }
 
-
     protected:
     private:
     };
-
 
 } // namespace

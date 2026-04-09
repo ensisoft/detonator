@@ -241,6 +241,11 @@ public:
         mTextureIndexMap[name] = index;
         return mTextures.back().get();
     }
+    gfx::Texture* MakeTexture(const std::string& id, gfx::Texture::CreateArgs args) override
+    {
+        TEST_REQUIRE(false);
+        return nullptr;
+    }
     gfx::Framebuffer* FindFramebuffer(const std::string& name) override
     {
         return nullptr;
