@@ -38,15 +38,17 @@ namespace gfx
         };
         using FlagBits = base::bitflag<Flags>;
 
-        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState&  state) const override;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry, Device& device,
+            ProgramState& program, RasterState&  state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
-        std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const override;
-        Usage GetGeometryUsage() const override;
+
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& env) const override;
+
         SpatialMode GetSpatialMode() const override;
-        size_t GetGeometryHash() const override;
+
     protected:
         DebugDrawableBase(const Drawable* drawable, Feature feature) noexcept
           : mDrawable(drawable)
@@ -68,6 +70,7 @@ namespace gfx
             static FlagBits bits(Flags::Normals);
             return bits;
         }
+        Environment GetEnvironment(const Environment& env) const;
     };
 
     class DebugDrawableInstance : public DebugDrawableBase

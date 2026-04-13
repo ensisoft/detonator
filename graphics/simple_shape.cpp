@@ -29,12 +29,15 @@
 #include "data/writer.h"
 #include "graphics/drawcall.h"
 #include "graphics/simple_shape.h"
+
+#include "device.h"
 #include "graphics/shader_source.h"
 #include "graphics/vertex.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 #include "graphics/geometry_algo.h"
 #include "graphics/paint_log.h"
+#include "graphics/drawable_effect.h"
 
 namespace gfx {
 
@@ -87,7 +90,8 @@ float SimpleShapeClass::GetShapeAttribute(ShapeAttribute attribute) const noexce
     return 0.0f;
 }
 
-bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
+bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device& device, ProgramState& program, RasterState& state) const
 {
     if (const auto* instanced_draw = draw.Get<GenericInstancedDraw>())
     {
@@ -102,53 +106,228 @@ bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, const DrawCa
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
     program.SetUniform("kDrawableFlags", mFlags);
+
+    if (mEffect)
+        mEffect->SetState(geometry, program);
+
     return true;
 }
 ShaderSource SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
 {
+    const auto effects = mEffect.has_value();
     const auto shape = GetShape();
+
     if (Is2DShape(shape))
-        return Drawable::CreateShader(env, device, Shader::Simple2D);
+        return Drawable::CreateShader(env.use_instancing, effects, device, Shader::Simple2D);
     if (Is3DShape(shape))
-        return Drawable::CreateShader(env, device, Shader::Simple3D);
+        return Drawable::CreateShader(env.use_instancing, effects, device, Shader::Simple3D);
 
     BUG("Bug on shape type.");
 }
-std::string SimpleShapeInstance::GetGeometryId(const Environment& env) const
-{
-    const detail::SimpleShapeEnvironment shape_env = {env.model_matrix};
-    return detail::GetSimpleShapeGeometryId(mClass->GetShapeArgs(), shape_env, mStyle, mClass->GetShapeType());
-}
 
-bool SimpleShapeInstance::Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const
+DrawGeometryHandle SimpleShapeInstance::GetGeometry(const Environment& env, Device& device) const
 {
-    if (env.mesh_type == MeshType::ShardedEffectMesh)
+    detail::SimpleShapeEnvironment shape_env;
+    shape_env.model_matrix = env.model_matrix;
+
+    if (mEffect)
     {
-        if (!Is2DShape(mClass->GetShapeType()))
-            return false;
-        if (mStyle != Style::Solid)
-            return false;
+        ASSERT(Is2DShape(mClass->GetShapeType()));
 
-        constexpr auto discard_skinny_slivers = true;
-        const auto& args = std::get<ShardedEffectMeshArgs>(env.mesh_args);
-        return ConstructShardMesh(env, device, geometry,args.mesh_subdivision_count, discard_skinny_slivers);
+        if (env.mesh_type == MeshType::DebugMesh)
+        {
+            GFX_PAINT_ERROR("Debug mesh is not supported on simple shape effect mesh.");
+            return DrawGeometryHandle::Null;
+        }
+
+        auto id = detail::GetSimpleShapeGeometryId(mClass->GetShapeArgs(), shape_env, Style::Solid, mClass->GetShapeType());
+
+        const auto effect_mesh_type = mEffect->GetEffectMshType();
+        if (effect_mesh_type == DrawableEffect::EffectMeshType::ShardMesh)
+        {
+            const auto args = mEffect->GetShardMeshArgs();
+            id += base::FormatString("ShardMesh@%1", args.mesh_subdivision_count);
+
+            if (env.mesh_type == MeshType::Wireframe)
+                id += "Wireframe";
+
+            auto shard_texture  = device.FindTexture(id);
+            auto shard_geometry = device.FindGeometry(id);
+            if (shard_texture && shard_geometry)
+                return DrawGeometryHandle(std::move(shard_geometry), shard_texture);
+
+            auto geometry_buffer = Construct(env);
+            ASSERT(!geometry_buffer.IsNull());
+
+            DrawableEffect::GeometryInfo info;
+            info.content_id   = std::move(id);
+            info.content_hash = 0;
+            info.content_name = base::FormatString("%1 Shards", mClass->GetShapeType());
+            info.usage        = BufferUsage::Static;
+            return DrawableEffect::GetShardGeometry(info, geometry_buffer, device);
+        }
+        else BUG("Missing effect mesh type handling.");
     }
 
-    const detail::SimpleShapeEnvironment shape_env = {env.model_matrix};
+    std::string id;
+    std::string name;
+    if (env.mesh_type == MeshType::Wireframe)
+    {
+        id = detail::GetSimpleShapeGeometryId(mClass->GetShapeArgs(), shape_env, Style::Solid, mClass->GetShapeType());
+        id += "Wireframe";
+        name = base::FormatString("%1 Wireframe", mClass->GetShapeType());
+    }
+    else if (env.mesh_type == MeshType::DebugMesh)
+    {
+        if (Is2DShape(mClass->GetShapeType()))
+        {
+            GFX_PAINT_ERROR("Debug mesh is not supported on 2D simple shape.");
+            return DrawGeometryHandle::Null;
+        }
 
-    geometry.usage = Geometry::Usage::Static;
-    geometry.content_name = base::ToString(mClass->GetShapeType());
-    detail::ConstructSimpleShape(mClass->GetShapeArgs(), shape_env, mStyle, mClass->GetShapeType(), geometry.buffer);
-    return true;
+        const auto normals    = env.mesh_flags.test(MeshFlags::DebugNormals);
+        const auto tangents   = env.mesh_flags.test(MeshFlags::DebugTangents);
+        const auto bitangents = env.mesh_flags.test(MeshFlags::DebugBitangents);
+        id = detail::GetSimpleShapeGeometryId(mClass->GetShapeArgs(), shape_env, Style::Solid, mClass->GetShapeType());
+        id += "DebugMesh";
+        if (normals)
+            id += "+Normals";
+        if (tangents)
+            id += "+Tangents";
+        if (bitangents)
+            id += "+BiTangents";
+
+        name = base::FormatString("%1 DebugMesh", mClass->GetShapeType());
+    }
+    else if (env.mesh_type == MeshType::PaintMesh)
+    {
+        id = detail::GetSimpleShapeGeometryId(mClass->GetShapeArgs(), shape_env, mStyle, mClass->GetShapeType());
+        if (mStyle == Style::Solid)
+            name = base::FormatString("%1", mClass->GetShapeType());
+        else if (mStyle == Style::Outline)
+            name = base::FormatString("%1 Outline", mClass->GetShapeType());
+    }
+
+    if (auto geometry = device.FindGeometry(id))
+        return std::move(geometry);
+
+    auto buffer = Construct(env);
+
+    Geometry::CreateArgs args;
+    args.buffer = buffer.TransferGeometryBuffer();
+    args.usage  = BufferUsage::Static;
+    args.content_hash = 0;
+    args.content_name = std::move(name);
+    return device.CreateGeometry(id, std::move(args));
+}
+
+DrawGeometryBuffer SimpleShapeInstance::Construct(const Environment& env) const
+{
+    detail::SimpleShapeEnvironment shape_env;
+    shape_env.model_matrix = env.model_matrix;
+
+    if (mEffect)
+    {
+        ASSERT(Is2DShape(mClass->GetShapeType()));
+
+        // not supported.
+        if (env.mesh_type == MeshType::DebugMesh)
+            return DrawGeometryBuffer::Null;
+
+        GeometryBuffer buffer;
+        detail::ConstructSimpleShape(mClass->GetShapeArgs(), shape_env, Style::Solid, mClass->GetShapeType(), buffer);
+
+        const auto effect_mesh_type = mEffect->GetEffectMshType();
+        if (effect_mesh_type == DrawableEffect::EffectMeshType::ShardMesh)
+        {
+            const auto args = mEffect->GetShardMeshArgs();
+            GeometryBuffer shard_geom_buffer;
+            TextureBuffer shard_data_buffer;
+            // should not fail since the data is all statically defined.
+            ASSERT(DrawableEffect::ConstructShardEffectMesh(std::move(buffer),
+                                                          &shard_geom_buffer,
+                                                          &shard_data_buffer,
+                                                          args.mesh_subdivision_count,
+                                                          args.discard_skinny_slivers));
+
+            if (env.mesh_type == MeshType::PaintMesh)
+            {
+                DEBUG("Created shard effect mesh on simple shape. [shape=%1]", mClass->GetShapeType());
+                return DrawGeometryBuffer(std::move(shard_geom_buffer), std::move(shard_data_buffer));
+            }
+            else if (env.mesh_type == MeshType::Wireframe)
+            {
+                GeometryBuffer wireframe;
+                CreateWireframe(shard_geom_buffer, wireframe);
+
+                DEBUG("Created wireframe shard effect mesh on simple shape. [shape=%1]", mClass->GetShapeType());
+                return DrawGeometryBuffer(std::move(wireframe), std::move(shard_data_buffer));
+            }
+        }
+        else BUG("Missing effect mesh type handling.");
+        return DrawGeometryBuffer::Null;
+    }
+
+    if (env.mesh_type == MeshType::Wireframe)
+    {
+        GeometryBuffer buffer;
+        GeometryBuffer wireframe;
+        detail::ConstructSimpleShape(mClass->GetShapeArgs(), shape_env, Style::Solid, mClass->GetShapeType(), buffer);
+        CreateWireframe(buffer, wireframe);
+
+        DEBUG("Created wireframe mesh on simple shape. [shape=%1]", mClass->GetShapeType());
+        return std::move(wireframe);
+    }
+    else if (env.mesh_type == MeshType::DebugMesh)
+    {
+        // not supported.
+        if (Is2DShape(mClass->GetShapeType()))
+            return DrawGeometryBuffer::Null;
+
+        const auto normals    = env.mesh_flags.test(MeshFlags::DebugNormals);
+        const auto tangents   = env.mesh_flags.test(MeshFlags::DebugTangents);
+        const auto bitangents = env.mesh_flags.test(MeshFlags::DebugBitangents);
+
+        unsigned flags = 0;
+        if (normals) flags |= DebugMeshFlags::Normals;
+        if (tangents) flags |= DebugMeshFlags::Tangents;
+        if (bitangents) flags |= DebugMeshFlags::Bitangents;
+
+        GeometryBuffer buffer;
+        GeometryBuffer debug_mesh;
+        detail::ConstructSimpleShape(mClass->GetShapeArgs(), shape_env, Style::Solid, mClass->GetShapeType(), buffer);
+        CreateDebugMesh(buffer, debug_mesh, flags);
+
+        DEBUG("Created debug mesh on simple shape. [shape=%1]", mClass->GetShapeType());
+        return std::move(debug_mesh);
+    }
+    else if (env.mesh_type == MeshType::PaintMesh)
+    {
+        GeometryBuffer buffer;
+        detail::ConstructSimpleShape(mClass->GetShapeArgs(), shape_env, mStyle, mClass->GetShapeType(), buffer);
+
+        DEBUG("Created paint mesh on simple shape. [shape=%1, style=%2]", mClass->GetShapeType(), mStyle);
+        return std::move(buffer);
+    }
+    else BUG("Missing mesh type handling.");
+    return GeometryBuffer{};
+}
+
+void SimpleShapeInstance::Update(const Environment& env, float dt)
+{
+    if (mEffect)
+        mEffect->Update(dt);
 }
 
 std::string SimpleShapeInstance::GetShaderId(const Environment& env) const
 {
+    const auto effects = mEffect.has_value();
     const auto shape = GetShape();
+
     if (Is2DShape(shape))
-        return Drawable::GetShaderId(env, Shader::Simple2D);
+        return Drawable::GetShaderId(env.use_instancing, effects, Shader::Simple2D);
     if (Is3DShape(shape))
-        return Drawable::GetShaderId(env, Shader::Simple3D);
+        return Drawable::GetShaderId(env.use_instancing, effects, Shader::Simple3D);
 
     BUG("Bug on shape type.");
 }
@@ -174,15 +353,13 @@ Drawable::DrawPrimitive SimpleShapeInstance::GetDrawPrimitive() const
     if (Is3DShape(mClass->GetShapeType()))
         return DrawPrimitive::Triangles;
 
+    if (mEffect)
+        return DrawPrimitive::Triangles;
+
     if (mStyle == Style::Outline)
         return DrawPrimitive::Lines;
 
     return DrawPrimitive::Triangles;
-}
-
-Drawable::Usage SimpleShapeInstance::GetGeometryUsage() const
-{
-    return Usage::Static;
 }
 
 SpatialMode SimpleShapeInstance::GetSpatialMode() const
@@ -190,34 +367,24 @@ SpatialMode SimpleShapeInstance::GetSpatialMode() const
     return mClass->GetSpatialMode();
 }
 
-bool SimpleShapeInstance::ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
-    unsigned mesh_subdivision_count, bool discard_skinny_slivers) const
+bool SimpleShapeInstance::SetEffect(DrawableEffect effect)
 {
-    Geometry::CreateArgs temp;
-    temp.content_name = base::ToString(mClass->GetShapeType());
-    temp.usage = Geometry::Usage::Static;
-    const detail::SimpleShapeEnvironment shape_env = {env.model_matrix};
-    detail::ConstructSimpleShape(mClass->GetShapeArgs(), shape_env, mStyle, mClass->GetShapeType(), temp.buffer);
-
-    // the triangle mesh computation produces a  mesh that  has the same
-    // vertex layout as the original drawables geometry  buffer.
-    GeometryBuffer shard_geometry_buffer;
-    if (!CreateShardEffectMesh(temp.buffer, &shard_geometry_buffer, mesh_subdivision_count, discard_skinny_slivers))
-        return false;
-
-    const auto vertex_count = shard_geometry_buffer.GetVertexCount();
-    const auto triangle_count = vertex_count / 3;
-
-    create.buffer       = std::move(shard_geometry_buffer);
-    create.usage        = temp.usage;
-    create.content_hash = temp.content_hash;
-    create.content_name = temp.content_name;
-    DEBUG("Successfully constructed simple shape shard mesh. [shape=%1, triangles=%2]",
-        mClass->GetShapeType(), triangle_count);
-    return true;
+    if (effect.GetEffectMshType() == DrawableEffect::EffectMeshType::ShardMesh)
+    {
+        if (Is2DShape(mClass->GetShapeType()))
+        {
+            mEffect = effect;
+            DEBUG("Set drawable effect on simple shape instance. [effect=%1]", mEffect->GetEffectType());
+            return true;
+        }
+    }
+    ERROR("Drawable effect is not compatible with the simple shape type. [shape=%1, effect=%2]",
+        mClass->GetShapeType(), effect.GetEffectType());
+    return false;
 }
 
-bool SimpleShape::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
+bool SimpleShape::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device& device, ProgramState& program, RasterState& state) const
 {
     if (const auto* instanced_draw = draw.Get<GenericInstancedDraw>())
     {
@@ -236,23 +403,19 @@ bool SimpleShape::ApplyDynamicState(const Environment& env, const DrawCall& draw
 }
 ShaderSource SimpleShape::GetShader(const Environment& env, const Device& device) const
 {
-    // not supporting the effect mesh operation in this render path right now
-    // since it's not needed.
-    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
-
     if (Is2DShape(mShape))
-        return CreateShader(env, device, Shader::Simple2D);
+        return CreateShader(env.use_instancing, false, device, Shader::Simple2D);
     if (Is3DShape(mShape))
-        return CreateShader(env, device, Shader::Simple3D);
+        return CreateShader(env.use_instancing, false, device, Shader::Simple3D);
 
     BUG("Bug on shape type.");
 }
 std::string SimpleShape::GetShaderId(const Environment& env) const
 {
     if (Is2DShape(mShape))
-        return Drawable::GetShaderId(env, Shader::Simple2D);
+        return Drawable::GetShaderId(env.use_instancing, false, Shader::Simple2D);
     if (Is3DShape(mShape))
-        return Drawable::GetShaderId(env, Shader::Simple3D);
+        return Drawable::GetShaderId(env.use_instancing, false, Shader::Simple3D);
 
     BUG("Bug on shape type.");
 }
@@ -267,24 +430,111 @@ std::string SimpleShape::GetShaderName(const Environment& env) const
     BUG("Bug on shape type.");
 }
 
-std::string SimpleShape::GetGeometryId(const Environment& env) const
+DrawGeometryHandle SimpleShape::GetGeometry(const Environment& env, Device& device) const
 {
-    const detail::SimpleShapeEnvironment shape_env = {env.model_matrix};
-    return detail::GetSimpleShapeGeometryId(mArgs, shape_env, mStyle, mShape);
+    detail::SimpleShapeEnvironment shape_env;
+    shape_env.model_matrix = env.model_matrix;
+
+    std::string id;
+    std::string name;
+    if (env.mesh_type == MeshType::Wireframe)
+    {
+        id = detail::GetSimpleShapeGeometryId(mArgs, shape_env, Style::Solid, mShape);
+        id += "Wireframe";
+        name = base::FormatString("%1 Wireframe", mShape);
+    }
+    else if (env.mesh_type == MeshType::DebugMesh)
+    {
+        if (Is2DShape(mShape))
+        {
+            GFX_PAINT_ERROR("Debug mesh is not supported on 2D simple shape.");
+            return DrawGeometryHandle::Null;
+        }
+
+        const auto normals    = env.mesh_flags.test(MeshFlags::DebugNormals);
+        const auto tangents   = env.mesh_flags.test(MeshFlags::DebugTangents);
+        const auto bitangents = env.mesh_flags.test(MeshFlags::DebugBitangents);
+        id = detail::GetSimpleShapeGeometryId(mArgs, shape_env, Style::Solid, mShape);
+        id += "DebugMesh";
+        if (normals)
+            id += "+Normals";
+        if (tangents)
+            id += "+Tangents";
+        if (bitangents)
+            id += "+BiTangents";
+
+        name = base::FormatString("%1 DebugMesh", mShape);
+    }
+    else if (env.mesh_type == MeshType::PaintMesh)
+    {
+        id = detail::GetSimpleShapeGeometryId(mArgs, shape_env, mStyle, mShape);
+        if (mStyle == Style::Solid)
+            name = base::FormatString("%1", mShape);
+        else if (mStyle == Style::Outline)
+            name = base::FormatString("%1 Outline", mShape);
+    }
+
+    if (auto geometry = device.FindGeometry(id))
+        return std::move(geometry);
+
+    auto buffer = Construct(env);
+
+    Geometry::CreateArgs args;
+    args.buffer = buffer.TransferGeometryBuffer();
+    args.usage  = BufferUsage::Static;
+    args.content_hash = 0;
+    args.content_name = std::move(name);
+    return device.CreateGeometry(id, std::move(args));
 }
 
-bool SimpleShape::Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const
+DrawGeometryBuffer SimpleShape::Construct(const Environment& env) const
 {
-    const detail::SimpleShapeEnvironment shape_env = {env.model_matrix};
+    detail::SimpleShapeEnvironment shape_env;
+    shape_env.model_matrix = env.model_matrix;
 
-    geometry.content_name = base::ToString(mShape);
-    geometry.usage = Geometry::Usage::Static;
-    detail::ConstructSimpleShape(mArgs, shape_env, mStyle, mShape, geometry.buffer);
+    if (env.mesh_type == MeshType::Wireframe)
+    {
+        GeometryBuffer buffer;
+        GeometryBuffer wireframe;
+        detail::ConstructSimpleShape(mArgs, shape_env, Style::Solid, mShape, buffer);
+        CreateWireframe(buffer, wireframe);
 
-    if (Is3DShape(mShape))
-        ASSERT(ComputeTangents(geometry.buffer));
+        DEBUG("Created wireframe mesh on simple shape. [shape=%1]", mShape);
+        return std::move(wireframe);
+    }
+    else if (env.mesh_type == MeshType::DebugMesh)
+    {
+        // not supported.
+        if (Is2DShape(mShape))
+            return DrawGeometryBuffer::Null;
 
-    return true;
+        const auto normals    = env.mesh_flags.test(MeshFlags::DebugNormals);
+        const auto tangents   = env.mesh_flags.test(MeshFlags::DebugTangents);
+        const auto bitangents = env.mesh_flags.test(MeshFlags::DebugBitangents);
+
+        unsigned flags = 0;
+        if (normals) flags |= DebugMeshFlags::Normals;
+        if (tangents) flags |= DebugMeshFlags::Tangents;
+        if (bitangents) flags |= DebugMeshFlags::Bitangents;
+
+        GeometryBuffer buffer;
+        GeometryBuffer debug_mesh;
+        detail::ConstructSimpleShape(mArgs, shape_env, Style::Solid, mShape, buffer);
+        CreateDebugMesh(buffer, debug_mesh, flags);
+
+        DEBUG("Created debug mesh on simple shape. [shape=%1]", mShape);
+        return std::move(debug_mesh);
+    }
+    else if (env.mesh_type == MeshType::PaintMesh)
+    {
+        GeometryBuffer buffer;
+        detail::ConstructSimpleShape(mArgs, shape_env, mStyle, mShape, buffer);
+
+        DEBUG("Created paint mesh on simple shape. [shape=%1, style=%2]", mShape, mStyle);
+        return std::move(buffer);
+    }
+    else BUG("Missing mesh type handling.");
+    return GeometryBuffer{};
 }
 
 Drawable::Type SimpleShape::GetType() const
@@ -301,11 +551,6 @@ Drawable::DrawPrimitive SimpleShape::GetDrawPrimitive() const
         return DrawPrimitive::Lines;
 
     return DrawPrimitive::Triangles;
-}
-
-Drawable::Usage SimpleShape::GetGeometryUsage() const
-{
-    return Usage::Static;
 }
 
 SpatialMode SimpleShape::GetSpatialMode() const

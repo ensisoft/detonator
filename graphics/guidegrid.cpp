@@ -21,6 +21,8 @@
 #include "base/format.h"
 #include "base/hash.h"
 #include "graphics/guidegrid.h"
+
+#include "device.h"
 #include "graphics/program.h"
 #include "graphics/shader_source.h"
 #include "graphics/utility.h"
@@ -28,7 +30,8 @@
 namespace gfx
 {
 
-bool Grid::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState& state) const
+bool Grid::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device&, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
@@ -39,18 +42,18 @@ bool Grid::ApplyDynamicState(const Environment& env, const DrawCall& draw, Devic
 
 std::string Grid::GetShaderId(const Environment& env) const
 {
-    return Drawable::GetShaderId(env, Shader::Simple2D);
+    // we're not supporting instancing.
+    ASSERT(env.use_instancing == false);
+
+    return Drawable::GetShaderId(env.use_instancing, false, Shader::Simple2D);
 }
 
 ShaderSource Grid::GetShader(const Environment& env, const Device& device) const
 {
-    // not supporting the effect mesh operation in this render path right now
-    // since it's not needed.
-    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
     // we're not supporting instancing.
     ASSERT(env.use_instancing == false);
 
-    return Drawable::CreateShader(env, device, Shader::Simple2D);
+    return Drawable::CreateShader(env.use_instancing, false, device, Shader::Simple2D);
 }
 
 std::string Grid::GetShaderName(const Environment& env) const
@@ -58,7 +61,7 @@ std::string Grid::GetShaderName(const Environment& env) const
     return Drawable::GetShaderName(env, Shader::Simple2D);
 }
 
-std::string Grid::GetGeometryId(const Environment& env) const
+DrawGeometryHandle Grid::GetGeometry(const Environment& env, Device& device) const
 {
     // use the content properties to generate a name for the
     // gpu side geometry.
@@ -66,10 +69,22 @@ std::string Grid::GetGeometryId(const Environment& env) const
     hash = base::hash_combine(hash, mNumVerticalLines);
     hash = base::hash_combine(hash, mNumHorizontalLines);
     hash = base::hash_combine(hash, mBorderLines);
-    return std::to_string(hash);
+    const auto id = std::to_string(hash);
+
+    if (auto geometry = device.FindGeometry(id))
+        return std::move(geometry);
+
+    auto buffer = Construct(env);
+
+    Geometry::CreateArgs args;
+    args.buffer = buffer.TransferGeometryBuffer();
+    args.usage  = BufferUsage::Static;
+    args.content_hash = hash;
+    args.content_name = base::FormatString("Grid %1x%2", mNumVerticalLines+1, mNumHorizontalLines+1);
+    return device.CreateGeometry(id, std::move(args));
 }
 
-bool Grid::Construct(const Environment&, Device&, Geometry::CreateArgs& create) const
+DrawGeometryBuffer Grid::Construct(const Environment&) const
 {
     std::vector<Vertex2D> verts;
 
@@ -117,13 +132,11 @@ bool Grid::Construct(const Environment&, Device&, Geometry::CreateArgs& create) 
         verts.push_back(corners[1]);
         verts.push_back(corners[3]);
     }
-    auto& geometry = create.buffer;
-    create.content_name = base::FormatString("Grid %1x%2", mNumVerticalLines+1, mNumHorizontalLines+1);
-    create.usage = GeometryBuffer::Usage::Static;
-    geometry.SetVertexBuffer(std::move(verts));
-    geometry.AddDrawCmd(Geometry::DrawType::Lines);
-    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
-    return true;
+    GeometryBuffer buffer;
+    buffer.SetVertexBuffer(std::move(verts));
+    buffer.AddDrawCmd(Geometry::DrawType::Lines);
+    buffer.SetVertexLayout(GetVertexLayout<Vertex2D>());
+    return std::move(buffer);
 }
 
 Drawable::Type Grid::GetType() const
@@ -139,11 +152,6 @@ Drawable::DrawPrimitive Grid::GetDrawPrimitive() const
 SpatialMode Grid::GetSpatialMode() const
 {
     return SpatialMode::Flat2D;
-}
-
-Drawable::Usage Grid::GetGeometryUsage() const
-{
-    return Usage::Static;
 }
 
 } // namespace

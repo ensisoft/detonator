@@ -32,6 +32,8 @@
 #include "base/json.h"
 #include "graphics/drawcall.h"
 #include "graphics/polygon_mesh.h"
+
+#include "device.h"
 #include "geometry_algo.h"
 #include "graphics/drawcmd.h"
 #include "graphics/loader.h"
@@ -210,26 +212,21 @@ const Geometry::DrawCommand* PolygonMeshClass::GetDrawCmd(size_t index) const no
     return nullptr;
 }
 
-std::string PolygonMeshClass::GetGeometryId(const Environment& env) const
-{
-    return mId;
-}
-
-std::string PolygonMeshClass::GetShaderId(const Environment& env) const
+std::string PolygonMeshClass::GetShaderId(bool instancing, bool effects) const
 {
     std::string id;
     if (mMeshType == MeshType::Simple2DRenderMesh)
-        id = Drawable::GetShaderId(env, Drawable::Shader::Simple2D);
+        id = Drawable::GetShaderId(instancing, effects, Drawable::Shader::Simple2D);
     else if (mMeshType == MeshType::Simple2DShardEffectMesh)
-        id = Drawable::GetShaderId(env, Drawable::Shader::Simple2D);
+        id = Drawable::GetShaderId(instancing, effects, Drawable::Shader::Simple2D);
     else if (mMeshType == MeshType::Simple3DRenderMesh)
-        id = Drawable::GetShaderId(env, Drawable::Shader::Simple3D);
+        id = Drawable::GetShaderId(instancing, false, Drawable::Shader::Simple3D);
     else if (mMeshType == MeshType::Model3DRenderMesh)
-        id = Drawable::GetShaderId(env, Drawable::Shader::Model3D);
+        id = Drawable::GetShaderId(instancing, false, Drawable::Shader::Model3D);
     else if (mMeshType == MeshType::Dimetric2DRenderMesh)
-        id = Drawable::GetShaderId(env, Drawable::Shader::Perceptual3D);
+        id = Drawable::GetShaderId(instancing, false, Drawable::Shader::Perceptual3D);
     else if (mMeshType == MeshType::Isometric2DRenderMesh)
-        id = Drawable::GetShaderId(env, Drawable::Shader::Perceptual3D);
+        id = Drawable::GetShaderId(instancing, false, Drawable::Shader::Perceptual3D);
     else BUG("Bug on polygon mesh type.");
 
     if (mShaderSrc.empty())
@@ -262,21 +259,21 @@ std::string PolygonMeshClass::GetShaderName(const Environment& env) const
     BUG("Bug on polygon mesh type.");
 }
 
-ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& device) const
+ShaderSource PolygonMeshClass::GetShader(bool instancing, bool effects, const Device& device) const
 {
     ShaderSource src;
     if (mMeshType == MeshType::Simple2DRenderMesh)
-        src = Drawable::CreateShader(env, device, Drawable::Shader::Simple2D);
+        src = Drawable::CreateShader(instancing, effects, device, Drawable::Shader::Simple2D);
     else if (mMeshType == MeshType::Simple2DShardEffectMesh)
-        src = Drawable::CreateShader(env, device, Drawable::Shader::Simple2D);
+        src = Drawable::CreateShader(instancing, effects, device, Drawable::Shader::Simple2D);
     else if (mMeshType == MeshType::Simple3DRenderMesh)
-        src = Drawable::CreateShader(env, device, Drawable::Shader::Simple3D);
+        src = Drawable::CreateShader(instancing, false, device, Drawable::Shader::Simple3D);
     else if (mMeshType == MeshType::Model3DRenderMesh)
-        src = Drawable::CreateShader(env, device, Drawable::Shader::Model3D);
+        src = Drawable::CreateShader(instancing, false, device, Drawable::Shader::Model3D);
     else if (mMeshType == MeshType::Dimetric2DRenderMesh)
-        src = Drawable::CreateShader(env, device, Drawable::Shader::Perceptual3D);
+        src = Drawable::CreateShader(instancing, false, device, Drawable::Shader::Perceptual3D);
     else if (mMeshType == MeshType::Isometric2DRenderMesh)
-        src = Drawable::CreateShader(env, device, Drawable::Shader::Perceptual3D);
+        src = Drawable::CreateShader(instancing, false, device, Drawable::Shader::Perceptual3D);
     else BUG("Bug on polygon mesh type.");
 
     if (!mShaderSrc.empty())
@@ -611,7 +608,8 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     return ok;
 }
 
-bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& create) const
+    /*
+DrawGeometryBuffer PolygonMeshClass::Construct(const Environment& env, Device&) const
 {
     if (env.mesh_type == DrawableClass::MeshType::ShardedEffectMesh)
     {
@@ -655,50 +653,41 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
 
         return ConstructInternal(create);
     }
-
     BUG("Bug on mesh type.");
 }
-bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
+    */
+
+bool PolygonMeshClass::Construct(GeometryBuffer* buffer) const
 {
-    const auto usage = mStatic ? Geometry::Usage::Static
-                               : Geometry::Usage::Dynamic;
-
-    auto& geometry_buffer = create.buffer;
-    ASSERT(geometry_buffer.GetNumDrawCmds() == 0);
-
     if (mData.has_value())
     {
         const auto& data = mData.value();
-        create.usage  = usage;
-        create.content_hash = GetContentHash();
-        create.content_name = mName;
 
-        geometry_buffer.SetVertexLayout(data.layout);
+        buffer->SetVertexLayout(data.layout);
         if (const auto vertex_count = data.vertices.size())
-            geometry_buffer.UploadVertices(data.vertices.data(), vertex_count);
+            buffer->UploadVertices(data.vertices.data(), vertex_count);
 
         if (!data.indices.empty())
-            geometry_buffer.UploadIndices(data.indices.data(), data.indices.size(), data.index_type);
+            buffer->UploadIndices(data.indices.data(), data.indices.size(), data.index_type);
 
         for (const auto& cmd : data.cmds)
         {
-            geometry_buffer.AddDrawCmd(cmd);
+            buffer->AddDrawCmd(cmd);
         }
+        return true;
     }
 
     if (mContentUri.empty())
         return true;
 
-    gfx::Loader::ResourceDesc desc;
+    Loader::ResourceDesc desc;
     desc.uri  = mContentUri;
     desc.id   = mId;
-    desc.type = gfx::Loader::Type::Mesh;
+    desc.type = Loader::Type::Mesh;
     const auto& data_buffer = LoadResource(desc);
     if (!data_buffer)
     {
-        create.error_log = base::FormatString("Failed to load polygon mesh data. [shape='%1, uri='%2]",
-            mName, mContentUri);
-        ERROR(create.error_log);
+        ERROR("Failed to load polygon mesh data. [name='%1', uri='%2']", mName, mContentUri);
         return false;
     }
 
@@ -707,9 +696,7 @@ bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
     auto [success, json, error] = base::JsonParse(beg, end);
     if (!success)
     {
-        create.error_log = base::FormatString("Failed to parse polygon mesh geometry buffer. [shape='%1', uri='%2', error='%3]",
-            mName, mContentUri, error);
-        ERROR(create.error_log);
+        ERROR("Failed to parse polygon mesh geometry buffer. [name='%1', uri='%2', error='%3']", mName, mContentUri, error);
         return false;
     }
 
@@ -718,46 +705,33 @@ bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
     VertexBuffer vertex_buffer;
     if (!vertex_buffer.FromJson(reader))
     {
-        create.error_log = base::FormatString("Failed to load polygon mesh vertex buffer. [shape='%1', uri='%2']",
-            mName, mContentUri);
-        ERROR(create.error_log);
+        ERROR("Failed to load polygon mesh vertex buffer. [name='%1', uri='%2']", mName, mContentUri);
         return false;
     }
     if (!vertex_buffer.Validate())
     {
-        create.error_log = base::FormatString("Invalid polygon mesh vertex buffer. [shape='%1', uri='%2']",
-            mName, mContentUri);
-        ERROR(create.error_log);
+        ERROR("Invalid polygon mesh vertex buffer. [name='%1', uri='%2']", mName, mContentUri);
         return false;
     }
 
     CommandBuffer command_buffer;
     if (!command_buffer.FromJson(reader))
     {
-        create.error_log = base::FormatString("Failed to load polygon mesh command buffer. [shape='%1', uri='%2']",
-            mName, mContentUri);
-        ERROR(create.error_log);
+        ERROR("Failed to load polygon mesh command buffer. [name='%1', uri='%2']", mName, mContentUri);
         return false;
     }
 
     IndexBuffer index_buffer;
     if (!index_buffer.FromJson(reader))
     {
-        create.error_log = base::FormatString("Failed to load polygon mesh index buffer. [shape='%1', uri='%2']",
-            mName, mContentUri);
-        ERROR(create.error_log);
-        return false;
+       ERROR("Failed to load polygon mesh index buffer. [name='%1', uri='%2']", mName, mContentUri);
+       return false;
     }
 
-    create.usage = usage;
-    create.content_name = mName;
-    create.content_hash = GetContentHash();
-
-    geometry_buffer.SetVertexLayout(vertex_buffer.GetLayout());
-    geometry_buffer.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize());
-    geometry_buffer.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(), index_buffer.GetType());
-    geometry_buffer.SetDrawCommands(command_buffer.GetCommandBuffer());
-    DEBUG("Loaded polygon mesh geometry buffer(s). [shape='%1', uri='%2']", mName, mContentUri);
+    buffer->SetVertexLayout(vertex_buffer.GetLayout());
+    buffer->UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize());
+    buffer->UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(), index_buffer.GetType());
+    buffer->SetDrawCommands(command_buffer.GetCommandBuffer());
     return true;
 }
 
@@ -816,7 +790,8 @@ std::size_t PolygonMeshInstance::GetSubMeshIndex() const noexcept
     return 0;
 }
 
-bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
+bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device& device, ProgramState& program, RasterState& state) const
 {
     unsigned flags = mFlags;
 
@@ -833,6 +808,9 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCa
     program.SetUniform("kTime", static_cast<float>(mTime));
     program.SetUniform("kRandom", mRandom);
     program.SetUniform("kDrawableFlags", flags);
+
+    if (mEffect)
+        mEffect->SetState(geometry, program);
 
     if (const auto* instanced_draw = draw.Get<GenericInstancedDraw>())
     {
@@ -856,22 +834,264 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCa
 
 ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
 {
-    return mClass->GetShader(env, device);
+    const bool effects = mEffect.has_value();
+    return mClass->GetShader(env.use_instancing, effects, device);
 }
 
-std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
+DrawGeometryHandle PolygonMeshInstance::GetGeometry(const Environment& env, Device& device) const
 {
-    return mClass->GetGeometryId(env);
+    const bool static_content = mClass->IsStatic();
+
+    if (mEffect)
+    {
+        // not supported.
+        if (env.mesh_type == DrawableClass::MeshType::DebugMesh)
+        {
+            GFX_PAINT_ERROR("Debug mesh is not supported on polygon effect mesh.");
+            return DrawGeometryHandle::Null;
+        }
+
+        const auto mesh_type = mClass->GetMeshType();
+        const auto effect_mesh_type = mEffect->GetEffectMshType();
+        if (effect_mesh_type == DrawableEffect::EffectMeshType::ShardMesh)
+        {
+            std::string id;
+
+            const auto args = mEffect->GetShardMeshArgs();
+            if (mesh_type == MeshType::Simple2DRenderMesh)
+            {
+                id += mClass->GetId();
+                id += base::FormatString("ShardMesh@%1", args.mesh_subdivision_count);
+            }
+            else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+            {
+                id = mClass->GetId();
+            }
+            else
+            {
+                // we should have done the validation in SetEffect.
+                // so if we're hitting this bug the problem is in SetEffect.
+                BUG("Unsupported polygon mesh and effect combination.");
+            }
+
+            if (env.mesh_type == DrawableClass::MeshType::Wireframe)
+                id += "Wireframe";
+
+            auto shard_texture  = device.FindTexture(id);
+            auto shard_geometry = device.FindGeometry(id);
+            if (shard_texture && shard_geometry)
+            {
+                if (static_content)
+                {
+                    if (!env.editing_mode)
+                        return DrawGeometryHandle(std::move(shard_geometry), shard_texture);
+
+                    const auto content_hash = mClass->GetContentHash();
+                    if (shard_geometry->GetContentHash() == content_hash)
+                        return DrawGeometryHandle(std::move(shard_geometry), shard_texture);
+                }
+                else
+                {
+                    const auto content_hash = mClass->GetContentHash();
+                    if (shard_geometry->GetContentHash() == content_hash)
+                        return DrawGeometryHandle(std::move(shard_geometry), shard_texture);
+                }
+            }
+            auto buffer = Construct(env);
+            if (buffer.IsNull())
+                return DrawGeometryHandle::CreateErrorGeometry(id,
+                    base::FormatString("Failed to load polygon mesh '%1'", mClass->GetName()),
+                    base::FormatString("Polygon mesh '%1' fallback", mClass->GetName()),
+                    mClass->GetContentHash(), device);
+
+            DrawableEffect::GeometryInfo info;
+            info.content_id   = std::move(id);
+            info.content_hash = mClass->GetContentHash();
+            info.content_name = base::FormatString("%1 Shards", mClass->GetName());
+            info.usage        = static_content ? BufferUsage::Static : BufferUsage::Dynamic;
+            return DrawableEffect::GetShardGeometry(info, buffer, device);
+
+        } else BUG("Missing effect mesh type handling.");
+    }
+    else
+    {
+        std::string id;
+        std::string name;
+        if (env.mesh_type == DrawableClass::MeshType::Wireframe)
+        {
+            id = base::FormatString("Wireframe %1", mClass->GetId());
+            name = base::FormatString("%1 Wireframe", mClass->GetName());
+        }
+        else if (env.mesh_type == DrawableClass::MeshType::DebugMesh)
+        {
+            const auto mesh_type = mClass->GetMeshType();
+            if (mesh_type != MeshType::Model3DRenderMesh && mesh_type != MeshType::Simple3DRenderMesh)
+                return DrawGeometryHandle::Null;
+
+            const auto normals    = env.mesh_flags.test(MeshFlags::DebugNormals);
+            const auto tangents   = env.mesh_flags.test(MeshFlags::DebugTangents);
+            const auto bitangents = env.mesh_flags.test(MeshFlags::DebugBitangents);
+
+            std::string s;
+            s += "DebugMesh";
+            if (normals)
+                s += "+Normals";
+            if (tangents)
+                s += "+Tangents";
+            if (bitangents)
+                s += "+BiTangents";
+            id = base::FormatString("%1 %2", s, mClass->GetId());
+            name = base::FormatString("%1 DebugMesh", mClass->GetName());
+        }
+        else if (env.mesh_type == DrawableClass::MeshType::PaintMesh)
+        {
+            id = mClass->GetId();
+            name = mClass->GetName();
+        } else BUG("Missing mesh type handling.");
+
+        if (auto geometry = device.FindGeometry(id))
+        {
+            if (static_content)
+            {
+                if (!env.editing_mode)
+                    return geometry;
+
+                const auto content_hash = mClass->GetContentHash();
+                if (geometry->GetContentHash() == content_hash)
+                    return geometry;
+            }
+            else
+            {
+                const auto content_hash = mClass->GetContentHash();
+                if (geometry->GetContentHash() == content_hash)
+                    return geometry;
+            }
+        }
+        auto buffer = Construct(env);
+        if (buffer.IsNull())
+            return DrawGeometryHandle::CreateErrorGeometry(id,
+                base::FormatString("Failed to load polygon mesh '%1'", mClass->GetName()),
+                base::FormatString("Polygon mesh '%1' fallback", mClass->GetName()),
+                mClass->GetContentHash(), device);
+
+        Geometry::CreateArgs args;
+        args.buffer = buffer.TransferGeometryBuffer();
+        args.content_hash = mClass->GetContentHash();
+        args.content_name = std::move(name);
+        args.usage = static_content ? BufferUsage::Static : BufferUsage::Dynamic;
+        return device.CreateGeometry(id, std::move(args));
+    }
+    return DrawGeometryHandle::Null;
 }
 
-bool PolygonMeshInstance::Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const
+DrawGeometryBuffer PolygonMeshInstance::Construct(const Environment& env) const
 {
-    return mClass->Construct(env, create);
+    GeometryBuffer buffer;
+    if (!mClass->Construct(&buffer))
+        return DrawGeometryBuffer::Null;
+
+    const bool static_content = mClass->IsStatic();
+
+    if (mEffect)
+    {
+        // not supported.
+        if (env.mesh_type == DrawableClass::MeshType::DebugMesh)
+            return DrawGeometryBuffer::Null;
+
+        const auto mesh_type = mClass->GetMeshType();
+        const auto effect_mesh_type = mEffect->GetEffectMshType();
+        if (effect_mesh_type == DrawableEffect::EffectMeshType::ShardMesh)
+        {
+            if (mesh_type == MeshType::Simple2DShardEffectMesh || mesh_type == MeshType::Simple2DRenderMesh)
+            {
+                const auto args = mEffect->GetShardMeshArgs();
+                GeometryBuffer shard_geom_buffer;
+                TextureBuffer shard_data_buffer;
+
+                // this will handle either Vertex2D or ShardVertex2D internally.
+                if (!DrawableEffect::ConstructShardEffectMesh(std::move(buffer),
+                                                              &shard_geom_buffer,
+                                                              &shard_data_buffer,
+                                                              args.mesh_subdivision_count,
+                                                              args.discard_skinny_slivers))
+                {
+                    ERROR("Failed to construct polygon mesh shard effect mesh. [name='%1']", mClass->GetName());
+                    return DrawGeometryBuffer::Null;
+                }
+
+                if (env.mesh_type == DrawableClass::MeshType::PaintMesh)
+                {
+                    if (static_content)
+                        DEBUG("Created shard effect mesh on polygon mesh. [name='%1', type=%2]", mClass->GetName(), mesh_type);
+
+                    return DrawGeometryBuffer(std::move(shard_geom_buffer), std::move(shard_data_buffer));
+                }
+                else if (env.mesh_type == DrawableClass::MeshType::Wireframe)
+                {
+                    GeometryBuffer wireframe;
+                    CreateWireframe(shard_geom_buffer, wireframe);
+
+                    if (static_content)
+                        DEBUG("Created wireframe shard effect mesh on polygon mesh. [name='%1', type=%2]", mClass->GetName(), mesh_type);
+
+                    return DrawGeometryBuffer(std::move(wireframe), std::move(shard_data_buffer));
+                }
+            }
+            else return DrawGeometryBuffer::Null;
+        }
+        else BUG("Missing effect mesh type handling.");
+    }
+
+    if (env.mesh_type == DrawableClass::MeshType::Wireframe)
+    {
+        GeometryBuffer wireframe;
+        CreateWireframe(buffer, wireframe);
+
+        if (static_content)
+            DEBUG("Created wireframe polygon mesh. [name='%1']", mClass->GetName());
+
+        return std::move(wireframe);
+    }
+    else if (env.mesh_type == DrawableClass::MeshType::DebugMesh)
+    {
+        const auto mesh_type = mClass->GetMeshType();
+        if (mesh_type != MeshType::Model3DRenderMesh && mesh_type != MeshType::Simple3DRenderMesh)
+            return GeometryBuffer{};
+
+        const auto normals    = env.mesh_flags.test(MeshFlags::DebugNormals);
+        const auto tangents   = env.mesh_flags.test(MeshFlags::DebugTangents);
+        const auto bitangents = env.mesh_flags.test(MeshFlags::DebugBitangents);
+
+        unsigned flags = 0;
+        if (normals) flags |= DebugMeshFlags::Normals;
+        if (tangents) flags |= DebugMeshFlags::Tangents;
+        if (bitangents) flags |= DebugMeshFlags::Bitangents;
+
+        GeometryBuffer debug_mesh;
+        CreateDebugMesh(buffer, debug_mesh, flags);
+
+        if (static_content)
+            DEBUG("Created debug mesh on polygon mesh. [name='%1']", mClass->GetName());
+
+        return std::move(debug_mesh);
+    }
+    else if (env.mesh_type == DrawableClass::MeshType::PaintMesh)
+    {
+        if (static_content)
+            DEBUG("Created paint mesh on polygon mesh. [name='%1']", mClass->GetName());
+
+        return std::move(buffer);
+    }
+    else BUG("Missing mesh type handling.");
+    return GeometryBuffer{};
 }
 
 void PolygonMeshInstance::Update(const Environment& env, float dt)
 {
     mTime += dt;
+
+    if (mEffect)
+        mEffect->Update(dt);
 }
 
 Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
@@ -921,27 +1141,33 @@ Drawable::Type PolygonMeshInstance::GetType() const
     return Type::Polygon;
 }
 
-Drawable::Usage PolygonMeshInstance::GetGeometryUsage() const
-{
-    if (mClass->IsStatic())
-        return Usage::Static;
-
-    return Usage::Dynamic;
-}
-
-size_t PolygonMeshInstance::GetGeometryHash() const
-{
-    return mClass->GetContentHash();
-}
-
 std::string PolygonMeshInstance::GetShaderId(const Environment& env) const
 {
-    return mClass->GetShaderId(env);
+    const bool effects = mEffect.has_value();
+    return mClass->GetShaderId(env.use_instancing, effects);
 }
 
 std::string PolygonMeshInstance::GetShaderName(const Environment& env) const
 {
     return mClass->GetShaderName(env);
 }
+
+bool PolygonMeshInstance::SetEffect(DrawableEffect effect)
+{
+    const auto mesh_type = mClass->GetMeshType();
+    if (effect.GetEffectMshType() == DrawableEffect::EffectMeshType::ShardMesh)
+    {
+        if (mesh_type == MeshType::Simple2DRenderMesh || mesh_type == MeshType::Simple2DShardEffectMesh)
+        {
+            mEffect = effect;
+            DEBUG("Set drawable effect on polygon mesh instance. [effect=%1]", mEffect->GetEffectType());
+            return true;
+        }
+    }
+    ERROR("Drawable effect is not compatible with the polygon mesh. [name='%1', mesh=%2, effect=%3]",
+        mClass->GetName(), mesh_type, effect.GetEffectType());
+    return false;
+}
+
 
 } // namespace

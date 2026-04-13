@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <cstring>
 
+#include "base/assert.h"
 #include "base/utility.h"
 #include "graphics/enum.h"
 #include "graphics/vertex.h"
@@ -116,6 +117,38 @@ namespace gfx
         {
             return mBuffer->data();
         }
+
+        void Resize(size_t size)
+        {
+            const auto bytes = sizeof(Struct) * size;
+            mStorage.resize(bytes);
+        }
+        Struct GetAt(size_t index) const noexcept
+        {
+            const auto beg_offset = index * sizeof(Struct);
+            const auto end_offset = index * sizeof(Struct) + sizeof(Struct);
+            const auto bytes = mBuffer->size();
+            ASSERT(end_offset <= bytes);
+
+            const auto& buffer = *mBuffer;
+
+            Struct ret;
+            std::memcpy(&ret, &buffer[beg_offset], sizeof(Struct));
+            return ret;
+        }
+
+        void SetAt(size_t index, const Struct& value) noexcept
+        {
+            const auto beg_offset = index * sizeof(Struct);
+            const auto end_offset = index * sizeof(Struct) + sizeof(Struct);
+            const auto bytes = mBuffer->size();
+            ASSERT(end_offset <= bytes);
+
+            auto& buffer = *mBuffer;
+
+            std::memcpy(&buffer[beg_offset], &value, sizeof(value));
+        }
+
     private:
         std::vector<uint8_t> mStorage;
         std::vector<uint8_t>* mBuffer = nullptr;

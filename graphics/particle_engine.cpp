@@ -29,6 +29,7 @@
 #include "data/reader.h"
 #include "graphics/particle_engine.h"
 
+#include "device.h"
 #include "paint_log.h"
 #include "graphics/drawcall.h"
 #include "graphics/shader_code.h"
@@ -97,11 +98,6 @@ std::string ParticleEngineClass::GetShaderId(const Environment& env) const
     return std::to_string(hash);
 }
 
-std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
-{
-    return "particle-buffer";
-}
-
 ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
 
@@ -125,7 +121,19 @@ std::string ParticleEngineClass::GetShaderName(const Environment& env) const
     return "2D Particle Shader";
 }
 
-bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const InstanceState& state, Geometry::CreateArgs& create) const
+DrawGeometryHandle ParticleEngineClass::GetGeometry(const Environment& env, Device& device, const InstanceState& state) const
+{
+    auto buffer = Construct(env, state);
+
+    Geometry::CreateArgs args;
+    args.buffer = buffer.TransferGeometryBuffer();
+    args.usage  = BufferUsage::Stream;
+    args.content_name = mName;
+    args.content_hash = 0;
+    return device.CreateGeometry("particle-buffer", std::move(args));
+}
+
+DrawGeometryBuffer ParticleEngineClass::Construct(const Drawable::Environment& env,  const InstanceState& state) const
 {
     // take a lock on the mutex to make sure that we don't have
     // a race condition with the background tasks.
@@ -154,11 +162,6 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
     static_assert(std::is_trivially_copyable<ParticleVertex>::value &&
                   std::is_trivially_copy_assignable<ParticleVertex>::value &&
                   std::is_standard_layout<ParticleVertex>::value, "Particle vertex is not supported.");
-
-    auto& geometry = create.buffer;
-    ASSERT(geometry.GetNumDrawCmds() == 0);
-    create.usage = Geometry::Usage::Stream;
-    create.content_name = mName;
 
     if (mParams->primitive == DrawPrimitive::Point)
     {
@@ -190,9 +193,11 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
             vertex.aData.w = particle.time / (particle.time_scale * mParams->max_lifetime);
         }
 
-        geometry.SetVertexLayout(layout);
-        geometry.SetVertexBuffer(std::move(vertex_buffer));
-        geometry.AddDrawCmd(Geometry::DrawType::Points);
+        GeometryBuffer buffer;
+        buffer.SetVertexLayout(layout);
+        buffer.SetVertexBuffer(std::move(vertex_buffer));
+        buffer.AddDrawCmd(Geometry::DrawType::Points);
+        return std::move(buffer);
     }
     else if (mParams->primitive == DrawPrimitive::FullLine ||
              mParams->primitive == DrawPrimitive::PartialLineBackward ||
@@ -286,14 +291,17 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
             vertex.aPosition = ToVec(end / glm::vec2(mParams->max_xpos, mParams->max_ypos));
             vertex_buffer[vertex_index+1] = vertex;
         }
-        geometry.SetVertexBuffer(std::move(vertex_buffer));
-        geometry.SetVertexLayout(layout);
-        geometry.AddDrawCmd(Geometry::DrawType::Lines);
+        GeometryBuffer buffer;
+        buffer.SetVertexBuffer(std::move(vertex_buffer));
+        buffer.SetVertexLayout(layout);
+        buffer.AddDrawCmd(Geometry::DrawType::Lines);
+        return std::move(buffer);
     }
-    return true;
+    return GeometryBuffer{};
 }
 
-bool ParticleEngineClass::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program) const
+bool ParticleEngineClass::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device& device, ProgramState& program) const
 {
     if (const auto* instanced_draw = draw.Get<GenericInstancedDraw>())
     {
@@ -1190,11 +1198,12 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, const Params& p
     return true;
 }
 
-bool ParticleEngineInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
+bool ParticleEngineInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device& device, ProgramState& program, RasterState& state) const
 {
     // state.line_width = 1.0; // don't change the line width
     state.culling    = Culling::None;
-    return mClass->ApplyDynamicState(env, draw, device, program);
+    return mClass->ApplyDynamicState(env, draw, geometry, device, program);
 }
 
 ShaderSource ParticleEngineInstance::GetShader(const Environment& env, const Device& device) const
@@ -1209,14 +1218,15 @@ std::string ParticleEngineInstance::GetShaderName(const Environment& env) const
 {
     return mClass->GetShaderName(env);
 }
-std::string ParticleEngineInstance::GetGeometryId(const Environment& env) const
+
+DrawGeometryHandle ParticleEngineInstance::GetGeometry(const Environment& env, Device& device) const
 {
-    return mClass->GetGeometryId(env);
+    return mClass->GetGeometry(env, device, *mState);
 }
 
-bool ParticleEngineInstance::Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const
+DrawGeometryBuffer ParticleEngineInstance::Construct(const Environment& env) const
 {
-    return mClass->Construct(env, *mState, create);
+    return mClass->Construct(env, *mState);
 }
 
 void ParticleEngineInstance::Update(const Environment& env, float dt)
@@ -1298,11 +1308,6 @@ SpatialMode ParticleEngineInstance::GetSpatialMode() const
 Drawable::Type ParticleEngineInstance::GetType() const
 {
     return Type::ParticleEngine;
-}
-
-Drawable::Usage ParticleEngineInstance::GetGeometryUsage() const
-{
-    return Usage::Stream;
 }
 
 } // namespace

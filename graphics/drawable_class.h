@@ -23,6 +23,7 @@
 #include <memory>
 #include <cstddef>
 
+#include "base/bitflag.h"
 #include "data/fwd.h"
 #include "graphics/enum.h"
 
@@ -72,22 +73,24 @@ namespace gfx
             EffectsDrawable,
             Other
         };
+
         enum class MeshType {
-            NormalRenderMesh,
-            ShardedEffectMesh
+            PaintMesh,
+            Wireframe,
+            DebugMesh
         };
-        struct ShardedEffectMeshArgs {
-            unsigned mesh_subdivision_count = 0;
+
+        enum class MeshFlags {
+            DebugNormals, DebugTangents, DebugBitangents
         };
-        using MeshArgs = std::variant<std::monostate, ShardedEffectMeshArgs>;
 
         // The environment that possibly affects the geometry and drawable
         // generation and update in some way.
         struct Environment {
             RenderPass render_pass = RenderPass::ColorPass;
-            // true if the draw is with "effects", i.e. per triangle transform
-            MeshType mesh_type = MeshType::NormalRenderMesh;
-            MeshArgs mesh_args;
+
+            MeshType mesh_type = MeshType::PaintMesh;
+            base::bitflag<MeshFlags> mesh_flags;
 
             // true to indicate that we're going to do instanced draw.
             bool use_instancing = false;

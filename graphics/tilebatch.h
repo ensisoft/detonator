@@ -55,17 +55,19 @@ namespace gfx
           : mTiles(std::move(tiles))
         {}
 
-        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState& raster) const override;
+       Type GetType() const override;
+
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+            Device& device, ProgramState& program, RasterState& raster) const override;
+
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
-        std::string GetGeometryId(const Environment& env) const override;
 
-        bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& create) const override;
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& env) const override;
 
         DrawPrimitive GetDrawPrimitive() const override;
-        Type GetType() const override;
-        Usage GetGeometryUsage() const override;
         SpatialMode GetSpatialMode() const override;
 
         inline void AddTile(const Tile& tile)

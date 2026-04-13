@@ -20,6 +20,8 @@
 #include "base/hash.h"
 #include "base/format.h"
 #include "graphics/linebatch.h"
+
+#include "device.h"
 #include "graphics/utility.h"
 #include "graphics/shader_source.h"
 #include "graphics/vertex.h"
@@ -28,7 +30,8 @@
 namespace gfx
 {
 
-bool LineBatch2D::ApplyDynamicState(const Environment &environment, const DrawCall& draw, Device&, ProgramState &program, RasterState &state) const
+bool LineBatch2D::ApplyDynamicState(const Environment &environment, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device&, ProgramState &program, RasterState &state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
@@ -37,18 +40,18 @@ bool LineBatch2D::ApplyDynamicState(const Environment &environment, const DrawCa
 
 ShaderSource LineBatch2D::GetShader(const Environment& env, const Device& device) const
 {
-    // not supporting the effect mesh operation in this render path right now
-    // since it's not needed.
-    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
     // we're not supporting instancing.
     ASSERT(env.use_instancing == false);
 
-    return Drawable::CreateShader(env, device, Shader::Simple2D);
+    return Drawable::CreateShader(env.use_instancing, false, device, Shader::Simple2D);
 }
 
 std::string LineBatch2D::GetShaderId(const Environment& env) const
 {
-    return Drawable::GetShaderId(env, Shader::Simple2D);
+    // we're not supporting instancing.
+    ASSERT(env.use_instancing == false);
+
+    return Drawable::GetShaderId(env.use_instancing, false, Shader::Simple2D);
 }
 
 std::string LineBatch2D::GetShaderName(const Environment& env) const
@@ -56,11 +59,19 @@ std::string LineBatch2D::GetShaderName(const Environment& env) const
     return Drawable::GetShaderName(env, Shader::Simple2D);
 }
 
-std::string LineBatch2D::GetGeometryId(const Environment &environment) const
+DrawGeometryHandle LineBatch2D::GetGeometry(const Environment& env, Device& device) const
 {
-    return "line-buffer-2d";
+    auto buffer = Construct(env);
+
+    Geometry::CreateArgs args;
+    args.content_hash = 0;
+    args.content_name = "2D Line Batch";
+    args.buffer = buffer.TransferGeometryBuffer();
+    args.usage  = BufferUsage::Stream;
+    return device.CreateGeometry("line-buffer-2d", std::move(args));
 }
-bool LineBatch2D::Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const
+
+DrawGeometryBuffer LineBatch2D::Construct(const Environment& environment) const
 {
     std::vector<Vertex2D> vertices;
     for (const auto& line : mLines)
@@ -74,14 +85,12 @@ bool LineBatch2D::Construct(const Environment& environment, Device&, Geometry::C
         vertices.push_back(a);
         vertices.push_back(b);
     }
-    create.content_name = "2D Line Batch";
-    create.usage = Geometry::Usage::Stream;
-    auto& geometry = create.buffer;
 
-    geometry.SetVertexBuffer(vertices);
-    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
-    geometry.AddDrawCmd(Geometry::DrawType::Lines);
-    return true;
+    GeometryBuffer buffer;
+    buffer.SetVertexBuffer(vertices);
+    buffer.SetVertexLayout(GetVertexLayout<Vertex2D>());
+    buffer.AddDrawCmd(Geometry::DrawType::Lines);
+    return std::move(buffer);
 }
 
 Drawable::DrawPrimitive LineBatch2D::GetDrawPrimitive() const
@@ -94,17 +103,13 @@ SpatialMode LineBatch2D::GetSpatialMode() const
     return SpatialMode::Flat2D;
 }
 
-Drawable::Usage LineBatch2D::GetGeometryUsage() const
-{
-    return Usage::Stream;
-}
-
 Drawable::Type LineBatch2D::GetType() const
 {
     return Type::LineBatch2D;
 }
 
-bool LineBatch3D::ApplyDynamicState(const Environment& environment, const DrawCall& draw, Device&, ProgramState& program, RasterState& state) const
+bool LineBatch3D::ApplyDynamicState(const Environment& environment, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device&, ProgramState& program, RasterState& state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
@@ -113,18 +118,18 @@ bool LineBatch3D::ApplyDynamicState(const Environment& environment, const DrawCa
 
 ShaderSource LineBatch3D::GetShader(const Environment& env, const Device& device) const
 {
-    // not supporting the effect mesh operation in this render path right now
-    // since it's not needed.
-    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
     // we're not supporting instancing.
     ASSERT(env.use_instancing == false);
 
-    return Drawable::CreateShader(env, device, Shader::Simple3D);
+    return Drawable::CreateShader(env.use_instancing, false, device, Shader::Simple3D);
 }
 
 std::string LineBatch3D::GetShaderId(const Environment& env) const
 {
-    return Drawable::GetShaderId(env, Shader::Simple3D);
+    // we're not supporting instancing.
+    ASSERT(env.use_instancing == false);
+
+    return Drawable::GetShaderId(env.use_instancing, false, Shader::Simple3D);
 }
 
 std::string LineBatch3D::GetShaderName(const Environment& env) const
@@ -132,12 +137,19 @@ std::string LineBatch3D::GetShaderName(const Environment& env) const
     return Drawable::GetShaderName(env, Shader::Simple3D);
 }
 
-std::string LineBatch3D::GetGeometryId(const Environment& environment) const
+DrawGeometryHandle LineBatch3D::GetGeometry(const Environment& env, Device& device) const
 {
-    return "line-buffer-3D";
+    auto buffer = Construct(env);
+
+    Geometry::CreateArgs args;
+    args.content_hash = 0;
+    args.content_name = "3D Line Batch";
+    args.buffer = buffer.TransferGeometryBuffer();
+    args.usage  = BufferUsage::Stream;
+    return device.CreateGeometry("line-buffer-3d", std::move(args));
 }
 
-bool LineBatch3D::Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const
+DrawGeometryBuffer LineBatch3D::Construct(const Environment& env) const
 {
     // it's also possible to draw without generating geometry by simply having
     // the two line end points as uniforms in the vertex shader and then using
@@ -155,14 +167,11 @@ bool LineBatch3D::Construct(const Environment& environment, Device&, Geometry::C
         vertices.push_back(b);
     }
 
-    create.content_name = "3D Line Batch";
-    create.usage = Geometry::Usage::Stream;
-    auto& geometry = create.buffer;
-
-    geometry.SetVertexBuffer(vertices);
-    geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
-    geometry.AddDrawCmd(Geometry::DrawType::Lines);
-    return true;
+    GeometryBuffer buffer;
+    buffer.SetVertexBuffer(vertices);
+    buffer.SetVertexLayout(GetVertexLayout<Vertex3D>());
+    buffer.AddDrawCmd(Geometry::DrawType::Lines);
+    return std::move(buffer);
 }
 
 Drawable::DrawPrimitive LineBatch3D::GetDrawPrimitive() const
@@ -173,11 +182,6 @@ Drawable::DrawPrimitive LineBatch3D::GetDrawPrimitive() const
 SpatialMode LineBatch3D::GetSpatialMode() const
 {
     return SpatialMode::True3D;
-}
-
-Drawable::Usage LineBatch3D::GetGeometryUsage() const
-{
-    return Usage::Stream;
 }
 
 Drawable::Type LineBatch3D::GetType() const

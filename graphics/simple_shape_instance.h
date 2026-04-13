@@ -23,11 +23,13 @@
 
 #include <memory>
 #include <string>
+#include <optional>
 #include <cstdint>
 
 #include "base/utility.h"
 #include "graphics/drawable.h"
 #include "graphics/simple_shape_class.h"
+#include "graphics/drawable_effect.h"
 
 namespace gfx
 {
@@ -65,16 +67,25 @@ namespace gfx
             return base::TestFlag(mFlags, flag);
         }
 
-        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const override;
+        Type GetType() const override;
+
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+            Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
-        std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Device&, Geometry::CreateArgs& geometry) const override;
-        Type GetType() const override;
+
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& env) const override;
+
         DrawPrimitive GetDrawPrimitive() const override;
-        Usage GetGeometryUsage() const override;
         SpatialMode GetSpatialMode() const override;
+
+        bool SetEffect(DrawableEffect effect) override;
+        void DeleteEffect() override
+        { mEffect.reset(); }
+
+        void Update(const Environment& env, float dt) override;
 
         const DrawableClass* GetClass() const override
         { return mClass.get(); }
@@ -87,13 +98,12 @@ namespace gfx
         { mStyle = style; }
         float GetShapeAttribute(ShapeAttribute attribute) const noexcept
         { return mClass->GetShapeAttribute(attribute); }
-    private:
-        bool ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
-            unsigned mesh_subdivision_count, bool discard_skinny_slivers) const;
+
     private:
         std::shared_ptr<const Class> mClass;
         Style mStyle = Style::Solid;
         std::uint32_t mFlags = 0;
+        std::optional<DrawableEffect> mEffect;
     };
 
     // Instance of a simple shape without class object.
@@ -123,16 +133,19 @@ namespace gfx
         {
             return base::TestFlag(mFlags, flag);
         }
+        Type GetType() const override;
 
-        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+            Device& device, ProgramState& program, RasterState& state) const override;
+
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
-        std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const override;
-        Type GetType() const override;
+
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& env) const override;
+
         DrawPrimitive GetDrawPrimitive() const override;
-        Usage GetGeometryUsage() const override;
         SpatialMode GetSpatialMode() const override;
 
         Shape GetShape() const noexcept

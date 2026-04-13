@@ -26,10 +26,11 @@
 
 namespace gfx
 {
+    class TextureBuffer;
     class GeometryBuffer;
     class VertexBuffer;
 
-    enum NormalMeshFlags {
+    enum DebugMeshFlags {
         Normals = 0x1,
         Tangents = 0x2,
         Bitangents = 0x4
@@ -37,10 +38,10 @@ namespace gfx
 
     void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe);
 
-    bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals,
-                      unsigned flags = NormalMeshFlags::Normals, float line_length = 0.2f);
+    bool CreateDebugMesh(const GeometryBuffer& geometry, GeometryBuffer& normals,
+                      unsigned flags = DebugMeshFlags::Normals, float line_length = 0.2f);
 
-    bool CreateShardEffectMesh(const GeometryBuffer& original_geometry_buffer,
+    bool CreateShardMesh(const GeometryBuffer& original_geometry_buffer,
                                GeometryBuffer* shard_geometry_buffer,
                                unsigned mesh_subdivision_count, bool discard_skinny_slivers);
 
@@ -50,4 +51,5 @@ namespace gfx
     bool ComputeTangents(GeometryBuffer& geometry);
 
     bool FindGeometryMinMax(const GeometryBuffer& buffer, glm::vec3* minimums, glm::vec3* maximums);
+
 } // namespace

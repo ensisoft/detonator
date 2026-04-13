@@ -1793,10 +1793,7 @@ void ShapeWidget::on_actionShowShader_triggered()
 {
     auto* device = mUI.widget->GetDevice();
 
-    gfx::Drawable::Environment environment;
-    environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
-    environment.use_instancing = false;
-    const auto& source = mState.polygon->GetShader(environment, *device);
+    const auto& source = mState.polygon->GetShader(false, false, *device);
 
     DlgTextEdit dlg(this);
     dlg.SetText(source.GetSource(), "GLSL");
