@@ -294,6 +294,8 @@ add_library(GfxLib
     graphics/bitmap_noise.cpp
     graphics/debug_drawable.cpp
     graphics/effect_drawable.cpp
+    graphics/drawable_effect.cpp
+    graphics/drawable_geometry.cpp
     graphics/device.cpp
     graphics/device_algo.cpp
     graphics/device_framebuffer.cpp

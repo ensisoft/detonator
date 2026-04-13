@@ -48,18 +48,19 @@ DrawCategory DrawableClass::MapDrawableCategory(Type type) noexcept
 }
 
 // static
-ShaderSource Drawable::CreateShader(const Environment& environment, const Device& device, Shader shader)
+ShaderSource Drawable::CreateShader(const bool instancing, const bool effects, const Device& device, Shader shader)
 {
     ShaderSource source;
     source.SetType(ShaderSource::Type::Vertex);
     source.SetVersion(ShaderSource::Version::GLSL_300);
-    source.AddDebugInfo("Instancing", environment.use_instancing ? "yes" : "no");
-    if (environment.use_instancing)
+    source.AddDebugInfo("Instancing", instancing ? "yes" : "no");
+    source.AddDebugInfo("Effects",    effects    ? "yes" : "no");
+    if (instancing)
         source.AddPreprocessorDefinition("INSTANCED_DRAW");
 
     if  (shader == Shader::Simple2D)
     {
-        if (environment.mesh_type == MeshType::ShardedEffectMesh)
+        if (effects)
         {
             source.LoadRawSource(glsl::vertex_2d_effect);
             source.AddShaderSourceUri("shaders/vertex_2d_effect.glsl");
@@ -67,17 +68,10 @@ ShaderSource Drawable::CreateShader(const Environment& environment, const Device
             source.AddPreprocessorDefinition("APPLY_SHARD_MESH_EFFECT");
             source.AddPreprocessorDefinition("MESH_EFFECT_TYPE_SHARD_EXPLOSION", static_cast<int>(MeshEffectType::ShardedMeshExplosion));
         }
-        else if (environment.mesh_type == MeshType::NormalRenderMesh)
-        {
-            // nothing to do here for now
-        }
-        else BUG("Bug no render mesh type.");
-
         source.LoadRawSource(glsl::vertex_base);
         source.LoadRawSource(glsl::vertex_2d_simple);
         source.AddShaderSourceUri("shaders/vertex_base.glsl");
         source.AddShaderSourceUri("shaders/vertex_2d_simple_shader.glsl");
-        source.AddDebugInfo("Mesh", base::ToString(environment.mesh_type));
     }
     else if (shader == Shader::Simple3D)
     {
@@ -106,11 +100,11 @@ ShaderSource Drawable::CreateShader(const Environment& environment, const Device
 }
 
 // static
-std::string Drawable::GetShaderId(const Environment& env, Shader shader)
+std::string Drawable::GetShaderId(const bool instancing, const bool effects, Shader shader)
 {
     std::size_t hash = 0;
-    hash = base::hash_combine(hash, env.use_instancing);
-    hash = base::hash_combine(hash, env.mesh_type);
+    hash = base::hash_combine(hash, instancing);
+    hash = base::hash_combine(hash, effects);
     hash = base::hash_combine(hash, shader);
     return std::to_string(hash);
 }

@@ -273,18 +273,15 @@ namespace gfx
             }
 
         private:
-            GeometryPtr GetGeometryPtr(size_t i) const noexcept
+            DrawGeometryHandle GetGeometryPtr(size_t i) const noexcept
             {
-                if (i >= mStateList.size())
-                    return nullptr;
-                return mStateList[i].geometry_gpu_ptr;
+                if (i >= mHandles.size())
+                    return DrawGeometryHandle::Null;
+                return mHandles[i];
             }
 
-            struct ItemState {
-                GeometryPtr geometry_gpu_ptr;
-            };
             std::vector<DrawItem> mItems;
-            std::vector<ItemState> mStateList;
+            std::vector<DrawGeometryHandle> mHandles;
             friend class Painter;
         };
 
@@ -354,8 +351,6 @@ namespace gfx
                               const Material& material,
                               const Drawable::Environment& drawable_environment,
                               const Material::Environment& material_environment) const;
-
-        GeometryPtr GetGpuGeometry(const Drawable& drawable, const Drawable::Environment& env) const;
 
     private:
         std::shared_ptr<Device> mDeviceInst;

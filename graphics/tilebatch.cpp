@@ -19,6 +19,8 @@
 #include "base/hash.h"
 #include "base/format.h"
 #include "graphics/tilebatch.h"
+
+#include "device.h"
 #include "graphics/program.h"
 #include "graphics/shader_code.h"
 #include "graphics/shader_source.h"
@@ -27,7 +29,8 @@
 namespace gfx
 {
 
-bool TileBatch::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState& raster) const
+bool TileBatch::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device&, ProgramState& program, RasterState& raster) const
 {
     const auto pixel_scale = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
 
@@ -126,12 +129,19 @@ std::string TileBatch::GetShaderName(const Environment& env) const
     BUG("Missing tile batch shader name.");
 }
 
-std::string TileBatch::GetGeometryId(const Environment& env) const
+DrawGeometryHandle TileBatch::GetGeometry(const Environment& env, Device& device) const
 {
-    return "tile-buffer";
+    auto buffer = Construct(env);
+
+    Geometry::CreateArgs args;
+    args.buffer = buffer.TransferGeometryBuffer();
+    args.usage  = BufferUsage::Stream;
+    args.content_name = "TileBatch";
+    args.content_hash = 0;
+    return device.CreateGeometry("tile-buffer", std::move(args));
 }
 
-bool TileBatch::Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const
+DrawGeometryBuffer TileBatch::Construct(const Environment& env) const
 {
     const auto shape = ResolveTileShape();
     if (shape == TileShape::Square)
@@ -142,14 +152,11 @@ bool TileBatch::Construct(const Environment& env, Device&, Geometry::CreateArgs&
             {"aTilePosition", 0, 4, 0, offsetof(TileVertex, pos),  DataType::Float},
             {"aTileData",     0, 2, 0, offsetof(TileVertex, data), DataType::Float}
         });
-
-        create.content_name = "TileBatch";
-        create.usage = Geometry::Usage ::Stream;
-        auto& geometry = create.buffer;
-
-        geometry.SetVertexBuffer(mTiles);
-        geometry.SetVertexLayout(layout);
-        geometry.AddDrawCmd(Geometry::DrawType::Points);
+        GeometryBuffer buffer;
+        buffer.SetVertexBuffer(mTiles);
+        buffer.SetVertexLayout(layout);
+        buffer.AddDrawCmd(Geometry::DrawType::Points);
+        return std::move(buffer);
     }
     else if (shape == TileShape::Rectangle)
     {
@@ -180,16 +187,15 @@ bool TileBatch::Construct(const Environment& env, Device&, Geometry::CreateArgs&
             vertices.push_back(bot_right);
             vertices.push_back(top_right);
         }
-        create.content_name = "TileBatch";
-        create.usage = Geometry::Usage::Stream;
-        auto& geometry = create.buffer;
-
-        geometry.SetVertexBuffer(vertices);
-        geometry.SetVertexLayout(layout);
-        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
+        GeometryBuffer buffer;
+        buffer.SetVertexBuffer(vertices);
+        buffer.SetVertexLayout(layout);
+        buffer.AddDrawCmd(Geometry::DrawType::Triangles);
+        return std::move(buffer);
     }
     else BUG("Unknown tile shape!");
-    return true;
+
+    return DrawGeometryBuffer::Null;
 }
 
 Drawable::DrawPrimitive TileBatch::GetDrawPrimitive() const
@@ -206,11 +212,6 @@ Drawable::DrawPrimitive TileBatch::GetDrawPrimitive() const
 Drawable::Type TileBatch::GetType() const
 {
     return Type::TileBatch;
-}
-
-Drawable::Usage TileBatch::GetGeometryUsage() const
-{
-    return Usage::Stream;
 }
 
 SpatialMode TileBatch::GetSpatialMode() const

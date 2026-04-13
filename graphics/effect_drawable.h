@@ -17,17 +17,12 @@
 #pragma once
 
 #include "config.h"
-#include "warnpush.h"
-#  include <glm/vec3.hpp>
-#include "warnpop.h"
 
+#include <string>
 #include <memory>
-#include <vector>
 #include <functional>
 #include <variant>
 
-#include "base/bitflag.h"
-#include "graphics/vertex.h"
 #include "graphics/drawable.h"
 #include "graphics/enum.h"
 
@@ -50,10 +45,10 @@ namespace gfx
         using EffectArgs = std::variant<MeshExplosionEffectArgs>;
 
         explicit EffectDrawable(std::shared_ptr<Drawable> drawable,
-            std::string effectId) noexcept;
+            std::string effectId, std::string effectName = "") noexcept;
 
         bool EnableEffect();
-        void DisableEffect();
+        bool DisableEffect();
 
         void SetEffectDrawable(std::shared_ptr<Drawable> effect_drawable)
         { mEffectDrawable = std::move(effect_drawable); }
@@ -65,16 +60,18 @@ namespace gfx
         void SetEffectArgs(EffectArgs args)
         { mArgs = args; }
 
-        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState&  state) const override;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+            Device& device, ProgramState& program, RasterState&  state) const override;
+
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
-        std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& create) const override;
+
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& env) const override;
         void Update(const Environment& env, float dt) override;
         void Restart(const Environment& env) override;
-        size_t GetGeometryHash() const override;
-        Usage GetGeometryUsage() const override;
+
         DrawPrimitive GetDrawPrimitive() const override;
         SpatialMode GetSpatialMode() const override;
         bool IsAlive() const override;
@@ -83,21 +80,16 @@ namespace gfx
         DrawCmd GetDrawCmd() const override;
 
         static void SetRandomGenerator(std::function<float(float min, float max)> random_function);
-    private:
-        bool ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
-            unsigned mesh_subdivision_count) const;
+
     private:
         std::shared_ptr<Drawable> mDrawable;
         std::shared_ptr<Drawable> mSourceDrawable;
         std::shared_ptr<Drawable> mEffectDrawable;
         std::string mEffectId;
+        std::string mEffectName;
         EffectType mType = EffectType::ShardedMeshExplosion;
         EffectArgs mArgs;
-
         bool mEnabled = false;
-        double mCurrentTime = 0.0f;
-
-        mutable glm::vec3 mShapeCenter = {0.0f, 0.0f, 0.0f};
     };
 
 } // namespace

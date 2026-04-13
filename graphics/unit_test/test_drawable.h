@@ -20,6 +20,7 @@
 
 namespace test
 {
+    /*
     class TestDrawable : public gfx::Drawable
     {
     public:
@@ -39,13 +40,19 @@ namespace test
         {
             return Drawable::GetShaderName(env, Shader::Simple2D);
         }
-        std::string GetGeometryId(const Environment& env) const override
+
+        gfx::DrawGeometryHandle GetGeometry(const Environment& env, gfx::Device& device) const override
         {
-            return "test-geometry-id";
+
         }
-        bool Construct(const Environment& env, gfx::Device& device, gfx::Geometry::CreateArgs& geometry) const override
+
+        gfx::DrawGeometryBuffer Construct(const Environment& env, gfx::Device& device) const override
         {
-            return !fail_construct;
+            if (fail_construct)
+                return gfx::DrawGeometryBuffer::Null;
+
+            gfx::GeometryBuffer buffer;
+            return std::move(buffer);
         }
         DrawPrimitive GetDrawPrimitive() const override
         {
@@ -67,4 +74,5 @@ namespace test
         size_t content_hash = 0;
         Usage usage = Usage::Static;
     };
+    */
 } // namespace

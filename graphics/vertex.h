@@ -73,8 +73,12 @@ namespace gfx
     };
 #pragma pack(pop)
 
+    inline Vec2 ToVec(float x, float y) noexcept
+    { return { x, y }; }
     inline Vec2 ToVec(const glm::vec2& vector) noexcept
     { return { vector.x, vector.y }; }
+    inline Vec3 ToVec(float x, float y, float z) noexcept
+    { return {x, y, z }; }
     inline Vec3 ToVec(const glm::vec3& vector) noexcept
     { return { vector.x, vector.y, vector.z }; }
     inline Vec4 ToVec(const glm::vec4& vector) noexcept

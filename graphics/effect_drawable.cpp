@@ -16,161 +16,104 @@
 
 #include "config.h"
 
-#include "base/math.h"
-#include "base/format.h"
+#include "base/assert.h"
 #include "base/logging.h"
-#include "base/hash.h"
-#include "base/random.h"
+#include "base/utility.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
-#include "graphics/geometry_algo.h"
-#include "graphics/device.h"
 #include "graphics/effect_drawable.h"
-#include "graphics/texture.h"
-#include "graphics/utility.h"
-
-namespace {
-std::function<float (float min, float max)> random_function;
-} // namespace
+#include "graphics/drawable_effect.h"
 
 namespace gfx
 {
-EffectDrawable::EffectDrawable(std::shared_ptr<Drawable> drawable, std::string effectId) noexcept
+EffectDrawable::EffectDrawable(std::shared_ptr<Drawable> drawable, std::string effectId, std::string effectName) noexcept
   : mDrawable(std::move(drawable))
   , mEffectId(std::move(effectId))
+ , mEffectName(std::move(effectName))
 {
-    if (!random_function)
-        random_function = base::rand<float>;
-
     mSourceDrawable = mDrawable;
 }
 
 bool EffectDrawable::EnableEffect()
 {
-    mEnabled = true;
-    if (mEffectDrawable)
-        mDrawable = mEffectDrawable;
-
-    return true;
-}
-
-void EffectDrawable::DisableEffect()
-{
-    mEnabled = false;
-}
-
-bool EffectDrawable::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState&  state) const
-{
-    Environment e = env;
-    e.mesh_type =  mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
-
-    if (!mDrawable->ApplyDynamicState(e, draw, device, program, state))
-        return false;
-
     if (mEnabled)
     {
-        auto* texture = device.FindTexture(mEffectId);
-        if (!texture)
-            return false;
+        WARN("Drawable effect is already enabled. [effect='%1']", mEffectName);
+        return false;
+    }
 
-        const auto texture_count = program.GetSamplerCount();
-
-        program.SetUniform("kEffectMeshCenter", mShapeCenter);
-        program.SetUniform("kEffectTime", static_cast<float>(mCurrentTime));
-        program.SetUniform("kEffectType", static_cast<int>(mType));
-        program.SetTexture("kShardDataTexture", texture_count, *texture);
-        program.SetTextureCount(texture_count + 1);
-
-        if (mType == EffectType::ShardedMeshExplosion)
+    if (auto* args = std::get_if<MeshExplosionEffectArgs>(&mArgs))
+    {
+        DrawableEffect::MeshExplosion explosion;
+        explosion.mesh_subdivision_count = args->mesh_subdivision_count;
+        explosion.shard_linear_acceleration = args->shard_linear_acceleration;
+        explosion.shard_linear_speed = args->shard_linear_speed;
+        explosion.shard_rotational_acceleration = args->shard_rotational_acceleration;
+        explosion.shard_rotational_speed = args->shard_rotational_speed;
+        if (mEffectDrawable)
         {
-            ASSERT(std::holds_alternative<MeshExplosionEffectArgs>(mArgs));
-            const auto* effect_args = std::get_if<MeshExplosionEffectArgs>(&mArgs);
-            glm::vec4 args;
-            args.x = effect_args->shard_linear_speed;
-            args.y = effect_args->shard_linear_acceleration;
-            args.z = effect_args->shard_rotational_speed;
-            args.w = effect_args->shard_rotational_acceleration;
-            program.SetUniform("kEffectArgs", args);
+            mEnabled = mEffectDrawable->SetEffect(DrawableEffect(explosion));
+            if (mEnabled)
+                mDrawable = mEffectDrawable;
+        }
+        else
+        {
+            mEnabled = mDrawable->SetEffect(DrawableEffect(explosion));
         }
     }
+    else BUG("Unhandled effect drawable effect type.");
+    return mEnabled;
+}
+
+bool EffectDrawable::DisableEffect()
+{
+    if (!mEnabled)
+    {
+        WARN("Drawable effect is already disabled. [effect='%1']", mEffectName);
+        return false;
+    }
+
+    mDrawable->DeleteEffect();
+
+    mEnabled = false;
+    if (mSourceDrawable)
+        mDrawable = mSourceDrawable;
+
     return true;
+}
+
+bool EffectDrawable::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device& device, ProgramState& program, RasterState&  state) const
+{
+    return mDrawable->ApplyDynamicState(env, draw, geometry, device, program, state);
 }
 
 ShaderSource EffectDrawable::GetShader(const Environment& env, const Device& device) const
 {
-    Environment e = env;
-    e.mesh_type =  mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
-    return mDrawable->GetShader(e, device);
+    return mDrawable->GetShader(env, device);
 }
 std::string EffectDrawable::GetShaderId(const Environment& env) const
 {
-    Environment e = env;
-    e.mesh_type = mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
-    return mDrawable->GetShaderId(e);
+    return mDrawable->GetShaderId(env);
 }
 std::string EffectDrawable::GetShaderName(const Environment& env) const
 {
-    Environment e = env;
-    e.mesh_type = mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
-    return mDrawable->GetShaderName(e);
-}
-std::string EffectDrawable::GetGeometryId(const Environment& env) const
-{
-    if (!mEnabled)
-        return mDrawable->GetGeometryId(env);
-
-    // A note about the geometry ID. Since we're now using static geometry
-    // for the mesh effect we essentially need to generate a new unique mesh
-    // ID for each effect.
-    // For example if the source drawable geometry is a "rectangle" we'd map
-    // to a static Geometry ID which would mean that any mesh effect geometry
-    // derived from the static rectangle geometry would end up referring
-    // to the same geometry data on the GPU.
-    // I.e. every spaceship explosion would be the same.
-
-    // So to fix this problem we either make the mesh dynamic and update
-    // the geometry data individually per each effect or make sure that
-    // each effect maps to a different GPU geometry.
-
-    Environment e = env;
-    e.mesh_type = MeshType::ShardedEffectMesh;
-
-    std::string id;
-    id += mDrawable->GetGeometryId(e);
-    id += "Effect:";
-    id += mEffectId;
-    return id;
-}
-bool EffectDrawable::Construct(const Environment& env, Device& device, Geometry::CreateArgs& create) const
-{
-    if (!mEnabled)
-        return mDrawable->Construct(env, device, create);
-
-    const auto source_draw_primitive = mDrawable->GetDrawPrimitive();
-    if (source_draw_primitive != DrawPrimitive::Triangles)
-    {
-        ERROR("Effect mesh can only be constructed with triangle mesh topology. [src='%1', primitive=%2]",
-            mDrawable->GetName(), source_draw_primitive);
-        return false;
-    }
-
-    if (mType == EffectType::ShardedMeshExplosion)
-    {
-        ASSERT(std::holds_alternative<MeshExplosionEffectArgs>(mArgs));
-        const auto* effect_args = std::get_if<MeshExplosionEffectArgs>(&mArgs);
-        return ConstructShardMesh(env, device, create, effect_args->mesh_subdivision_count);
-    }
-    else BUG("Unhandled effect drawable type.");
-
-    return false;
+    return mDrawable->GetShaderName(env);
 }
 
-void EffectDrawable::Update(const Environment &env, float dt)
+DrawGeometryHandle EffectDrawable::GetGeometry(const Environment& env, Device& device) const
 {
-    if (!mEnabled)
-        return mDrawable->Update(env, dt);
+    return mDrawable->GetGeometry(env, device);
+}
 
-    mCurrentTime += dt;
+DrawGeometryBuffer EffectDrawable::Construct(const Environment& env) const
+{
+    return mDrawable->Construct(env);
+}
+
+void EffectDrawable::Update(const Environment& env, float dt)
+{
+    mDrawable->Update(env, dt);
 }
 
 void EffectDrawable::Restart(const Environment& env)
@@ -178,31 +121,9 @@ void EffectDrawable::Restart(const Environment& env)
     mDrawable->Restart(env);
 }
 
-size_t EffectDrawable::GetGeometryHash() const
-{
-    // we don't return content / geometry hash here, because it'd be expensive
-    // to compute since it depends on the geometry that the drawable we're
-    // wrapping produces. Instead we can say our geometry hash changes
-    // whenever the drawable geometry hash changes.
-    // At runtime this would likely produce a stupid result if the geometry
-    // is dynamic or stream. But this should work well fro design time
-    // and static content so we're able to reflect the changes done to
-    // the underlying geometry when visualizing this effect mesh.
-    return mDrawable->GetGeometryHash();
-}
-
-Drawable::Usage EffectDrawable::GetGeometryUsage() const
-{
-    // same comment here , see GetGeometryHash
-    return mDrawable->GetGeometryUsage();
-}
-
 Drawable::DrawPrimitive EffectDrawable::GetDrawPrimitive() const
 {
-    if (!mEnabled)
-        return mDrawable->GetDrawPrimitive();
-
-    return DrawPrimitive::Triangles;
+    return mDrawable->GetDrawPrimitive();
 }
 
 SpatialMode EffectDrawable::GetSpatialMode() const
@@ -212,10 +133,7 @@ SpatialMode EffectDrawable::GetSpatialMode() const
 
 bool EffectDrawable::IsAlive() const
 {
-    if (!mEnabled)
-        return mDrawable->IsAlive();
-
-    return true;
+    return mDrawable->IsAlive();
 }
 Drawable::Type EffectDrawable::GetType() const
 {
@@ -226,33 +144,33 @@ void EffectDrawable::Execute(const Environment& env, const Command& command)
 {
     if (command.name == "EnableMeshEffect")
     {
-        DEBUG("Received mesh effect command. [cmd='%1']", command.name);
+        DEBUG("Received mesh effect command. [effect='%1', cmd='%2']", mEffectName, command.name);
         if (const auto* ptr = base::SafeFind(command.args, std::string("state")))
         {
             if (const auto* state = std::get_if<std::string>(ptr))
             {
+                bool state_now = mEnabled;
+
                 if (*state == "toggle")
-                    mEnabled = !mEnabled;
+                    state_now = !state_now;
                 else if (*state == "on")
-                    mEnabled = true;
+                    state_now = true;
                 else if (*state == "off")
-                    mEnabled = false;
-                else WARN("Ignoring enable mesh effect command with unexpected state parameter. [state='%1']", state);
-                if (mEnabled)
+                    state_now = false;
+                else WARN("Ignoring enable mesh effect command with unexpected state parameter. [effect='%1', state='%2']", mEffectName, state);
+
+                if (state_now != mEnabled)
                 {
-                    if (mEffectDrawable)
-                        mDrawable = mEffectDrawable;
-                }
-                else
-                {
-                    mDrawable = mSourceDrawable;
+                    if (state_now)
+                        EnableEffect();
+                    else DisableEffect();
                 }
             }
             else
             {
-                WARN("Ignoring enable mesh effect command with unexpected 'state' parameter type. Expected 'string'");
+                WARN("Ignoring enable mesh effect command with unexpected 'state' parameter type. Expected 'string'. [effect='%1']", mEffectName);
             }
-        } else WARN("Ignoring enable mesh effect command without 'state' parameter.");
+        } else WARN("Ignoring enable mesh effect command without 'state' parameter. [effect='%1']", mEffectName);
     }
     mDrawable->Execute(env, command);
 }
@@ -264,111 +182,7 @@ Drawable::DrawCmd EffectDrawable::GetDrawCmd() const
 // static
 void EffectDrawable::SetRandomGenerator(std::function<float(float min, float max)> rf)
 {
-    random_function = rf;
+    DrawableEffect::SetRandomGenerator(std::move(rf));
 }
-
-bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
-    unsigned mesh_subdivision_count) const
-{
-    Environment e = env;
-    e.mesh_type = MeshType::ShardedEffectMesh;
-    e.mesh_args = ShardedEffectMeshArgs { mesh_subdivision_count };
-
-    Geometry::CreateArgs temp;
-    if (!mDrawable->Construct(e, device, temp))
-    {
-        ERROR("Failed to construct effect drawable source mesh. [src='%1']", mDrawable->GetName());
-        return false;
-    }
-    ASSERT(temp.buffer.GetLayout() == GetVertexLayout<ShardVertex2D>());
-    const VertexStream vertex_stream(temp.buffer.GetLayout(),
-                                     temp.buffer.GetVertexBuffer());
-    const auto vertex_count = vertex_stream.GetCount();
-
-    // hmm, is this adequate?
-    if (vertex_count == 0)
-    {
-        create.usage  = temp.usage;
-        create.content_hash = temp.content_hash;
-        create.content_name = "ShardEffect/" + temp.content_name;
-        DEBUG("Created empty shard effect mesh on drawable. [src='%1']", mDrawable->GetName());
-        return true;
-    }
-
-    glm::vec3 minimums = {0.0f, 0.0f, 0.0f};
-    glm::vec3 maximums = {0.0f, 0.0f, 0.0f};
-    if (!FindGeometryMinMax(temp.buffer, &minimums, &maximums))
-    {
-        ERROR("Failed to compute shard effect mesh bounds.");
-        return false;
-    }
-    const auto shape_bounds_dimensions = maximums - minimums;
-    mShapeCenter = minimums + shape_bounds_dimensions * 0.5f;
-
-    struct ShardTempData {
-        glm::vec2 aPosition = {0.0f, 0.0f};
-        unsigned vertex_count = 0;
-    };
-    std::vector<ShardTempData> shard_temp_data;
-
-    for (size_t i=0; i<vertex_count; ++i)
-    {
-        const auto* vertex = vertex_stream.GetVertex<ShardVertex2D>(i);
-        const auto shard_index = vertex->aShardIndex;
-        if (shard_index >= shard_temp_data.size())
-            shard_temp_data.resize(shard_index + 1);
-        shard_temp_data[shard_index].aPosition.x += vertex->aPosition.x;
-        shard_temp_data[shard_index].aPosition.y += vertex->aPosition.y;
-        shard_temp_data[shard_index].vertex_count++;
-    }
-
-    struct ShardData {
-        Vec4 data[1];
-    };
-    std::vector<ShardData> shard_data_buffer;
-    shard_data_buffer.resize(shard_temp_data.size());
-    for (size_t i=0; i<shard_data_buffer.size(); ++i)
-    {
-        // compute the arithmetic center (centroid of vertices)
-        const auto& shard_center = shard_temp_data[i].aPosition / float(shard_temp_data[i].vertex_count);
-        const auto shard_random_value = random_function(0.0f, 1.0f);
-        shard_data_buffer[i].data[0].x = shard_center.x;
-        shard_data_buffer[i].data[0].y = shard_center.y;
-        shard_data_buffer[i].data[0].z = 0.0f; // reserved
-        shard_data_buffer[i].data[0].w = shard_random_value;
-    }
-
-    // ES 3.0 (which is the basis of WebGL 2.0) does not have Shared Storage
-    // Buffer Object ((SSBO). The standard workaround is to use a float32
-    // texture for packing the data into and then read the data via texelFetch
-    // in the shader and manually unpack from the texels.
-    // The number of shards can be arbitrary and we really only have 3 choices.
-    // 1. Bake the per shard data in each vertex. That's currently 2 * 4 * 4
-    //    bytes of overhead per each triangle shard
-    // 2. Use Uniform Buffer Object (UBO) and shader uniform block. Works but
-    //    requires knowing the maximum buffer sizes up front since.
-    // 3. Use float texture workaround.
-
-    // Note that GL ES 3.1 does have SSBO BUT that's not part of WebGL. Rather
-    // WebGL 2.0 Compute has SSBO but that's just a completely different WebGL
-    // context (compute context vs. rendering context) and is not supported by
-    // Emscripten either.
-    if (!PackDataTexture(mEffectId, "Shard data texture", &shard_data_buffer[0], shard_data_buffer.size(), device))
-    {
-        ERROR("Shard data exceeds available data texture size. [shards=%1]", shard_data_buffer.size());
-        return false;
-    }
-
-    create.buffer = std::move(temp.buffer);
-    create.usage  = temp.usage;
-    create.content_hash = temp.content_hash;
-    create.content_name = "ShardEffect/" + temp.content_name;
-    if (mDrawable->IsStaticGeometry())
-    {
-        DEBUG("Created shard effect mesh on source drawable. [src='%1']", mDrawable->GetName());
-    }
-    return true;
-}
-
 
 } // namespace

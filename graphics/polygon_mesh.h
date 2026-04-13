@@ -136,12 +136,11 @@ namespace gfx
         size_t GetDrawCmdCount() const noexcept;
         const DrawCommand* GetDrawCmd(size_t index) const noexcept;
 
-        std::string GetGeometryId(const Environment& env) const;
-        std::string GetShaderId(const Environment& env) const;
+        std::string GetShaderId(bool instancing, bool effects) const;
         std::string GetShaderName(const Environment& env) const;
-        ShaderSource GetShader(const Environment& env, const Device& device) const;
+        ShaderSource GetShader(bool instancing, bool effects, const Device& device) const;
 
-        bool Construct(const Environment& env, Geometry::CreateArgs& create) const;
+        bool Construct(GeometryBuffer* buffer) const;
 
         void SetSubMeshDrawCmd(const std::string& key, const DrawCmd& cmd);
 
@@ -161,8 +160,6 @@ namespace gfx
         std::unique_ptr<DrawableClass> Copy() const override;
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
-    private:
-        bool ConstructInternal(Geometry::CreateArgs& create) const;
 
     private:
         std::string mId;
@@ -260,21 +257,24 @@ namespace gfx
             return base::TestFlag(mFlags, flag);
         }
 
-        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+            Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
-        std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const override;
+
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& env) const override;
         void Update(const Environment& env, float dt) override;
 
         DrawCmd GetDrawCmd() const override;
         SpatialMode GetSpatialMode() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         Type GetType() const override;
-        Usage GetGeometryUsage() const override;
 
-        size_t GetGeometryHash() const override;
+        bool SetEffect(DrawableEffect effect) override;
+        void DeleteEffect() override
+        { mEffect.reset(); }
 
         const DrawableClass* GetClass() const override
         { return mClass.get(); }
@@ -282,6 +282,7 @@ namespace gfx
         std::shared_ptr<const PolygonMeshClass> mClass;
         std::optional<Perceptual3DGeometry> mPerceptualGeometry;
         std::variant<std::monostate, std::string, std::size_t> mSubMeshKey;
+        std::optional<DrawableEffect> mEffect;
         std::uint32_t mFlags = 0;
         double mTime = 0.0;
         float mRandom = 0.0f;

@@ -1292,8 +1292,16 @@ std::string GetSimpleShapeGeometryId(const SimpleShapeArgs& args,
         style = Style::Solid;
 
     std::string id;
-    id += base::ToString(type);
-    id += base::ToString(style);
+    if (style == Style::Solid)
+    {
+        id += base::ToString(type);
+    }
+    else if (style == Style::Outline)
+    {
+        id += base::ToString(type);
+        id += base::ToString(style);
+    }
+
     if (type == SimpleShapeType::Capsule || type == SimpleShapeType::RoundRect)
     {
         // try to figure out if the model matrix will distort the

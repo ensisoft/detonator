@@ -35,17 +35,18 @@ namespace gfx
           , mNumHorizontalLines(num_horizontal_lines)
           , mBorderLines(border_lines)
         {}
-        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+            Device&, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
-        std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Device&, Geometry::CreateArgs& geometry) const override;
+
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& env) const override;
 
         Type GetType() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         SpatialMode GetSpatialMode() const override;
-        Usage GetGeometryUsage() const override;
 
     private:
         unsigned mNumVerticalLines = 1;

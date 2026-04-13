@@ -33,7 +33,8 @@
 #include "graphics/tool/polygon.h"
 #include "graphics/vertex_algo.h"
 #include "graphics/geometry_algo.h"
-
+#include "graphics/effect_drawable.h"
+#include "graphics/drawable_effect.h"
 #include "test_device.cpp"
 
 bool operator==(const gfx::Vec2& lhs, const gfx::Vec2& rhs)
@@ -235,7 +236,7 @@ void unit_test_command_stream()
 }
 
 
-void unit_test_wireframe()
+void unit_test_wireframe_algo()
 {
     TEST_CASE(test::Type::Feature)
 
@@ -344,7 +345,7 @@ void unit_test_wireframe()
     }
 }
 
-void unit_test_triangle_mesh()
+void unit_test_triangle_algo()
 {
     TEST_CASE(test::Type::Feature)
 
@@ -478,7 +479,7 @@ void unit_test_triangle_mesh()
     }
 }
 
-void unit_test_tangents()
+void unit_test_tangent_algo()
 {
     TEST_CASE(test::Type::Feature)
 
@@ -1163,25 +1164,156 @@ void unit_test_polygon_data()
     }
 }
 
-void unit_test_simple_shape_shard_mesh()
+void unit_test_simple_shape_mesh()
 {
     TEST_CASE(test::Type::Feature)
 
+    // normal  paint mesh
     {
         auto klass = std::make_shared<gfx::RectangleClass>();
         gfx::RectangleClassInstance rect(klass);
 
-        TestDevice device;
         gfx::Drawable::Environment env;
-        env.mesh_type = gfx::Drawable::MeshType::ShardedEffectMesh;
-        env.mesh_args = gfx::Drawable::ShardedEffectMeshArgs { 0 }; // should produce two triangles
+        env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
 
-        gfx::Geometry::CreateArgs geometry;
-        rect.Construct(env, device, geometry);
+        auto geometry = rect.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
 
-        TEST_REQUIRE(geometry.buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
-        const gfx::VertexStream stream(geometry.buffer.GetLayout(),
-                                       geometry.buffer.GetVertexBuffer());
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+        TEST_REQUIRE(buffer.GetVertexCount() == 6);
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Triangles);
+
+        // rectangle solid mesh: two triangles, vertices in model space
+        // triangle 0
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(0)->aPosition == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(1)->aPosition == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(2)->aPosition == gfx::ToVec(1.0f, -1.0f));
+        // triangle 1
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(3)->aPosition == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(4)->aPosition == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(5)->aPosition == gfx::ToVec(1.0f,  0.0f));
+
+        // texture coordinates
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(0)->aTexCoord == gfx::ToVec(0.0f, 0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(1)->aTexCoord == gfx::ToVec(0.0f, 1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(2)->aTexCoord == gfx::ToVec(1.0f, 1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(3)->aTexCoord == gfx::ToVec(0.0f, 0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(4)->aTexCoord == gfx::ToVec(1.0f, 1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(5)->aTexCoord == gfx::ToVec(1.0f, 0.0f));
+    }
+
+    // wireframe mesh
+    {
+        auto klass = std::make_shared<gfx::RectangleClass>();
+        gfx::RectangleClassInstance rect(klass);
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::Wireframe;
+
+        auto geometry = rect.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Lines);
+
+        // each triangle produces 3 lines (2 verts each), 2 triangles = 12 vertices
+        TEST_REQUIRE(buffer.GetVertexCount() == 12);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+
+        // triangle 0: (0,0), (0,-1), (1,-1)
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 0)->aPosition == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 1)->aPosition == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 2)->aPosition == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 3)->aPosition == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 4)->aPosition == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 5)->aPosition == gfx::ToVec(0.0f,  0.0f));
+
+        // triangle 1: (0,0), (1,-1), (1,0)
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 6)->aPosition == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 7)->aPosition == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 8)->aPosition == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>( 9)->aPosition == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(10)->aPosition == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(11)->aPosition == gfx::ToVec(0.0f,  0.0f));
+    }
+
+    // 2D debug mesh
+    {
+        auto klass = std::make_shared<gfx::RectangleClass>();
+        gfx::RectangleClassInstance rect(klass);
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::DebugMesh;
+
+        auto geometry = rect.Construct(env);
+        TEST_REQUIRE(geometry.IsNull());
+    }
+
+    // 3D debug mesh
+    {
+        auto klass = std::make_shared<gfx::CubeClass>();
+        gfx::SimpleShapeInstance cube(klass);
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::DebugMesh;
+        env.mesh_flags.set(gfx::Drawable::MeshFlags::DebugNormals, true);
+
+        auto geometry = cube.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex3D>());
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Lines);
+
+        // cube has 24 vertices (4 per face x 6 faces), normals-only debug mesh
+        // produces 2 output vertices per input vertex: 24 * 2 = 48
+        TEST_REQUIRE(buffer.GetVertexCount() == 48);
+
+        // verify the front face normal lines.
+        // front face vertices (indices 0-3) all have normal {0, 0, 1}.
+        // each normal line: start = vertex position, end = position + normal * 0.2f
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+
+        // vertex 0: FrontTopLeft {-0.5, 0.5, 0.5}
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aPosition == gfx::ToVec(-0.5f,  0.5f, 0.5f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aPosition == gfx::ToVec(-0.5f,  0.5f, 0.7f));
+        // vertex 1: FrontBotLeft {-0.5, -0.5, 0.5}
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aPosition == gfx::ToVec(-0.5f, -0.5f, 0.5f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(3)->aPosition == gfx::ToVec(-0.5f, -0.5f, 0.7f));
+        // vertex 2: FrontBotRight {0.5, -0.5, 0.5}
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(4)->aPosition == gfx::ToVec( 0.5f, -0.5f, 0.5f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(5)->aPosition == gfx::ToVec( 0.5f, -0.5f, 0.7f));
+        // vertex 3: FrontTopRight {0.5, 0.5, 0.5}
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(6)->aPosition == gfx::ToVec( 0.5f,  0.5f, 0.5f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(7)->aPosition == gfx::ToVec( 0.5f,  0.5f, 0.7f));
+    }
+
+    // effect paint mesh
+    {
+        auto klass = std::make_shared<gfx::RectangleClass>();
+
+        gfx::DrawableEffect::MeshExplosion explosion;
+        explosion.mesh_subdivision_count = 0;// should produce two triangles
+
+        gfx::RectangleClassInstance rect(klass);
+        rect.SetEffect(gfx::DrawableEffect(explosion));
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
+
+        auto geometry = rect.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+        const auto& buffer = geometry.GetGeometryBuffer();
+
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        const gfx::VertexStream stream(buffer.GetLayout(),  buffer.GetVertexBuffer());
         TEST_REQUIRE(stream.GetCount() == 6);
         TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aShardIndex == 0);
         TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aShardIndex == 0);
@@ -1190,6 +1322,407 @@ void unit_test_simple_shape_shard_mesh()
         TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(4)->aShardIndex == 1);
         TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(5)->aShardIndex == 1);
 
+    }
+
+    // effect wireframe mesh
+    {
+        auto klass = std::make_shared<gfx::RectangleClass>();
+
+        gfx::DrawableEffect::MeshExplosion explosion;
+        explosion.mesh_subdivision_count = 0; // should produce two triangles
+
+        gfx::RectangleClassInstance rect(klass);
+        rect.SetEffect(gfx::DrawableEffect(explosion));
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::Wireframe;
+
+        auto geometry = rect.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Lines);
+
+        // each shard triangle produces 3 lines (2 verts each), 2 shards = 12 vertices
+        TEST_REQUIRE(buffer.GetVertexCount() == 12);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+
+        // shard 0 triangle: (0,0), (0,-1), (1,-1) — all verts carry shard index 0
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 0)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 0)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 1)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 1)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 2)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 2)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 3)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 3)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 4)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 4)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 5)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 5)->aShardIndex == 0);
+
+        // shard 1 triangle: (0,0), (1,-1), (1,0) — all verts carry shard index 1
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 6)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 6)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 7)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 7)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 8)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 8)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 9)->aPosition   == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 9)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(10)->aPosition   == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(10)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(11)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(11)->aShardIndex == 1);
+    }
+}
+
+void unit_test_polygon_simple_render_mesh()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // Single triangle mesh: v0=(0,0), v1=(0,-1), v2=(1,-1)
+    const gfx::Vertex2D verts[3] = {
+        { {0.0f,  0.0f}, {0.0f, 0.0f} },
+        { {0.0f, -1.0f}, {0.0f, 1.0f} },
+        { {1.0f, -1.0f}, {1.0f, 1.0f} },
+    };
+    gfx::VertexBuffer vertex_buffer;
+    vertex_buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    vertex_buffer.Resize(3);
+    for (int i=0; i<3; ++i)
+        vertex_buffer.SetVertex(verts[i], i);
+
+    std::vector<gfx::Geometry::DrawCommand> cmds(1);
+    cmds[0].type = gfx::Geometry::DrawType::Triangles;
+    cmds[0].count = 3;
+
+    auto klass = std::make_shared<gfx::PolygonMeshClass>();
+    klass->SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
+    klass->SetVertexBuffer(std::move(vertex_buffer));
+    klass->SetCommandBuffer(std::move(cmds));
+
+    // paint mesh
+    {
+        gfx::PolygonMeshInstance mesh(klass);
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
+
+        auto geometry = mesh.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+        TEST_REQUIRE(buffer.GetVertexCount() == 3);
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Triangles);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(0)->aPosition == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(1)->aPosition == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(2)->aPosition == gfx::ToVec(1.0f, -1.0f));
+    }
+
+    // wireframe mesh
+    {
+        gfx::PolygonMeshInstance mesh(klass);
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::Wireframe;
+
+        auto geometry = mesh.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Lines);
+
+        // 1 triangle x 3 lines x 2 verts = 6 vertices
+        TEST_REQUIRE(buffer.GetVertexCount() == 6);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        // triangle: (0,0), (0,-1), (1,-1)
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(0)->aPosition == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(1)->aPosition == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(2)->aPosition == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(3)->aPosition == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(4)->aPosition == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(5)->aPosition == gfx::ToVec(0.0f,  0.0f));
+    }
+
+    // effect paint mesh
+    {
+        gfx::PolygonMeshInstance mesh(klass);
+
+        gfx::DrawableEffect::MeshExplosion explosion;
+        explosion.mesh_subdivision_count = 0; // should produce one triangle (no subdivision)
+        mesh.SetEffect(gfx::DrawableEffect(explosion));
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
+
+        auto geometry = mesh.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Triangles);
+        TEST_REQUIRE(buffer.GetVertexCount() == 3);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(2)->aShardIndex == 0);
+    }
+
+    // effect wireframe mesh
+    {
+        gfx::PolygonMeshInstance mesh(klass);
+
+        gfx::DrawableEffect::MeshExplosion explosion;
+        explosion.mesh_subdivision_count = 0; // should produce one triangle (no subdivision)
+        mesh.SetEffect(gfx::DrawableEffect(explosion));
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::Wireframe;
+
+        auto geometry = mesh.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Lines);
+
+        // 1 shard triangle x 3 lines x 2 verts = 6 vertices
+        TEST_REQUIRE(buffer.GetVertexCount() == 6);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        // shard 0 triangle: (0,0), (0,-1), (1,-1)
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(2)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(2)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(3)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(3)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(4)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(4)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(5)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(5)->aShardIndex == 0);
+    }
+}
+
+void unit_test_polygon_simple_shard_mesh()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // Two-triangle shard mesh: triangle 0 has shard index 0, triangle 1 has shard index 1.
+    const gfx::ShardVertex2D verts[6] = {
+        // triangle 0, shard 0
+        { {0.0f,  0.0f}, {0.0f, 0.0f}, 0 },
+        { {0.0f, -1.0f}, {0.0f, 1.0f}, 0 },
+        { {1.0f, -1.0f}, {1.0f, 1.0f}, 0 },
+        // triangle 1, shard 1
+        { {0.0f,  0.0f}, {0.0f, 0.0f}, 1 },
+        { {1.0f, -1.0f}, {1.0f, 1.0f}, 1 },
+        { {1.0f,  0.0f}, {1.0f, 0.0f}, 1 },
+    };
+    gfx::VertexBuffer vertex_buffer;
+    vertex_buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::ShardVertex2D>());
+    vertex_buffer.Resize(6);
+    for (int i=0; i<6; ++i)
+        vertex_buffer.SetVertex(verts[i], i);
+
+    std::vector<gfx::Geometry::DrawCommand> cmds(2);
+    cmds[0].type   = gfx::Geometry::DrawType::Triangles;
+    cmds[0].count  = 3;
+    cmds[0].offset = 0;
+    cmds[1].type   = gfx::Geometry::DrawType::Triangles;
+    cmds[1].count  = 3;
+    cmds[1].offset = 3;
+
+    auto klass = std::make_shared<gfx::PolygonMeshClass>();
+    klass->SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh);
+    klass->SetVertexBuffer(std::move(vertex_buffer));
+    klass->SetCommandBuffer(std::move(cmds));
+
+    // paint mesh — inline shard mesh is returned as-is
+    {
+        gfx::PolygonMeshInstance mesh(klass);
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
+
+        auto geometry = mesh.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        TEST_REQUIRE(buffer.GetVertexCount() == 6);
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 2);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Triangles);
+        TEST_REQUIRE(buffer.GetDrawCmd(1).type == gfx::DrawType::Triangles);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        // triangle 0 — shard 0
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(2)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(2)->aShardIndex == 0);
+        // triangle 1 — shard 1
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(3)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(3)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(4)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(4)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(5)->aPosition   == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(5)->aShardIndex == 1);
+    }
+
+    // wireframe mesh — each triangle becomes 3 line segments preserving shard index
+    {
+        gfx::PolygonMeshInstance mesh(klass);
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::Wireframe;
+
+        auto geometry = mesh.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Lines);
+
+        // 2 triangles x 3 lines x 2 verts = 12 vertices
+        TEST_REQUIRE(buffer.GetVertexCount() == 12);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        // shard 0 triangle: (0,0) -> (0,-1) -> (1,-1) -> (0,0)
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 0)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 0)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 1)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 1)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 2)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 2)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 3)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 3)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 4)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 4)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 5)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 5)->aShardIndex == 0);
+        // shard 1 triangle: (0,0) -> (1,-1) -> (1,0) -> (0,0)
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 6)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 6)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 7)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 7)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 8)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 8)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 9)->aPosition   == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 9)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(10)->aPosition   == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(10)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(11)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(11)->aShardIndex == 1);
+    }
+
+    // effect paint mesh — ShardVertex2D input passes through ConstructShardEffectMesh unchanged;
+    // the original shard geometry is returned with a shard data texture buffer added
+    {
+        gfx::PolygonMeshInstance mesh(klass);
+
+        gfx::DrawableEffect::MeshExplosion explosion;
+        explosion.mesh_subdivision_count = 0;
+        mesh.SetEffect(gfx::DrawableEffect(explosion));
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
+
+        auto geometry = mesh.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        TEST_REQUIRE(buffer.GetVertexCount() == 6);
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 2);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Triangles);
+        TEST_REQUIRE(buffer.GetDrawCmd(1).type == gfx::DrawType::Triangles);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        // triangle 0 — shard 0
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(2)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(2)->aShardIndex == 0);
+        // triangle 1 — shard 1
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(3)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(3)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(4)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(4)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(5)->aPosition   == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(5)->aShardIndex == 1);
+    }
+
+    // effect wireframe mesh — same passthrough geometry, then wireframed
+    {
+        gfx::PolygonMeshInstance mesh(klass);
+
+        gfx::DrawableEffect::MeshExplosion explosion;
+        explosion.mesh_subdivision_count = 0;
+        mesh.SetEffect(gfx::DrawableEffect(explosion));
+
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::Wireframe;
+
+        auto geometry = mesh.Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Lines);
+
+        // 2 shard triangles x 3 lines x 2 verts = 12 vertices
+        TEST_REQUIRE(buffer.GetVertexCount() == 12);
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        // shard 0 triangle: (0,0) -> (0,-1) -> (1,-1) -> (0,0)
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 0)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 0)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 1)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 1)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 2)->aPosition   == gfx::ToVec(0.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 2)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 3)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 3)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 4)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 4)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 5)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 5)->aShardIndex == 0);
+        // shard 1 triangle: (0,0) -> (1,-1) -> (1,0) -> (0,0)
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 6)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 6)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 7)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 7)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 8)->aPosition   == gfx::ToVec(1.0f, -1.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 8)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 9)->aPosition   == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>( 9)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(10)->aPosition   == gfx::ToVec(1.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(10)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(11)->aPosition   == gfx::ToVec(0.0f,  0.0f));
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(11)->aShardIndex == 1);
     }
 }
 
@@ -1201,8 +1734,6 @@ void unit_test_shader_id()
     {
         gfx::Drawable::Environment env;
         env.use_instancing = false;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         std::vector<std::string> list;
 
         list.push_back(gfx::Arrow().GetShaderId(env));
@@ -1241,8 +1772,6 @@ void unit_test_shader_id()
     {
         gfx::Drawable::Environment env;
         env.use_instancing = true;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         std::vector<std::string> list;
 
         list.push_back(gfx::Arrow().GetShaderId(env));
@@ -1284,21 +1813,12 @@ void unit_test_shader_id()
 
         env0.use_instancing = false;
         env1.use_instancing = false;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::Arrow().GetShaderId(env0) == gfx::Arrow().GetShaderId(env1));
 
         env0.use_instancing = false;
         env1.use_instancing = true;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::Arrow().GetShaderId(env0) != gfx::Arrow().GetShaderId(env1));
 
-        env0.use_instancing = false;
-        env1.use_instancing = false;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::ShardedEffectMesh;
-        TEST_REQUIRE(gfx::Arrow().GetShaderId(env0) != gfx::Arrow().GetShaderId(env1));
     }
 
     // other 2D "shapes" GuideGrid, and LineBatch should also use the same simple 2D shader
@@ -1308,14 +1828,10 @@ void unit_test_shader_id()
 
         env0.use_instancing = false;
         env1.use_instancing = false;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::Grid(10, 10).GetShaderId(env0) == gfx::Arrow().GetShaderId(env1));
 
         env0.use_instancing = false;
         env1.use_instancing = true;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::Grid(10, 10).GetShaderId(env0) != gfx::Arrow().GetShaderId(env1));
     }
 
@@ -1325,21 +1841,16 @@ void unit_test_shader_id()
 
         env0.use_instancing = false;
         env1.use_instancing = false;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::LineBatch2D().GetShaderId(env0) == gfx::Arrow().GetShaderId(env1));
 
         env0.use_instancing = false;
         env1.use_instancing = true;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::LineBatch2D().GetShaderId(env0) != gfx::Arrow().GetShaderId(env1));
     }
     // all 3D shapes should use same shader
     {
         gfx::Drawable::Environment env;
         env.use_instancing = false;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         std::vector<std::string> list;
 
         list.push_back(gfx::Cube().GetShaderId(env));
@@ -1361,7 +1872,6 @@ void unit_test_shader_id()
 
         gfx::Drawable::Environment env;
         env.use_instancing = true;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         std::vector<std::string> list;
 
         list.push_back(gfx::Cube().GetShaderId(env));
@@ -1395,14 +1905,10 @@ void unit_test_shader_id()
 
         env0.use_instancing = false;
         env1.use_instancing = false;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::LineBatch3D().GetShaderId(env0) == gfx::Cube().GetShaderId(env1));
 
         env0.use_instancing = false;
         env1.use_instancing = true;
-        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
-        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::LineBatch3D().GetShaderId(env0) != gfx::Cube().GetShaderId(env1));
     }
 
@@ -1413,17 +1919,14 @@ void unit_test_shader_id()
 
         gfx::Drawable::Environment env;
         env.use_instancing = false;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::PolygonMeshInstance(klass).GetShaderId(env) == gfx::Arrow().GetShaderId(env));
 
         env.use_instancing = true;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::PolygonMeshInstance(klass).GetShaderId(env) == gfx::Arrow().GetShaderId(env));
 
         klass.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple3DRenderMesh);
 
         env.use_instancing = false;
-        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
         TEST_REQUIRE(gfx::PolygonMeshInstance(klass).GetShaderId(env) == gfx::Cube().GetShaderId(env));
 
         klass.SetMeshType(gfx::PolygonMeshClass::MeshType::Model3DRenderMesh);
@@ -1439,14 +1942,16 @@ int test_main(int argc, char* argv[])
 {
     unit_test_vertex_stream();
     unit_test_command_stream();
-    unit_test_wireframe();
-    unit_test_triangle_mesh();
-    unit_test_tangents();
+    unit_test_wireframe_algo();
+    unit_test_triangle_algo();
+    unit_test_tangent_algo();
     unit_test_polygon_builder_json();
     unit_test_polygon_builder_build();
     unit_test_particle_engine_data();
     unit_test_polygon_data();
-    unit_test_simple_shape_shard_mesh();
+    unit_test_simple_shape_mesh();
+    unit_test_polygon_simple_render_mesh();
+    unit_test_polygon_simple_shard_mesh();
     unit_test_shader_id();
     return 0;
 }

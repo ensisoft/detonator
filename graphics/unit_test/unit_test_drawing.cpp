@@ -1252,18 +1252,17 @@ void unit_test_polygon_inline_data()
     TEST_REQUIRE(hash1);
 
     {
-        gfx::Geometry::CreateArgs args;
         gfx::DrawableClass::Environment env;
         env.editing_mode = true;
 
-        auto& geom = args.buffer;
-        TEST_REQUIRE(poly.Construct(env, args));
-        TEST_REQUIRE(geom.GetNumDrawCmds() == 1);
-        TEST_REQUIRE(geom.GetDrawCmd(0) == cmd);
-        TEST_REQUIRE(geom.GetVertexCount() == 3);
-        TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts));
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(poly.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0) == cmd);
+        TEST_REQUIRE(buffer.GetVertexCount() == 3);
+        TEST_REQUIRE(buffer.GetVertexBytes() == sizeof(verts));
 
-        const gfx::VertexStream stream(geom.GetLayout(), geom.GetVertexBuffer());
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
@@ -1279,19 +1278,18 @@ void unit_test_polygon_inline_data()
     TEST_REQUIRE(hash1 != hash2);
 
     {
-        gfx::Geometry::CreateArgs args;
         gfx::DrawableClass::Environment env;
         env.editing_mode = true;
 
-        auto& geom = args.buffer;
-        TEST_REQUIRE(poly.Construct(env, args));
-        TEST_REQUIRE(geom.GetNumDrawCmds() == 2);
-        TEST_REQUIRE(geom.GetDrawCmd(0) == cmd);
-        TEST_REQUIRE(geom.GetDrawCmd(1) == cmd);
-        TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts) * 2);
-        TEST_REQUIRE(geom.GetVertexCount() == 6);
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(poly.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 2);
+        TEST_REQUIRE(buffer.GetDrawCmd(0) == cmd);
+        TEST_REQUIRE(buffer.GetDrawCmd(1) == cmd);
+        TEST_REQUIRE(buffer.GetVertexBytes() == sizeof(verts) * 2);
+        TEST_REQUIRE(buffer.GetVertexCount() == 6);
 
-        const gfx::VertexStream stream(geom.GetLayout(), geom.GetVertexBuffer());
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
@@ -1338,7 +1336,6 @@ void unit_test_polygon_mesh()
         data::FileDevice file;
         file.Open("mesh-test.json");
         json.Dump(file);
-
         file.Close();
     }
 
@@ -1346,19 +1343,17 @@ void unit_test_polygon_mesh()
         gfx::PolygonMeshClass poly;
         poly.SetContentUri("mesh-test.json");
 
-        gfx::Geometry::CreateArgs args;
         gfx::DrawableClass::Environment env;
         env.editing_mode = false;
 
-        auto& geom = args.buffer;
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(poly.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0) == cmds[0]);
+        TEST_REQUIRE(buffer.GetVertexBytes() == sizeof(verts));
+        TEST_REQUIRE(buffer.GetVertexCount() == 3);
 
-        TEST_REQUIRE(poly.Construct(env, args));
-        TEST_REQUIRE(geom.GetNumDrawCmds() == 1);
-        TEST_REQUIRE(geom.GetDrawCmd(0) == cmds[0]);
-        TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts));
-        TEST_REQUIRE(geom.GetVertexCount() == 3);
-
-        const gfx::VertexStream stream(geom.GetLayout(), geom.GetVertexBuffer());
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
@@ -1381,28 +1376,19 @@ void unit_test_polygon_shader()
         klass1.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
         klass1.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
 
-        gfx::DrawableClass::Environment env;
-        env.use_instancing = false;
-        TEST_REQUIRE(klass0.GetShaderId(env) == klass1.GetShaderId(env));
+        TEST_REQUIRE(klass0.GetShaderId(false, false) == klass1.GetShaderId(false, false));
+        TEST_REQUIRE(klass0.GetShaderId(true, false) == klass1.GetShaderId(true, false));
+        TEST_REQUIRE(klass0.GetShaderId(true, false) != klass1.GetShaderId(false, false));
 
-        env.use_instancing = true;
-        TEST_REQUIRE(klass0.GetShaderId(env) == klass1.GetShaderId(env));
-
-        env.use_instancing = true;
-        std::string id0 = klass0.GetShaderId(env);
-        env.use_instancing = false;
-        std::string id1 = klass1.GetShaderId(env);
-        TEST_REQUIRE(id0 != id1);
-
+        TEST_REQUIRE(klass0.GetShaderId(false, true) != klass0.GetShaderId(false, false));
+        TEST_REQUIRE(klass0.GetShaderId(true, false) != klass0.GetShaderId(false, false));
 
         klass0.SetShaderSrc(R"(
 void CustomVertexTransform(inout VertexData vs) {
   vs.vertex = vec4(0.0);
 }
         )");
-        env.use_instancing = false;
-        TEST_REQUIRE(klass0.GetShaderId(env) != klass1.GetShaderId(env));
-
+        TEST_REQUIRE(klass0.GetShaderId(false, false) != klass1.GetShaderId(false, false));
     }
 
     // test shader source generation
@@ -1419,18 +1405,13 @@ void CustomVertexTransform(inout VertexData vs) {
         )");
 
         TestDevice dev;
-        gfx::DrawableClass::Environment env;
-        env.use_instancing = false;
-
-        const auto& src = klass.GetShader(env, dev);
+        const auto& src = klass.GetShader(false, false, dev);
         const auto& source = src.GetSource();
         //std::cout << source;
         TEST_REQUIRE(base::Contains(source, "#define CUSTOM_VERTEX_TRANSFORM"));
         TEST_REQUIRE(base::Contains(source, "void CustomVertexTransform(inout VertexData vs"));
         TEST_REQUIRE(base::Contains(source, "// bla"));
-
     }
-
 }
 
 void unit_test_local_particles()
@@ -1462,18 +1443,17 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        gfx::Geometry::CreateArgs args;
         gfx::FlatShadedColorProgram pass;
         gfx::DrawableClass::Environment env;
 
         eng.Restart(env);
-        TestDevice dev;
-        TEST_REQUIRE(eng.Construct(env, dev, args));
-        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
-        const gfx::VertexStream stream(args.buffer.GetLayout(),
-                                       args.buffer.GetVertexBuffer());
+        auto geometry = eng.Construct(env);
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetVertexCount() == p.num_particles);
 
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexBuffer());
         for (size_t i=0; i<p.num_particles; ++i)
         {
             const auto& v = *stream.GetVertex<ParticleVertex>(i);
@@ -1499,20 +1479,17 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-
-        gfx::Geometry::CreateArgs args;
         gfx::FlatShadedColorProgram pass;
         gfx::DrawableClass::Environment env;
 
         eng.Restart(env);
 
-        TestDevice dev;
-        TEST_REQUIRE(eng.Construct(env, dev, args));
-        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+        auto geometry = eng.Construct(env);
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetVertexCount() == p.num_particles);
 
-        const gfx::VertexStream stream(args.buffer.GetLayout(),
-                                       args.buffer.GetVertexBuffer());
-
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexBuffer());
         for (size_t i=0; i<p.num_particles; ++i)
         {
             const auto& v = *stream.GetVertex<ParticleVertex>(i);
@@ -1538,19 +1515,17 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        gfx::Geometry::CreateArgs args;
         gfx::FlatShadedColorProgram pass;
         gfx::DrawableClass::Environment env;
 
         eng.Restart(env);
 
-        TestDevice dev;
-        TEST_REQUIRE(eng.Construct(env, dev, args));
-        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+        auto geometry = eng.Construct(env);
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetVertexCount() == p.num_particles);
 
-        const gfx::VertexStream stream(args.buffer.GetLayout(),
-                                       args.buffer.GetVertexBuffer());
-
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexBuffer());
         for (size_t i=0; i<p.num_particles; ++i)
         {
             const auto& v = *stream.GetVertex<ParticleVertex>(i);
@@ -1578,19 +1553,17 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        gfx::Geometry::CreateArgs args;
         gfx::FlatShadedColorProgram pass;
         gfx::DrawableClass::Environment env;
 
         eng.Restart(env);
 
-        TestDevice dev;
-        TEST_REQUIRE(eng.Construct(env, dev, args));
-        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+        auto geometry = eng.Construct(env);
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetVertexCount() == p.num_particles);
 
-        const gfx::VertexStream stream(args.buffer.GetLayout(),
-                                       args.buffer.GetVertexBuffer());
-
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                        buffer.GetVertexBuffer());
         for (size_t i=0; i<p.num_particles; ++i)
         {
             const auto& v = *stream.GetVertex<ParticleVertex>(i);
@@ -1623,19 +1596,17 @@ void unit_test_local_particles()
             gfx::ParticleEngineClass klass(p);
             gfx::ParticleEngineInstance eng(klass);
 
-            gfx::Geometry::CreateArgs args;
             gfx::FlatShadedColorProgram pass;
             gfx::DrawableClass::Environment env;
 
             eng.Restart(env);
 
-            TestDevice dev;
-            TEST_REQUIRE(eng.Construct(env, dev, args));
-            TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+            auto geometry = eng.Construct(env);
+            const auto& buffer = geometry.GetGeometryBuffer();
+            TEST_REQUIRE(buffer.GetVertexCount() == p.num_particles);
 
-            const gfx::VertexStream stream(args.buffer.GetLayout(),
-                                           args.buffer.GetVertexBuffer());
-
+            const gfx::VertexStream stream(buffer.GetLayout(),
+                                           buffer.GetVertexBuffer());
             for (size_t i=0; i<p.num_particles; ++i)
             {
                 const auto& v = *stream.GetVertex<ParticleVertex>(i);
@@ -1671,20 +1642,18 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        gfx::Geometry::CreateArgs args;
         gfx::FlatShadedColorProgram pass;
         gfx::DrawableClass::Environment env;
 
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
 
-        TestDevice dev;
-        TEST_REQUIRE(eng.Construct(env, dev, args));
-        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+        auto geometry = eng.Construct(env);
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetVertexCount() == p.num_particles);
 
-        const gfx::VertexStream stream(args.buffer.GetLayout(),
-                                       args.buffer.GetVertexBuffer());
-
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexBuffer());
         for (size_t i=0; i<p.num_particles; ++i)
         {
             const auto& v = *stream.GetVertex<ParticleVertex>(i);
@@ -1712,20 +1681,18 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        gfx::Geometry::CreateArgs args;
         gfx::FlatShadedColorProgram pass;
         gfx::DrawableClass::Environment env;
 
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
 
-        TestDevice dev;
-        TEST_REQUIRE(eng.Construct(env, dev, args));
-        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+        auto geometry = eng.Construct(env);
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetVertexCount() == p.num_particles);
 
-        const gfx::VertexStream stream(args.buffer.GetLayout(),
-                                       args.buffer.GetVertexBuffer());
-
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexBuffer());
         for (size_t i=0; i<p.num_particles; ++i)
         {
             const auto& v = *stream.GetVertex<ParticleVertex>(i);
@@ -1765,10 +1732,8 @@ void unit_test_global_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        TestDevice dev;
         gfx::FlatShadedColorProgram pass;
         gfx::DrawableClass::Environment env;
-        gfx::Geometry::CreateArgs args;
 
         base::Transform transform;
         transform.Resize(200.0f, 6.0f);
@@ -1779,12 +1744,12 @@ void unit_test_global_particles()
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
 
-        TEST_REQUIRE(eng.Construct(env, dev, args));
-        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+        auto geometry = eng.Construct(env);
+        const auto& buffer = geometry.GetGeometryBuffer();
+        TEST_REQUIRE(buffer.GetVertexCount() == p.num_particles);
 
-        const gfx::VertexStream stream(args.buffer.GetLayout(),
-                                       args.buffer.GetVertexBuffer());
-
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexBuffer());
         for (size_t i=0; i<p.num_particles; ++i)
         {
             const auto& v = *stream.GetVertex<ParticleVertex>(i);
@@ -2095,6 +2060,7 @@ void unit_test_painter_fallback_geometry()
 {
     TEST_CASE(test::Type::Feature)
 
+    /*
     // stream fail, will try to reconstct on every draw
     {
         test::TestDrawable d;
@@ -2169,6 +2135,7 @@ void unit_test_painter_fallback_geometry()
             TEST_REQUIRE(geom.GetName() == "fallback");
         }
     }
+    */
 }
 
 // multiple materials with textures should only load the

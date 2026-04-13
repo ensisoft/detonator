@@ -29,6 +29,8 @@
 #include "graphics/shader_source.h"
 #include "graphics/wavefront_mesh.h"
 
+#include "device.h"
+
 namespace
 {
 
@@ -216,7 +218,8 @@ private:
 namespace gfx
 {
 
-bool WavefrontMesh::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
+bool WavefrontMesh::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
+    Device& device, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = (*env.proj_matrix);
@@ -225,10 +228,31 @@ bool WavefrontMesh::ApplyDynamicState(const Environment& env, const DrawCall& dr
     program.SetUniform("kDrawableFlags", mFlags);
     return true;
 }
-bool WavefrontMesh::Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const
+
+DrawGeometryHandle WavefrontMesh::GetGeometry(const Environment& env, Device& device) const
+{
+    const auto id = mFileUri;
+    if (auto geometry = device.FindGeometry(id))
+        return std::move(geometry);
+
+    auto buffer = Construct(env);
+    if (buffer.IsNull())
+        return DrawGeometryHandle::CreateErrorGeometry(id,
+            base::FormatString("Failed to load Wavefront mesh '%1'", mFileUri),
+            base::FormatString("Wavefront mesh '%1' fallback", mFileUri), 0, device);
+
+    Geometry::CreateArgs args;
+    args.buffer = buffer.TransferGeometryBuffer();
+    args.usage  = BufferUsage::Static;
+    args.content_hash = 0;
+    args.content_name = mFileUri;
+    return device.CreateGeometry(id, std::move(args));
+}
+
+DrawGeometryBuffer WavefrontMesh::Construct(const Environment& env) const
 {
     if (mFileUri.empty())
-        return false;
+        return DrawGeometryBuffer::Null;
 
     Loader::ResourceDesc desc;
     desc.type = Loader::Type::Mesh;
@@ -236,8 +260,8 @@ bool WavefrontMesh::Construct(const Environment& env, Device& device, Geometry::
     const auto& data_buffer = LoadResource(desc);
     if (!data_buffer)
     {
-        ERROR("Failed to load Wavefront (.obj) mesh. [uri='%1']", mFileUri);
-        return false;
+        ERROR("Failed to load Wavefront (.obj) mesh resource buffer. [uri='%1']", mFileUri);
+        return DrawGeometryBuffer::Null;
     }
 
     ObjLoader loader;
@@ -246,7 +270,7 @@ bool WavefrontMesh::Construct(const Environment& env, Device& device, Geometry::
     if (!wavefront::ParseObj(beg, end, loader))
     {
         ERROR("Failed to parse Wavefront (.obj) file. [uri='%1']", mFileUri);
-        return false;
+        return DrawGeometryBuffer::Null;
     }
 
     auto vertex_buffer = loader.TransferVertexBuffer();
@@ -256,36 +280,28 @@ bool WavefrontMesh::Construct(const Environment& env, Device& device, Geometry::
 
     GeometryBuffer buffer;
     buffer.SetVertexLayout(GetVertexLayout<Vertex3D>());
-    buffer.SetVertexBuffer(std::move(vertex_buffer));
-    buffer.SetIndexBuffer(std::move(index_buffer));
+    buffer.SetVertexBuffer(vertex_buffer);
+    buffer.SetIndexBuffer(index_buffer);
     buffer.AddDrawCmd(DrawType::Triangles);
-
-    geometry.buffer = std::move(buffer);
-    geometry.usage = Geometry::Usage::Static;
-    geometry.content_name = mFileUri;
-    geometry.content_hash = 0; // Hmm?? todo?
-    return true;
+    return std::move(buffer);
 }
 ShaderSource WavefrontMesh::GetShader(const Environment& env, const Device& device) const
 {
-    // not supporting effect mesh
-    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
     // not supporting instancing
     ASSERT(env.use_instancing == false);
 
-    return Drawable::CreateShader(env, device, Shader::Simple3D);
+    return Drawable::CreateShader(env.use_instancing, false, device, Shader::Simple3D);
 }
 std::string WavefrontMesh::GetShaderId(const Environment& env) const
 {
-    return Drawable::GetShaderId(env, Shader::Simple3D);
+    // not supporting instancing
+    ASSERT(env.use_instancing == false);
+
+    return Drawable::GetShaderId(env.use_instancing, false, Shader::Simple3D);
 }
 std::string WavefrontMesh::GetShaderName(const Environment& env) const
 {
     return Drawable::GetShaderName(env, Shader::Simple3D);
-}
-std::string WavefrontMesh::GetGeometryId(const Environment& env) const
-{
-    return mFileUri;
 }
 
 SpatialMode WavefrontMesh::GetSpatialMode() const

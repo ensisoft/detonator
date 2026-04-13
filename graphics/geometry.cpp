@@ -320,7 +320,7 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer, Tess
     return true;
 }
 
-bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, unsigned flags, float line_length)
+bool CreateDebugMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, unsigned flags, float line_length)
 {
     const VertexStream vertices(geometry.GetLayout(),
                                 geometry.GetVertexDataPtr(),
@@ -333,7 +333,7 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
 
     unsigned data_count = 0;
 
-    if (flags & NormalMeshFlags::Normals)
+    if (flags & DebugMeshFlags::Normals)
     {
         const auto* normal   = vertices.FindAttribute("aNormal");
         if (!normal || normal->num_vector_components != 3)
@@ -342,7 +342,7 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
         data_count++;
     }
 
-    if (flags & NormalMeshFlags::Tangents)
+    if (flags & DebugMeshFlags::Tangents)
     {
         const auto* tangent = vertices.FindAttribute("aTangent");
         if (!tangent || tangent->num_vector_components != 3)
@@ -350,7 +350,7 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
 
         data_count++;
     }
-    if (flags & NormalMeshFlags::Bitangents)
+    if (flags & DebugMeshFlags::Bitangents)
     {
         const auto* bitangent = vertices.FindAttribute("aBitangent");
         if (!bitangent || bitangent->num_vector_components != 3)
@@ -375,7 +375,7 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
 
         unsigned vertex_data_index = 0;
 
-        if (flags & NormalMeshFlags::Normals)
+        if (flags & DebugMeshFlags::Normals)
         {
             const auto& aNormal = ToVec(*vertices.GetAttribute<Vec3>("aNormal", i));
 
@@ -390,7 +390,7 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
             vertex_writer.SetVertex(b, vertex_index + 1);
             vertex_data_index += 2;
         }
-        if (flags & NormalMeshFlags::Tangents)
+        if (flags & DebugMeshFlags::Tangents)
         {
             const auto& aTangent = ToVec(*vertices.GetAttribute<Vec3>("aTangent", i));
 
@@ -406,7 +406,7 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
             vertex_data_index += 2;
         }
 
-        if (flags & NormalMeshFlags::Bitangents)
+        if (flags & DebugMeshFlags::Bitangents)
         {
             const auto& aBitangent = ToVec(*vertices.GetAttribute<Vec3>("aBitangent", i));
 
@@ -429,7 +429,7 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
     return true;
 }
 
-bool CreateShardEffectMesh(const GeometryBuffer& original_geometry_buffer, GeometryBuffer* shard_geometry_buffer,
+bool CreateShardMesh(const GeometryBuffer& original_geometry_buffer, GeometryBuffer* shard_geometry_buffer,
     unsigned mesh_subdivision_count, bool discard_skinny_slivers)
 {
     // the triangle mesh computation produces a  mesh that  has the same

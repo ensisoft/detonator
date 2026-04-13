@@ -64,7 +64,7 @@ void Painter::Prime(DrawItemList& cmds) const
     if (cmds.mItems.empty())
         return;
 
-    cmds.mStateList.resize(cmds.mItems.size());
+    cmds.mHandles.resize(cmds.mItems.size());
 
     for (size_t i=0; i<cmds.mItems.size(); ++i)
     {
@@ -77,7 +77,7 @@ void Painter::Prime(DrawItemList& cmds) const
         drawable_env.view_matrix    = cmd.view       ? cmd.view       : &mViewMatrix;
         drawable_env.proj_matrix    = cmd.projection ? cmd.projection : &mProjMatrix;
         drawable_env.model_matrix   = cmd.model      ? cmd.model      : &Identity;
-        cmds.mStateList[i].geometry_gpu_ptr = GetGpuGeometry(*cmd.drawable, drawable_env);
+        cmds.mHandles[i] = cmd.drawable->GetGeometry(drawable_env, *mDevice);
     }
 }
 
@@ -118,11 +118,17 @@ bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const
         drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
 
         auto geometry = list.GetGeometryPtr(i);
-        if (geometry == nullptr)
-            TRACE_CALL("GetGpuGeometry", geometry = GetGpuGeometry(*draw.drawable, drawable_env));
+        if (geometry.IsNull())
+            TRACE_CALL("GetGpuGeometry", geometry = draw.drawable->GetGeometry(drawable_env, *mDevice));
 
-        if (!geometry)
+        if (!geometry.IsValid())
+        {
+            auto error_log = geometry.GetErrorLog();
+            if (error_log.empty())
+                error_log = base::FormatString("Failed to create '%1' geometry.", draw.drawable->GetName());
+            GFX_PAINT_ERROR(error_log);
             continue;
+        }
 
         Material::Environment material_env;
         material_env.editing_mode   = mEditingMode;
@@ -147,7 +153,7 @@ bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const
             Drawable::RasterState drawable_raster_state;
             drawable_raster_state.culling    = draw.culling;
             drawable_raster_state.line_width = draw.line_width;
-            state_ok &= draw.drawable->ApplyDynamicState(drawable_env, draw.draw_call, *mDevice, gpu_program_state, drawable_raster_state);
+            state_ok &= draw.drawable->ApplyDynamicState(drawable_env, draw.draw_call, geometry, *mDevice, gpu_program_state, drawable_raster_state);
 
             device_state.blending      = material_raster_state.blending;
             device_state.premulalpha   = material_raster_state.premultiplied_alpha;
@@ -181,7 +187,7 @@ bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const
 
         TRACE_CALL("DeviceDraw", mDevice->Draw(*gpu_program,
                       gpu_program_state,
-                      GeometryDrawCommand(*geometry,
+                      GeometryDrawCommand(*geometry.GetGeometry(),
                           cmd_params.draw_cmd_start,
                           cmd_params.draw_cmd_count),
                       device_state, mFrameBuffer));
@@ -445,133 +451,6 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         return nullptr;
 
     return gpu_program;
-}
-
-GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::Environment& env) const
-{
-    const auto& id = drawable.GetGeometryId(env);
-
-    const auto usage = drawable.GetGeometryUsage();
-
-    // STREAM
-    // - the underlying device VBO gets "orphaned" (i.e. discarded) after every frame.
-    // - the stream data must be re-uploaded one very draw.
-    // - the expectation is that a single stream Drawable is not drawn multiple
-    //   times within a frame. For example if you were to draw a single particle
-    //   engine instance multiple times this would end up producing redundant
-    //   GPU geometry data on every draw. Don't do that.
-    //
-    // DYNAMIC
-    // - this geometry is drawn often and updated only occasionally, i.e
-    //   less often than every frame. every frame would be STREAM.
-    // - geometry hash value is used to determine whether the underlying
-    //   device VBO (geometry) needs to be updated or not.
-    //
-    // STATIC
-    // - this geometry is drawn often and never changes EXCEPT if
-    //   we're actually running in the editor (in edit/design) mode
-    //   in which case it can change.
-    // - conditional check for changes in the content based on the
-    //   edit mode flag.
-
-    if (usage == Drawable::Usage::Stream)
-    {
-        // with STREAM geometry we assume there's no IO taking place
-        // (that would be terrible), but the geometry data is generated
-        // on the CPU on the fly by computation. (See particles)
-        // So with this in mind, even if the geometry generation fails
-        // let's just keep trying and not generate any fallback geometry.
-        Geometry::CreateArgs args;
-        if (!drawable.Construct(env, *mDevice, args))
-        {
-            const auto* drawable_class = drawable.GetClass();
-            GFX_PAINT_ERROR("Failed to construct drawable stream geometry. [name='%1']",
-                drawable_class ? drawable_class->GetName() : "");
-            return nullptr;
-        }
-
-        return mDevice->CreateGeometry(id, std::move(args));
-    }
-    else if (usage == Drawable::Usage::Dynamic)
-    {
-        auto geom = mDevice->FindGeometry(id);
-        const auto content_hash  = geom ? geom->GetContentHash() : 0;
-        const auto drawable_hash = drawable.GetGeometryHash();
-
-        // construct geometry if it doesn't exist or the hash has changed
-        // indicating a dynamic change in the geometry data.
-        if (geom == nullptr || (content_hash != drawable_hash))
-        {
-            Geometry::CreateArgs args;
-            if (!drawable.Construct(env, *mDevice, args))
-            {
-                const auto* drawable_class = drawable.GetClass();
-                args.fallback = true;
-                args.buffer.ClearData();
-                args.buffer_ptr.reset();
-                ERROR("Failed to construct drawable geometry. [name='%1']",
-                    drawable_class ? drawable_class->GetName() : "");
-            }
-            geom = mDevice->CreateGeometry(id, std::move(args));
-        }
-        if (geom->IsFallback())
-        {
-            const auto* drawable_class = drawable.GetClass();
-            GFX_PAINT_ERROR("Failed to construct drawable geometry. [name='%1']",
-                drawable_class ? drawable_class->GetName() : "");
-            const auto& info = geom->GetErrorLog();
-            const auto& info_lines = base::SplitString(info, '\n');
-            for (const auto& info_line : info_lines)
-                GFX_PAINT_ERROR(info_line);
-
-            return nullptr;
-        }
-        return geom;
-    }
-    else if (usage == Drawable::Usage::Static)
-    {
-        auto geom = mDevice->FindGeometry(id);
-        size_t content_hash = 0;
-        size_t drawable_hash = 0;
-
-        // evaluate hash only if in editing mode since it could be
-        // expensive computation.
-        if (mEditingMode)
-        {
-            content_hash  = geom ? geom->GetContentHash() : 0;
-            drawable_hash = drawable.GetGeometryHash();
-        }
-        // construct geometry if it doesn't exist or the hash changed
-        // and we're in editing mode.
-        if (geom == nullptr || (mEditingMode && (content_hash != drawable_hash)))
-        {
-            Geometry::CreateArgs args;
-            if (!drawable.Construct(env, *mDevice, args))
-            {
-                const auto* drawable_class = drawable.GetClass();
-                args.fallback = true;
-                args.buffer.ClearData();
-                args.buffer_ptr.reset();
-                ERROR("Failed to construct drawable geometry. [name='%1']",
-                      drawable_class ? drawable_class->GetName() : "");
-            }
-            geom = mDevice->CreateGeometry(id, std::move(args));
-        }
-        if (geom->IsFallback())
-        {
-            const auto* drawable_class = drawable.GetClass();
-            GFX_PAINT_ERROR("Failed to construct drawable geometry. [name='%1']",
-                drawable_class ? drawable_class->GetName() : "");
-            const auto& info = geom->GetErrorLog();
-            const auto& info_lines = base::SplitString(info, '\n');
-            for (const auto& info_line : info_lines)
-                GFX_PAINT_ERROR(info_line);
-
-            return nullptr;
-        }
-        return geom;
-
-    } else BUG("Missing geometry usage handling.");
 }
 
 IRect Painter::MapToDevice(const IRect& rect) const noexcept

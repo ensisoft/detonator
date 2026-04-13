@@ -65,16 +65,17 @@ namespace gfx
             mLines.push_back(line);
         }
 
-        bool ApplyDynamicState(const Environment& environment, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& environment, const DrawCall& draw, const DrawGeometryHandle& geometry,
+            Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& environment, const Device& device) const override;
         std::string GetShaderId(const Environment& environment) const override;
         std::string GetShaderName(const Environment& environment) const override;
-        std::string GetGeometryId(const Environment& environment) const override;
-        bool Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const override;
+
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& environment) const override;
 
         DrawPrimitive GetDrawPrimitive() const override;
         SpatialMode GetSpatialMode() const override;
-        Usage GetGeometryUsage() const override;
         Type GetType() const override;
     private:
         std::vector<Line> mLines;
@@ -105,16 +106,17 @@ namespace gfx
         inline void AddLine(glm::vec3 start, glm::vec3 end)
         { mLines.push_back({ start, end }); }
 
-        bool ApplyDynamicState(const Environment& environment, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& environment, const DrawCall& draw, const DrawGeometryHandle& geometry,
+            Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& environment, const Device& device) const override;
         std::string GetShaderId(const Environment& environment) const override;
         std::string GetShaderName(const Environment& environment) const override;
-        std::string GetGeometryId(const Environment& environment) const override;
-        bool Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const override;
+
+        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
+        DrawGeometryBuffer Construct(const Environment& environment) const override;
 
         DrawPrimitive GetDrawPrimitive() const override;
         SpatialMode GetSpatialMode() const override;
-        Usage GetGeometryUsage() const override;
         Type GetType() const override;
     private:
         std::vector<Line> mLines;
