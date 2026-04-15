@@ -299,7 +299,8 @@ namespace gfx
                   const Matrix4x4& model,
                   const Material& material,
                   const DrawState& state,
-                  const ShaderProgram& program) const;
+                  const ShaderProgram& program,
+                  DrawCall draw_call = {}) const;
 
         struct MinimalDrawState
         {
@@ -337,7 +338,8 @@ namespace gfx
         bool Draw(const Drawable& drawable,
                   const Matrix4x4& model,
                   const Material& material,
-                  const MinimalDrawState& state = {}) const;
+                  const MinimalDrawState& state = {},
+                  DrawCall draw_call = {}) const;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
