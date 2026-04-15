@@ -202,10 +202,12 @@ bool Painter::Draw(const Drawable& shape,
                    const Matrix4x4& model,
                    const Material& material,
                    const DrawState& state,
-                   const ShaderProgram& program) const
+                   const ShaderProgram& program,
+                   DrawCall draw_call) const
 {
     std::vector<DrawItem> list;
     list.resize(1);
+    list[0].draw_call  = std::move(draw_call);
     list[0].drawable   = &shape;
     list[0].material   = &material;
     list[0].model      = &model;
@@ -231,7 +233,8 @@ bool Painter::Draw(const Drawable& shape,
 bool Painter::Draw(const Drawable& drawable,
                    const Matrix4x4& model,
                    const Material& material,
-                   const MinimalDrawState& state) const
+                   const MinimalDrawState& state,
+                   DrawCall draw_call) const
 {
     DrawState full_state;
     full_state.render_pass          = RenderPass::ColorPass;
@@ -244,7 +247,7 @@ bool Painter::Draw(const Drawable& drawable,
     full_state.line_width           = state.line_width;
 
     FlatShadedColorProgram program;
-    return Draw(drawable, model, material, full_state, program);
+    return Draw(drawable, model, material, full_state, program, std::move(draw_call));
 }
 
 // static
