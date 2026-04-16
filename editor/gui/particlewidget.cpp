@@ -52,6 +52,7 @@
 #include "editor/gui/dlgparticle.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/translation.h"
+#include "graphics/material_class_api.h"
 
 namespace gui
 {
@@ -1063,9 +1064,9 @@ void ParticleEditorWidget::ShowParams()
     const auto* file_texture_src = dynamic_cast<const gfx::TextureFileSource*>(texture_src);
 
     SetValue(mUI.cmbSurface, mMaterialClass->GetSurfaceType());
-    SetValue(mUI.startColor, mMaterialClass->GetParticleStartColor());
-    SetValue(mUI.midColor, mMaterialClass->GetParticleMidColor());
-    SetValue(mUI.endColor, mMaterialClass->GetParticleEndColor());
+    SetValue(mUI.startColor, mMaterialClass->GetUniformValue<gfx::kParticleStartColor>());
+    SetValue(mUI.midColor, mMaterialClass->GetUniformValue<gfx::kParticleMidColor>());
+    SetValue(mUI.endColor, mMaterialClass->GetUniformValue<gfx::kParticleEndColor>());
     SetValue(mUI.cmbParticle, ListItemId(file_texture_src->GetFilename()));
     if (const auto bitmap = texture_src->GetData())
     {
@@ -1242,11 +1243,13 @@ void ParticleEditorWidget::on_btnCreateMaterial_clicked()
     mMaterialClass->SetActiveTextureMap(map->GetId());
     mMaterialClass->SetTextureMap(0, std::move(map));
     mMaterialClass->SetName((std::string)GetValue(mUI.name) + std::string(" Particle"));
-    mMaterialClass->SetParticleStartColor(GetValue(mUI.startColor));
-    mMaterialClass->SetParticleMidColor(GetValue(mUI.midColor));
-    mMaterialClass->SetParticleEndColor(GetValue(mUI.endColor));
-    mMaterialClass->SetParticleBaseRotation(0.0f);
-    mMaterialClass->SetParticleRotation(gfx::MaterialClass::ParticleRotation::ParticleDirectionAndBase);
+
+    const gfx::Particle2DMaterialClass particle(*mMaterialClass);
+    particle.SetParticleStartColor(GetValue(mUI.startColor));
+    particle.SetParticleMidColor(GetValue(mUI.midColor));
+    particle.SetParticleEndColor(GetValue(mUI.endColor));
+    particle.SetParticleBaseRotation(0.0f);
+    particle.SetParticleRotation(gfx::MaterialClass::ParticleRotation::ParticleDirectionAndBase);
 
     mMaterial.reset();
 
@@ -1305,7 +1308,7 @@ void ParticleEditorWidget::on_startColor_colorChanged(QColor)
     if (!mMaterialClass)
         return;
 
-    mMaterialClass->SetParticleStartColor(GetValue(mUI.startColor));
+    mMaterialClass->SetUniform<gfx::kParticleStartColor>(GetValue(mUI.startColor));
 }
 
 void ParticleEditorWidget::on_midColor_colorChanged(QColor)
@@ -1313,7 +1316,7 @@ void ParticleEditorWidget::on_midColor_colorChanged(QColor)
     if (!mMaterialClass)
         return;
 
-    mMaterialClass->SetParticleMidColor(GetValue(mUI.midColor));
+    mMaterialClass->SetUniform<gfx::kParticleMidColor>(GetValue(mUI.midColor));
 }
 
 void ParticleEditorWidget::on_endColor_colorChanged(QColor)
@@ -1321,7 +1324,7 @@ void ParticleEditorWidget::on_endColor_colorChanged(QColor)
     if (!mMaterialClass)
         return;
 
-    mMaterialClass->SetParticleEndColor(GetValue(mUI.endColor));
+    mMaterialClass->SetUniform<gfx::kParticleEndColor>(GetValue(mUI.endColor));
 }
 
 void ParticleEditorWidget::on_primitive_currentIndexChanged(int)

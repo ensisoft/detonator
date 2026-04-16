@@ -34,6 +34,7 @@
 #include "graphics/types.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
+#include "graphics/material_class_api.h"
 #include "graphics/material_instance.h"
 #include "graphics/device.h"
 #include "graphics/drawable.h"
@@ -84,7 +85,7 @@ void unit_test_material_uniforms()
         gfx::ProgramState state;
         gfx::MaterialClass test(gfx::MaterialClass::Type::Color);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        test.SetBaseColor(gfx::Color::Green);
+        test.SetUniform<gfx::kBaseColor>(gfx::Color::Green);
         test.SetStatic(false);
 
         // check that the dynamic state is set as expected.
@@ -107,10 +108,10 @@ void unit_test_material_uniforms()
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetStatic(false);
 
-        test.SetAmbientColor(gfx::Color::Red);
-        test.SetDiffuseColor(gfx::Color::Green);
-        test.SetSpecularColor(gfx::Color::Blue);
-        test.SetSpecularExponent(128.0f);
+        test.SetUniform<gfx::kAmbientColor>(gfx::Color::Red);
+        test.SetUniform<gfx::kDiffuseColor>(gfx::Color::Green);
+        test.SetUniform<gfx::kSpecularColor>(gfx::Color::Blue);
+        test.SetUniform<gfx::kSpecularExponent>(128.0f);
 
         // check that the dynamic state is set as expected.
         // this should mean that both static uniforms  and dynamic
@@ -139,10 +140,10 @@ void unit_test_material_uniforms()
         gfx::ProgramState program;
 
         gfx::MaterialClass test(gfx::MaterialClass::Type::Gradient);
-        test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::GradientColor0);
-        test.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::GradientColor1);
-        test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::GradientColor2);
-        test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::GradientColor3);
+        test.SetUniform<gfx::kGradientColor0>(gfx::Color::DarkGreen);
+        test.SetUniform<gfx::kGradientColor1>(gfx::Color::DarkGray);
+        test.SetUniform<gfx::kGradientColor2>(gfx::Color::DarkBlue);
+        test.SetUniform<gfx::kGradientColor3>(gfx::Color::DarkMagenta);
 
         test.SetStatic(false);
 
@@ -172,7 +173,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::MaterialClass test(gfx::MaterialClass::Type::Texture);
+        gfx::TextureMaterialClass test;
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
         test.SetTextureVelocityX(4.0f);
@@ -186,7 +187,7 @@ void unit_test_material_uniforms()
         env.draw_category = gfx::DrawCategory::Basic;
         env.draw_primitive = gfx::DrawPrimitive::Triangles;
         env.material_time = 2.0f;
-        test.ApplyDynamicState(env, device, program);
+        test->ApplyDynamicState(env, device, program);
 
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
@@ -202,7 +203,7 @@ void unit_test_material_uniforms()
         env.draw_category  = gfx::DrawCategory::Particles;
         env.draw_primitive = gfx::DrawPrimitive::Points;
         test.SetParticleEffect(gfx::MaterialClass::ParticleEffect::Rotate);
-        test.ApplyDynamicState(env, device, program);
+        test->ApplyDynamicState(env, device, program);
         TEST_REQUIRE(program.GetUniform("kParticleEffect", &particle_effect));
         TEST_REQUIRE(particle_effect == static_cast<int>(gfx::MaterialClass::ParticleEffect::Rotate));
 
@@ -215,7 +216,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
+        gfx::SpriteMaterialClass test;
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
         test.SetTextureVelocityX(4.0f);
@@ -231,7 +232,7 @@ void unit_test_material_uniforms()
         env.draw_category = gfx::DrawCategory::Basic;
         env.draw_primitive = gfx::DrawPrimitive::Triangles;
         env.material_time = 2.0f;
-        test.ApplyDynamicState(env, device, program);
+        test->ApplyDynamicState(env, device, program);
 
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
@@ -249,7 +250,7 @@ void unit_test_material_uniforms()
 
         env.draw_category = gfx::DrawCategory::Particles;
         env.draw_primitive = gfx::DrawPrimitive::Points;
-        test.ApplyDynamicState(env, device, program);
+        test->ApplyDynamicState(env, device, program);
         TEST_REQUIRE(program.GetUniform("kParticleEffect", &particle_effect));
         TEST_REQUIRE(particle_effect == 0);
 
@@ -262,7 +263,7 @@ void unit_test_material_uniforms()
 
         gfx::ColorClass test(gfx::MaterialClass::Type::Color);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        test.SetBaseColor(gfx::Color::Green);
+        test.SetUniform<gfx::kBaseColor>(gfx::Color::Green);
         test.SetStatic(true);
 
         gfx::FlatShadedColorProgram pass;
@@ -287,10 +288,10 @@ void unit_test_material_uniforms()
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetStatic(true);
 
-        test.SetAmbientColor(gfx::Color::Red);
-        test.SetDiffuseColor(gfx::Color::Green);
-        test.SetSpecularColor(gfx::Color::Blue);
-        test.SetSpecularExponent(128.0f);
+        test.SetUniform<gfx::kAmbientColor>(gfx::Color::Red);
+        test.SetUniform<gfx::kDiffuseColor>(gfx::Color::Green);
+        test.SetUniform<gfx::kSpecularColor>(gfx::Color::Blue);
+        test.SetUniform<gfx::kSpecularExponent>(128.0f);
 
         // check that the dynamic state is set as expected.
         // this should mean that both static uniforms  and dynamic
@@ -326,10 +327,10 @@ void unit_test_material_uniforms()
         gfx::ProgramState program;
 
         gfx::MaterialClass test(gfx::MaterialClass::Type::Gradient);
-        test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::GradientColor0);
-        test.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::GradientColor1);
-        test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::GradientColor2);
-        test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::GradientColor3);
+        test.SetUniform<gfx::kGradientColor0>(gfx::Color::DarkGreen);
+        test.SetUniform<gfx::kGradientColor1>(gfx::Color::DarkGray);
+        test.SetUniform<gfx::kGradientColor2>(gfx::Color::DarkBlue);
+        test.SetUniform<gfx::kGradientColor3>(gfx::Color::DarkMagenta);
         test.SetStatic(true);
 
         gfx::FlatShadedColorProgram pass;
@@ -366,7 +367,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::MaterialClass test(gfx::MaterialClass::Type::Texture);
+        gfx::TextureMaterialClass test;
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
         test.SetTextureVelocityX(4.0f);
@@ -379,7 +380,7 @@ void unit_test_material_uniforms()
         gfx::MaterialClass::State env;
         env.material_time = 2.0f;
 
-        test.ApplyStaticState(env, device, program);
+        test->ApplyStaticState(env, device, program);
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
         glm::vec1 particle_rotation_flag;
@@ -392,7 +393,7 @@ void unit_test_material_uniforms()
 
         program.Clear();
 
-        test.ApplyDynamicState(env, device, program);
+        test->ApplyDynamicState(env, device, program);
         TEST_REQUIRE(!program.HasUniform("kTextureScale"));
         TEST_REQUIRE(!program.HasUniform("kTextureVelocityXY"));
         TEST_REQUIRE(!program.HasUniform("kTextureVelocityZ"));
@@ -405,7 +406,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
+        gfx::SpriteMaterialClass test;
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
         test.SetTextureVelocityX(4.0f);
@@ -420,7 +421,7 @@ void unit_test_material_uniforms()
         gfx::MaterialClass::State env;
         env.material_time = 2.0f;
 
-        test.ApplyStaticState(env, device, program);
+        test->ApplyStaticState(env, device, program);
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
         gfx::Color4f base_color;
@@ -433,7 +434,7 @@ void unit_test_material_uniforms()
 
         program.Clear();
 
-        test.ApplyDynamicState(env, device, program);
+        test->ApplyDynamicState(env, device, program);
         TEST_REQUIRE(!program.HasUniform("kTextureScale"));
         TEST_REQUIRE(!program.HasUniform("kTextureVelocityXY"));
         TEST_REQUIRE(!program.HasUniform("kTextureVelocityZ"));
@@ -446,7 +447,7 @@ void unit_test_material_uniforms()
     {
         gfx::MaterialClass foo(gfx::MaterialClass::Type::Color);
         foo.SetStatic(true);
-        foo.SetBaseColor(gfx::Color::Red);
+        foo.SetUniform<gfx::kBaseColor>(gfx::Color::Red);
 
         gfx::FlatShadedColorProgram pass;
         gfx::MaterialClass::State state;
@@ -454,7 +455,7 @@ void unit_test_material_uniforms()
         auto bar = foo;
         TEST_REQUIRE(foo.GetShaderId(state) == bar.GetShaderId(state));
 
-        bar.SetBaseColor(gfx::Color::Green);
+        bar.SetUniform<gfx::kBaseColor>(gfx::Color::Green);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
     }
 
@@ -463,29 +464,29 @@ void unit_test_material_uniforms()
         foo.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         foo.SetStatic(true);
 
-        foo.SetAmbientColor(gfx::Color::Red);
-        foo.SetDiffuseColor(gfx::Color::Green);
-        foo.SetSpecularColor(gfx::Color::Blue);
-        foo.SetSpecularExponent(128.0f);
+        foo.SetUniform<gfx::kAmbientColor>(gfx::Color::Red);
+        foo.SetUniform<gfx::kDiffuseColor>(gfx::Color::Green);
+        foo.SetUniform<gfx::kSpecularColor>(gfx::Color::Blue);
+        foo.SetUniform<gfx::kSpecularExponent>(128.0f);
 
         gfx::MaterialClass::State state;
 
         auto bar = foo;
         TEST_REQUIRE(foo.GetShaderId(state) == bar.GetShaderId(state));
 
-        foo.SetAmbientColor(gfx::Color::HotPink);
+        foo.SetUniform<gfx::kAmbientColor>(gfx::Color::HotPink);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
 
         bar = foo;
-        foo.SetDiffuseColor(gfx::Color::HotPink);
+        foo.SetUniform<gfx::kDiffuseColor>(gfx::Color::HotPink);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
 
         bar = foo;
-        foo.SetSpecularColor(gfx::Color::HotPink);
+        foo.SetUniform<gfx::kSpecularColor>(gfx::Color::HotPink);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
 
         bar = foo;
-        foo.SetSpecularExponent(8.0f);
+        foo.SetUniform<gfx::kSpecularExponent>(8.0f);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
 
     }
@@ -494,10 +495,10 @@ void unit_test_material_uniforms()
     {
         gfx::MaterialClass foo(gfx::MaterialClass::Type::Gradient);
         foo.SetStatic(true);
-        foo.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::GradientColor2);
-        foo.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::GradientColor0);
-        foo.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::GradientColor3);
-        foo.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::GradientColor1);
+        foo.SetUniform<gfx::kGradientColor2>(gfx::Color::DarkBlue);
+        foo.SetUniform<gfx::kGradientColor0>(gfx::Color::DarkGreen);
+        foo.SetUniform<gfx::kGradientColor3>(gfx::Color::DarkMagenta);
+        foo.SetUniform<gfx::kGradientColor1>(gfx::Color::DarkGray);
 
         gfx::FlatShadedColorProgram pass;
         gfx::MaterialClass::State state;
@@ -505,21 +506,21 @@ void unit_test_material_uniforms()
         auto bar = foo;
         TEST_REQUIRE(foo.GetShaderId(state) == bar.GetShaderId(state));
 
-        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::GradientColor2);
+        foo.SetUniform<gfx::kGradientColor2>(gfx::Color::White);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
-        foo.SetColor(gfx::Color::White,gfx::GradientClass::ColorIndex::GradientColor3);
+        foo.SetUniform<gfx::kGradientColor3>(gfx::Color::White);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
-        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::GradientColor0);
+        foo.SetUniform<gfx::kGradientColor0>(gfx::Color::White);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
-        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::GradientColor1);
+        foo.SetUniform<gfx::kGradientColor1>(gfx::Color::White);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
     }
 
     {
-        gfx::MaterialClass foo(gfx::MaterialClass::Type::Texture);
+        gfx::TextureMaterialClass foo;
         foo.SetStatic(true);
         foo.SetTextureScaleX(2.0f);
         foo.SetTextureScaleY(3.0f);
@@ -530,27 +531,29 @@ void unit_test_material_uniforms()
         gfx::FlatShadedColorProgram pass;
         gfx::MaterialClass::State state;
 
-        auto bar = foo;
-        TEST_REQUIRE(bar.GetShaderId(state) == foo.GetShaderId(state));
-        bar = foo;
+        gfx::TextureMaterialClass bar;
+        bar.Imitate(foo);
+
+        TEST_REQUIRE(bar->GetShaderId(state) == foo->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureScaleX(2.2f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureScaleY(2.0f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureVelocityX(4.1f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureVelocityY(-5.0f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureVelocityZ(1.0f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
     }
 
     {
-        gfx::SpriteClass foo(gfx::MaterialClass::Type::Sprite);
+        gfx::SpriteMaterialClass foo;
         foo.SetStatic(true);
         foo.SetTextureScaleX(2.0f);
         foo.SetTextureScaleY(3.0f);
@@ -562,26 +565,27 @@ void unit_test_material_uniforms()
         gfx::FlatShadedColorProgram pass;
         gfx::MaterialClass::State state;
 
-        auto bar = foo;
-        TEST_REQUIRE(bar.GetShaderId(state) == foo.GetShaderId(state));
-        bar = foo;
+        gfx::SpriteMaterialClass bar;
+        bar.Imitate(foo);
+        TEST_REQUIRE(bar->GetShaderId(state) == foo->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureScaleX(2.2f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureScaleY(2.0f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureVelocityX(4.1f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureVelocityY(-5.0f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetTextureVelocityZ(1.0f);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
-        bar = foo;
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
+        bar.Imitate(foo);
         foo.SetBaseColor(gfx::Color::Blue);
-        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
+        TEST_REQUIRE(foo->GetShaderId(state) != bar->GetShaderId(state));
     }
 }
 
@@ -966,7 +970,7 @@ void unit_test_material_uniform_folding()
         TestDevice device;
 
         gfx::MaterialClass klass(gfx::MaterialClass::Type::Color);
-        klass.SetBaseColor(gfx::Color::White);
+        klass.SetUniform<gfx::kBaseColor>(gfx::Color::White);
         klass.SetStatic(true);
         const auto& source = klass.GetShader(state, device);
         const auto& sauce = source.GetSource();
@@ -979,10 +983,10 @@ void unit_test_material_uniform_folding()
         gfx::MaterialClass test(gfx::MaterialClass::Type::BasicLight);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetStatic(true);
-        test.SetAmbientColor(gfx::Color::Red);
-        test.SetDiffuseColor(gfx::Color::Green);
-        test.SetSpecularColor(gfx::Color::Blue);
-        test.SetSpecularExponent(128.0f);
+        test.SetUniform<gfx::kAmbientColor>(gfx::Color::Red);
+        test.SetUniform<gfx::kDiffuseColor>(gfx::Color::Green);
+        test.SetUniform<gfx::kSpecularColor>(gfx::Color::Blue);
+        test.SetUniform<gfx::kSpecularExponent>(128.0f);
 
         const auto& source = test.GetShader(state, device);
         const auto& sauce = source.GetSource();
@@ -1000,10 +1004,10 @@ void unit_test_material_uniform_folding()
         TestDevice device;
 
         gfx::MaterialClass klass(gfx::MaterialClass::Type::Gradient);
-        klass.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::GradientColor2);
-        klass.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::GradientColor0);
-        klass.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::GradientColor3);
-        klass.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::GradientColor1);
+        klass.SetUniform<gfx::kGradientColor2>(gfx::Color::Blue);
+        klass.SetUniform<gfx::kGradientColor0>(gfx::Color::Green);
+        klass.SetUniform<gfx::kGradientColor3>(gfx::Color::Red);
+        klass.SetUniform<gfx::kGradientColor1>(gfx::Color::White);
         klass.SetStatic(true);
         const auto& source = klass.GetShader(state, device);
         const auto& sauce = source.GetSource();
@@ -1020,7 +1024,7 @@ void unit_test_material_uniform_folding()
     {
         TestDevice device;
 
-        gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
+        gfx::TextureMaterialClass klass;
         klass.SetStatic(true);
         klass.SetBaseColor(gfx::Color::White);
         klass.SetTextureVelocityX(4.0f);
@@ -1028,7 +1032,7 @@ void unit_test_material_uniform_folding()
         klass.SetTextureVelocityZ(-1.0f);
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
-        const auto& source = klass.GetShader(state, device);
+        const auto& source = klass->GetShader(state, device);
         const auto& sauce = source.GetSource();
         TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kBaseColor;") == false);
         TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kTextureScale") == false);
@@ -1042,14 +1046,14 @@ void unit_test_material_uniform_folding()
     {
         TestDevice device;
 
-        gfx::MaterialClass klass(gfx::MaterialClass::Type::Sprite);
+        gfx::SpriteMaterialClass klass;
         klass.SetStatic(true);
         klass.SetTextureVelocityX(4.0f);
         klass.SetTextureVelocityY(5.0f);
         klass.SetTextureVelocityZ(-1.0f);
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
-        const auto& source = klass.GetShader(state, device);
+        const auto& source = klass->GetShader(state, device);
         const auto& sauce = source.GetSource();
         TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kTextureScale") == false);
         TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kTextureVelocityXY") == false);
@@ -2199,102 +2203,102 @@ void unit_test_gpu_id_bug()
     {
         gfx::MaterialClass klass(gfx::MaterialClass::Type::Color);
         klass.SetStatic(false);
-        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetUniform<gfx::kBaseColor>(gfx::Color::White);
 
         const auto& initial = klass.GetShaderId(env);
-        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetUniform<gfx::kBaseColor>(gfx::Color::Red);
         TEST_REQUIRE(klass.GetShaderId(env) == initial);
     }
 
     {
-        gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
+        gfx::TextureMaterialClass klass;
         klass.SetStatic(false);
-        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetBaseColor(gfx::Color::White);
         klass.SetTextureScaleX(1.0f);
         klass.SetTextureScaleY(1.0f);
         klass.SetTextureVelocityX(0.0f);
         klass.SetTextureVelocityY(0.0f);
         klass.SetTextureRotation(0.0f);
-        const auto& initial = klass.GetShaderId(env);
+        const auto& initial = klass->GetShaderId(env);
 
-        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetBaseColor(gfx::Color::Red);
         klass.SetTextureScaleX(1.5f);
         klass.SetTextureScaleY(1.5f);
         klass.SetTextureVelocityX(1.0f);
         klass.SetTextureVelocityY(1.0f);
         klass.SetTextureRotation(1.0f);
-        TEST_REQUIRE(klass.GetShaderId(env) == initial);
+        TEST_REQUIRE(klass->GetShaderId(env) == initial);
     }
 
     {
-        gfx::MaterialClass klass(gfx::MaterialClass::Type::Sprite);
+        gfx::SpriteMaterialClass klass;
         klass.SetStatic(false);
-        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetBaseColor(gfx::Color::White);
         klass.SetTextureScaleX(1.0f);
         klass.SetTextureScaleY(1.0f);
         klass.SetTextureVelocityX(0.0f);
         klass.SetTextureVelocityY(0.0f);
         klass.SetTextureRotation(0.0f);
-        const auto& initial = klass.GetShaderId(env);
+        const auto& initial = klass->GetShaderId(env);
 
-        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetBaseColor(gfx::Color::Red);
         klass.SetTextureScaleX(1.5f);
         klass.SetTextureScaleY(1.5f);
         klass.SetTextureVelocityX(1.0f);
         klass.SetTextureVelocityY(1.0f);
         klass.SetTextureRotation(1.0f);
-        TEST_REQUIRE(klass.GetShaderId(env) == initial);
+        TEST_REQUIRE(klass->GetShaderId(env) == initial);
     }
 
     // static
     {
         gfx::MaterialClass klass(gfx::MaterialClass::Type::Color);
         klass.SetStatic(true);
-        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetUniform<gfx::kBaseColor>(gfx::Color::White);
 
         const auto& initial = klass.GetShaderId(env);
-        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetUniform<gfx::kBaseColor>(gfx::Color::Red);
         TEST_REQUIRE(klass.GetShaderId(env) != initial);
     }
 
     {
-        gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
+        gfx::TextureMaterialClass klass;
         klass.SetStatic(true);
-        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetBaseColor(gfx::Color::White);
         klass.SetTextureScaleX(1.0f);
         klass.SetTextureScaleY(1.0f);
         klass.SetTextureVelocityX(0.0f);
         klass.SetTextureVelocityY(0.0f);
         klass.SetTextureRotation(0.0f);
-        const auto& initial = klass.GetShaderId(env);
+        const auto& initial = klass->GetShaderId(env);
 
-        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetBaseColor(gfx::Color::Red);
         klass.SetTextureScaleX(1.5f);
         klass.SetTextureScaleY(1.5f);
         klass.SetTextureVelocityX(1.0f);
         klass.SetTextureVelocityY(1.0f);
         klass.SetTextureRotation(1.0f);
-        TEST_REQUIRE(klass.GetShaderId(env) != initial);
+        TEST_REQUIRE(klass->GetShaderId(env) != initial);
     }
 
     {
-        gfx::MaterialClass klass(gfx::MaterialClass::Type::Sprite);
+        gfx::SpriteMaterialClass klass;
         klass.SetStatic(true);
-        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetBaseColor(gfx::Color::White);
         klass.SetTextureScaleX(1.0f);
         klass.SetTextureScaleY(1.0f);
         klass.SetTextureVelocityX(0.0f);
         klass.SetTextureVelocityY(0.0f);
         klass.SetTextureRotation(0.0f);
-        const auto& initial = klass.GetShaderId(env);
+        const auto& initial = klass->GetShaderId(env);
 
-        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetBaseColor(gfx::Color::Red);
         klass.SetTextureScaleX(1.5f);
         klass.SetTextureScaleY(1.5f);
         klass.SetTextureVelocityX(1.0f);
         klass.SetTextureVelocityY(1.0f);
         klass.SetTextureRotation(1.0f);
-        TEST_REQUIRE(klass.GetShaderId(env) != initial);
+        TEST_REQUIRE(klass->GetShaderId(env) != initial);
     }
 
 }

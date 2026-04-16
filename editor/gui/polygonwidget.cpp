@@ -1254,7 +1254,7 @@ public:
 
         const auto alpha = 0.87f;
         static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
-        color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
+        color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::LightGray, alpha));
         color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
         gfx::Painter::MinimalDrawState state;
@@ -2336,7 +2336,7 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
     {
         const auto alpha = 0.87f * mState.vertex_alpha;
         static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
-        color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
+        color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::LightGray, alpha));
         color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
         gfx::PolygonMeshInstance instance(polygon);
@@ -2358,8 +2358,8 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         if (mSelectedCommand != InvalidIndex)
         {
             if (mState.vertex_alpha == 1.0f)
-                color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 0.3f));
-            else color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 1.0f));
+                color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::DarkGreen, 0.3f));
+            else color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::DarkGreen, 1.0f));
 
             painter.Draw(instance, view, gfx::MaterialInstance(color), state,
                 instance.CreateSubMeshDraw(mSelectedCommand));
@@ -2367,8 +2367,8 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         if (mSelectedVertex != InvalidIndex)
         {
             if (mState.vertex_alpha == 1.0f)
-                color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 0.3f));
-            else color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 1.0f));
+                color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::DarkGreen, 0.3f));
+            else color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::DarkGreen, 1.0f));
 
             const auto draw_cmd_index = mState.builder->FindDrawCommand(mSelectedVertex);
             painter.Draw(instance, view, gfx::MaterialInstance(color), state,

@@ -127,18 +127,18 @@ size_t MaterialClass::GetShaderHash() const
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetBaseColor());
+            hash = base::hash_combine(hash, GetUniformValue<kBaseColor>());
         }
     }
     else if (mType == Type::Gradient)
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor0));
-            hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor1));
-            hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor2));
-            hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor3));
-            hash = base::hash_combine(hash, GetGradientWeight());
+            hash = base::hash_combine(hash, GetUniformValue<kGradientColor0>());
+            hash = base::hash_combine(hash, GetUniformValue<kGradientColor1>());
+            hash = base::hash_combine(hash, GetUniformValue<kGradientColor2>());
+            hash = base::hash_combine(hash, GetUniformValue<kGradientColor3>());
+            hash = base::hash_combine(hash, GetUniformValue<kGradientWeight>());
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -146,11 +146,11 @@ size_t MaterialClass::GetShaderHash() const
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetBaseColor());
-            hash = base::hash_combine(hash, GetTextureScale());
-            hash = base::hash_combine(hash, GetTextureVelocity());
-            hash = base::hash_combine(hash, GetTextureRotation());
-            hash = base::hash_combine(hash, GetAlphaCutoff());
+            hash = base::hash_combine(hash, GetUniformValue<kBaseColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kTextureScale>());
+            hash = base::hash_combine(hash, GetUniformValue<kTextureVelocity>());
+            hash = base::hash_combine(hash, GetUniformValue<kTextureRotation>());
+            hash = base::hash_combine(hash, GetUniformValue<kAlphaCutoff>());
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -158,11 +158,11 @@ size_t MaterialClass::GetShaderHash() const
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetBaseColor());
-            hash = base::hash_combine(hash, GetTextureScale());
-            hash = base::hash_combine(hash, GetTextureVelocity());
-            hash = base::hash_combine(hash, GetTextureRotation());
-            hash = base::hash_combine(hash, GetAlphaCutoff());
+            hash = base::hash_combine(hash, GetUniformValue<kBaseColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kTextureScale>());
+            hash = base::hash_combine(hash, GetUniformValue<kTextureVelocity>());
+            hash = base::hash_combine(hash, GetUniformValue<kTextureRotation>());
+            hash = base::hash_combine(hash, GetUniformValue<kAlphaCutoff>());
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -170,10 +170,11 @@ size_t MaterialClass::GetShaderHash() const
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetBaseColor());
-            hash = base::hash_combine(hash, GetAlphaCutoff());
-            hash = base::hash_combine(hash, GetTileSize());
-            hash = base::hash_combine(hash, GetTileOffset());
+            hash = base::hash_combine(hash, GetUniformValue<kBaseColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kAlphaCutoff>());
+            hash = base::hash_combine(hash, GetUniformValue<kTilePadding>());
+            hash = base::hash_combine(hash, GetUniformValue<kTileOffset>());
+            hash = base::hash_combine(hash, GetUniformValue<kTileSize>());
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -181,9 +182,10 @@ size_t MaterialClass::GetShaderHash() const
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetParticleStartColor());
-            hash = base::hash_combine(hash, GetParticleEndColor());
-            hash = base::hash_combine(hash, GetParticleBaseRotation());
+            hash = base::hash_combine(hash, GetUniformValue<kParticleStartColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kParticleEndColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kParticleMidColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kParticleBaseRotation>());
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -191,10 +193,10 @@ size_t MaterialClass::GetShaderHash() const
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetAmbientColor());
-            hash = base::hash_combine(hash, GetDiffuseColor());
-            hash = base::hash_combine(hash, GetSpecularColor());
-            hash = base::hash_combine(hash, GetSpecularExponent());
+            hash = base::hash_combine(hash, GetUniformValue<kAmbientColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kDiffuseColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kSpecularColor>());
+            hash = base::hash_combine(hash, GetUniformValue<kSpecularExponent>());
         }
     }
     else if (mType == Type::Custom)
@@ -239,27 +241,46 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mTextureWrapY);
     hash = base::hash_combine(hash, mFlags);
 
-    hash = base::hash_combine(hash, GetTextureRotation());
-    hash = base::hash_combine(hash, GetTextureScale());
-    hash = base::hash_combine(hash, GetTextureVelocity());
-    hash = base::hash_combine(hash, GetColor(ColorIndex::BaseColor));
-    hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor0));
-    hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor1));
-    hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor2));
-    hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor3));
-    hash = base::hash_combine(hash, GetGradientWeight());
-    hash = base::hash_combine(hash, GetAlphaCutoff());
-    hash = base::hash_combine(hash, GetTileSize());
-    hash = base::hash_combine(hash, GetTileOffset());
-    hash = base::hash_combine(hash, GetParticleStartColor());
-    hash = base::hash_combine(hash, GetParticleEndColor());
-    hash = base::hash_combine(hash, GetParticleRotation());
-    hash = base::hash_combine(hash, GetParticleBaseRotation());
+    hash = base::hash_combine(hash, GetUniformValue<kTextureRotation>());
+    hash = base::hash_combine(hash, GetUniformValue<kTextureScale>());
+    hash = base::hash_combine(hash, GetUniformValue<kTextureVelocity>());
+    hash = base::hash_combine(hash, GetUniformValue<kBaseColor>());
+    hash = base::hash_combine(hash, GetUniformValue<kAlphaCutoff>());
+    hash = base::hash_combine(hash, GetUniformValue<kParticleEffect>());
 
-    hash = base::hash_combine(hash, GetAmbientColor());
-    hash = base::hash_combine(hash, GetDiffuseColor());
-    hash = base::hash_combine(hash, GetSpecularColor());
-    hash = base::hash_combine(hash, GetSpecularExponent());
+    if (mType == Type::Gradient)
+    {
+        hash = base::hash_combine(hash, GetUniformValue<kGradientColor0>());
+        hash = base::hash_combine(hash, GetUniformValue<kGradientColor1>());
+        hash = base::hash_combine(hash, GetUniformValue<kGradientColor2>());
+        hash = base::hash_combine(hash, GetUniformValue<kGradientColor3>());
+        hash = base::hash_combine(hash, GetUniformValue<kGradientWeight>());
+        hash = base::hash_combine(hash, GetUniformValue<kGradientType>());
+    }
+
+    if (mType == Type::Tilemap)
+    {
+        hash = base::hash_combine(hash, GetUniformValue<kTileSize>());
+        hash = base::hash_combine(hash, GetUniformValue<kTilePadding>());
+        hash = base::hash_combine(hash, GetUniformValue<kTileOffset>());
+    }
+
+    if (mType == Type::Particle2D)
+    {
+        hash = base::hash_combine(hash, GetUniformValue<kParticleStartColor>());
+        hash = base::hash_combine(hash, GetUniformValue<kParticleEndColor>());
+        hash = base::hash_combine(hash, GetUniformValue<kParticleMidColor>());
+        hash = base::hash_combine(hash, GetUniformValue<kParticleBaseRotation>());
+        hash = base::hash_combine(hash, GetUniformValue<kParticleRotation>());
+    }
+
+    if (mType == Type::BasicLight)
+    {
+        hash = base::hash_combine(hash, GetUniformValue<kAmbientColor>());
+        hash = base::hash_combine(hash, GetUniformValue<kDiffuseColor>());
+        hash = base::hash_combine(hash, GetUniformValue<kSpecularColor>());
+        hash = base::hash_combine(hash, GetUniformValue<kSpecularExponent>());
+    }
 
     // remember that the order of uniforms (and texturemaps)
     // can change between IntoJson/FromJson! This can result
@@ -379,33 +400,48 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             // fold a set of known uniforms to constants in the shader
             // code so that we don't need to set them at runtime.
             // the tradeoff is that this creates more shader programs!
-            source.FoldUniform("kAlphaCutoff", GetAlphaCutoff());
-            source.FoldUniform("kBaseColor", GetColor(ColorIndex::BaseColor));
-            source.FoldUniform("kGradientColor0", GetColor(ColorIndex::GradientColor0));
-            source.FoldUniform("kGradientColor1", GetColor(ColorIndex::GradientColor1));
-            source.FoldUniform("kGradientColor2", GetColor(ColorIndex::GradientColor2));
-            source.FoldUniform("kGradientColor3", GetColor(ColorIndex::GradientColor3));
-            source.FoldUniform("kGradientGamma", GetGradientGamma());
-            source.FoldUniform("kGradientWeight", GetGradientWeight());
-            source.FoldUniform("kGradientType", static_cast<unsigned>(GetGradientType()));
-            source.FoldUniform("kTextureVelocity", GetTextureVelocity());
-            source.FoldUniform("kTextureVelocityXY", glm::vec2(GetTextureVelocity()));
-            source.FoldUniform("kTextureVelocityZ", GetTextureVelocity().z);
-            source.FoldUniform("kTextureRotation", GetTextureRotation());
-            source.FoldUniform("kTextureScale", GetTextureScale());
-            source.FoldUniform("kTileSize", GetTileSize());
-            source.FoldUniform("kTileOffset", GetTileOffset());
-            source.FoldUniform("kTilePadding", GetTilePadding());
-            source.FoldUniform("kSurfaceType", static_cast<unsigned>(mSurfaceType));
-            source.FoldUniform("kParticleStartColor", GetParticleStartColor());
-            source.FoldUniform("kParticleEndColor", GetParticleEndColor());
-            source.FoldUniform("kParticleMidColor", GetParticleMidColor());
-            source.FoldUniform("kParticleBaseRotation", GetParticleBaseRotation());
+            source.FoldUniform("kSurfaceType",      static_cast<unsigned>(mSurfaceType));
+            source.FoldUniform("kAlphaCutoff",      GetUniformValue<kAlphaCutoff>());
+            source.FoldUniform("kBaseColor",        GetUniformValue<kBaseColor>());
+            source.FoldUniform("kTextureVelocity",  GetUniformValue<kTextureVelocity>());
+            source.FoldUniform("kTextureVelocityZ", GetUniformValue<kTextureVelocity>().z);
+            source.FoldUniform("kTextureRotation",  GetUniformValue<kTextureRotation>());
+            source.FoldUniform("kTextureScale",     GetUniformValue<kTextureScale>());
+            source.FoldUniform("kTextureVelocityXY", glm::vec2(GetUniformValue<kTextureVelocity>()));
 
-            source.FoldUniform("kAmbientColor", GetAmbientColor());
-            source.FoldUniform("kDiffuseColor", GetDiffuseColor());
-            source.FoldUniform("kSpecularColor", GetSpecularColor());
-            source.FoldUniform("kSpecularExponent", GetSpecularExponent());
+            if (mType == Type::Gradient)
+            {
+                source.FoldUniform("kGradientColor0", GetUniformValue<kGradientColor0>());
+                source.FoldUniform("kGradientColor1", GetUniformValue<kGradientColor1>());
+                source.FoldUniform("kGradientColor2", GetUniformValue<kGradientColor2>());
+                source.FoldUniform("kGradientColor3", GetUniformValue<kGradientColor3>());
+                source.FoldUniform("kGradientGamma",  GetUniformValue<kGradientGamma>());
+                source.FoldUniform("kGradientWeight", GetUniformValue<kGradientWeight>());
+                source.FoldUniform("kGradientType",   static_cast<unsigned>(GetUniformValue<kGradientType>()));
+            }
+
+            if (mType == Type::Tilemap)
+            {
+                source.FoldUniform("kTileSize",        GetUniformValue<kTileSize>());
+                source.FoldUniform("kTileOffset",      GetUniformValue<kTileOffset>());
+                source.FoldUniform("kTilePadding",     GetUniformValue<kTilePadding>());
+            }
+
+            if (mType == Type::Particle2D)
+            {
+                source.FoldUniform("kParticleStartColor",   GetUniformValue<kParticleStartColor>());
+                source.FoldUniform("kParticleEndColor",     GetUniformValue<kParticleEndColor>());
+                source.FoldUniform("kParticleMidColor",     GetUniformValue<kParticleMidColor>());
+                source.FoldUniform("kParticleBaseRotation", GetUniformValue<kParticleBaseRotation>());
+            }
+
+            if (mType == Type::BasicLight)
+            {
+                source.FoldUniform("kAmbientColor",     GetUniformValue<kAmbientColor>());
+                source.FoldUniform("kDiffuseColor",     GetUniformValue<kDiffuseColor>());
+                source.FoldUniform("kSpecularColor",    GetUniformValue<kSpecularColor>());
+                source.FoldUniform("kSpecularExponent", GetUniformValue<kSpecularExponent>());
+            }
         }
     }
     else
@@ -460,20 +496,20 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     {
         if (!IsStatic())
         {
-            SetUniform("kBaseColor", state.uniforms, GetBaseColor(),   program);
+            SetUniform("kBaseColor", state.uniforms, GetUniformValue<kBaseColor>(),   program);
         }
     }
     else if (mType == Type::Gradient)
     {
         if (!IsStatic())
         {
-            SetUniform("kGradientColor0", state.uniforms, GetColor(ColorIndex::GradientColor0), program);
-            SetUniform("kGradientColor1", state.uniforms, GetColor(ColorIndex::GradientColor1), program);
-            SetUniform("kGradientColor2", state.uniforms, GetColor(ColorIndex::GradientColor2), program);
-            SetUniform("kGradientColor3", state.uniforms, GetColor(ColorIndex::GradientColor3), program);
-            SetUniform("kGradientWeight", state.uniforms, GetGradientWeight(), program);
-            SetUniform("kGradientGamma",  state.uniforms, GetGradientGamma(), program);
-            SetUniform("kGradientType", state.uniforms, static_cast<unsigned>(GetGradientType()), program);
+            SetUniform("kGradientColor0", state.uniforms, GetUniformValue<kGradientColor0>(), program);
+            SetUniform("kGradientColor1", state.uniforms, GetUniformValue<kGradientColor1>(), program);
+            SetUniform("kGradientColor2", state.uniforms, GetUniformValue<kGradientColor2>(), program);
+            SetUniform("kGradientColor3", state.uniforms, GetUniformValue<kGradientColor3>(), program);
+            SetUniform("kGradientWeight", state.uniforms, GetUniformValue<kGradientWeight>(), program);
+            SetUniform("kGradientGamma",  state.uniforms, GetUniformValue<kGradientGamma>(), program);
+            SetUniform("kGradientType",   state.uniforms, static_cast<unsigned>(GetUniformValue<kGradientType>()), program);
         }
     }
     else if (mType == Type::Sprite)
@@ -497,55 +533,55 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
 {
     if (mType == Type::Color)
     {
-        program.SetUniform("kBaseColor", GetBaseColor());
+        program.SetUniform("kBaseColor", GetUniformValue<kBaseColor>());
     }
     else if (mType == Type::Gradient)
     {
-        program.SetUniform("kGradientColor0", GetColor(ColorIndex::GradientColor0));
-        program.SetUniform("kGradientColor1", GetColor(ColorIndex::GradientColor1));
-        program.SetUniform("kGradientColor2", GetColor(ColorIndex::GradientColor2));
-        program.SetUniform("kGradientColor3", GetColor(ColorIndex::GradientColor3));
-        program.SetUniform("kGradientWeight", GetGradientWeight());
-        program.SetUniform("kGradientGamma",  GetGradientGamma());
-        program.SetUniform("kGradientType", static_cast<unsigned>(GetGradientType()));
+        program.SetUniform("kGradientColor0", GetUniformValue<kGradientColor0>());
+        program.SetUniform("kGradientColor1", GetUniformValue<kGradientColor1>());
+        program.SetUniform("kGradientColor2", GetUniformValue<kGradientColor2>());
+        program.SetUniform("kGradientColor3", GetUniformValue<kGradientColor3>());
+        program.SetUniform("kGradientWeight", GetUniformValue<kGradientWeight>());
+        program.SetUniform("kGradientGamma",  GetUniformValue<kGradientGamma>());
+        program.SetUniform("kGradientType",   static_cast<unsigned>(GetUniformValue<kGradientType>()));
     }
     else if (mType == Type::Sprite)
     {
-        program.SetUniform("kBaseColor",         GetBaseColor());
-        program.SetUniform("kTextureScale",      GetTextureScale());
-        program.SetUniform("kTextureVelocity",   GetTextureVelocity());
-        program.SetUniform("kTextureRotation",   GetTextureRotation());
-        program.SetUniform("kAlphaCutoff",       GetAlphaCutoff());
+        program.SetUniform("kBaseColor",         GetUniformValue<kBaseColor>());
+        program.SetUniform("kTextureScale",      GetUniformValue<kTextureScale>());
+        program.SetUniform("kTextureVelocity",   GetUniformValue<kTextureVelocity>());
+        program.SetUniform("kTextureRotation",   GetUniformValue<kTextureRotation>());
+        program.SetUniform("kAlphaCutoff",       GetUniformValue<kAlphaCutoff>());
     }
     else if (mType == Type::Texture)
     {
-        program.SetUniform("kBaseColor",         GetBaseColor());
-        program.SetUniform("kTextureScale",      GetTextureScale());
-        program.SetUniform("kTextureVelocity",   GetTextureVelocity());
-        program.SetUniform("kTextureRotation",   GetTextureRotation());
-        program.SetUniform("kAlphaCutoff",       GetAlphaCutoff());
+        program.SetUniform("kBaseColor",         GetUniformValue<kBaseColor>());
+        program.SetUniform("kTextureScale",      GetUniformValue<kTextureScale>());
+        program.SetUniform("kTextureVelocity",   GetUniformValue<kTextureVelocity>());
+        program.SetUniform("kTextureRotation",   GetUniformValue<kTextureRotation>());
+        program.SetUniform("kAlphaCutoff",       GetUniformValue<kAlphaCutoff>());
     }
     else if (mType == Type::Tilemap)
     {
-        program.SetUniform("kBaseColor",   GetBaseColor());
-        program.SetUniform("kAlphaCutoff", GetAlphaCutoff());
+        program.SetUniform("kBaseColor",   GetUniformValue<kBaseColor>());
+        program.SetUniform("kAlphaCutoff", GetUniformValue<kAlphaCutoff>());
         // I'm not sure if there's a use case for setting the texture
         // scale or texture velocity. so we're not applying these now.
     }
     else if (mType ==Type::Particle2D)
     {
-        program.SetUniform("kParticleStartColor",   GetParticleStartColor());
-        program.SetUniform("kParticleEndColor",     GetParticleEndColor());
-        program.SetUniform("kParticleMidColor",     GetParticleMidColor());
-        program.SetUniform("kParticleBaseRotation", GetParticleBaseRotation());
-        program.SetUniform("kAlphaCutoff",          GetAlphaCutoff());
+        program.SetUniform("kParticleStartColor",   GetUniformValue<kParticleStartColor>());
+        program.SetUniform("kParticleEndColor",     GetUniformValue<kParticleEndColor>());
+        program.SetUniform("kParticleMidColor",     GetUniformValue<kParticleMidColor>());
+        program.SetUniform("kParticleBaseRotation", GetUniformValue<kParticleBaseRotation>());
+        program.SetUniform("kAlphaCutoff",          GetUniformValue<kAlphaCutoff>());
     }
     else if (mType == Type::BasicLight)
     {
-        program.SetUniform("kAmbientColor", GetAmbientColor());
-        program.SetUniform("kDiffuseColor", GetDiffuseColor());
-        program.SetUniform("kSpecularColor", GetSpecularColor());
-        program.SetUniform("kSpecularExponent", GetSpecularExponent());
+        program.SetUniform("kAmbientColor",     GetUniformValue<kAmbientColor>());
+        program.SetUniform("kDiffuseColor",     GetUniformValue<kDiffuseColor>());
+        program.SetUniform("kSpecularColor",    GetUniformValue<kSpecularColor>());
+        program.SetUniform("kSpecularExponent", GetUniformValue<kSpecularExponent>());
     }
 
     else if (mType == Type::Custom)
@@ -719,7 +755,7 @@ bool MaterialClass::FromJson(const data::Reader& data, unsigned flags)
         ParticleEffect effect;
         ok &= data.Read("particle_action", &effect);
         if (effect != ParticleEffect::None)
-            SetParticleEffect(effect);
+            SetUniform<kParticleEffect>(effect);
     }
 
     if (data.HasValue("static"))
@@ -813,10 +849,10 @@ bool MaterialClass::FromJson(const data::Reader& data, unsigned flags)
         base::Contains(mUniforms, "kParticleEndColor") &&
         !base::Contains(mUniforms, "kParticleMidColor"))
     {
-        const auto& start_color = GetParticleStartColor();
-        const auto& end_color = GetParticleEndColor();
+        const auto& start_color = GetUniformValue<kParticleStartColor>();
+        const auto& end_color = GetUniformValue<kParticleEndColor>();
         const auto& mid_color = start_color * 0.5f + end_color * 0.5f;
-        SetParticleMidColor(mid_color);
+        SetUniform<kParticleMidColor>(mid_color);
         DEBUG("Fabricated particle material mid-way color value. [name='%1']", mName);
     }
 
@@ -914,7 +950,7 @@ void MaterialClass::BeginPacking(TexturePacker* packer) const
                 // static and not be changed by the game by default at runtime.
 
                 // velocity check
-                const auto& velocity = GetTextureVelocity();
+                const auto& velocity = GetUniformValue<kTextureVelocity>();
                 const bool has_x_velocity = !math::equals(0.0f, velocity.x, eps);
                 const bool has_y_velocity = !math::equals(0.0f, velocity.y, eps);
                 if (has_x_velocity && (mTextureWrapX == TextureWrapping::Repeat ||
@@ -925,7 +961,7 @@ void MaterialClass::BeginPacking(TexturePacker* packer) const
                     can_combine = false;
 
                 // scale check
-                const auto& scale = GetTextureScale();
+                const auto& scale = GetUniformValue<kTextureScale>();
                 if (scale.x > 1.0f && (mTextureWrapX == TextureWrapping::Repeat ||
                                        mTextureWrapX == TextureWrapping::Mirror))
                     can_combine = false;
@@ -1480,7 +1516,7 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
 
     if (state.draw_category == DrawCategory::Particles)
     {
-        const auto effect = static_cast<int>(GetParticleEffect());
+        const auto effect = static_cast<int>(GetUniformValue<kParticleEffect>());
         program.SetUniform("kParticleEffect", effect);
     }
 
@@ -1495,11 +1531,11 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     }
     if (!IsStatic())
     {
-        SetUniform("kBaseColor",         state.uniforms, GetBaseColor(), program);
-        SetUniform("kTextureScale",      state.uniforms, GetTextureScale(), program);
-        SetUniform("kTextureVelocity",   state.uniforms, GetTextureVelocity(), program);
-        SetUniform("kTextureRotation",   state.uniforms, GetTextureRotation(), program);
-        SetUniform("kAlphaCutoff",       state.uniforms, GetAlphaCutoff(), program);
+        SetUniform("kBaseColor",         state.uniforms, GetUniformValue<kBaseColor>(),       program);
+        SetUniform("kTextureScale",      state.uniforms, GetUniformValue<kTextureScale>(),    program);
+        SetUniform("kTextureVelocity",   state.uniforms, GetUniformValue<kTextureVelocity>(), program);
+        SetUniform("kTextureRotation",   state.uniforms, GetUniformValue<kTextureRotation>(), program);
+        SetUniform("kAlphaCutoff",       state.uniforms, GetUniformValue<kAlphaCutoff>(),     program);
     }
     return true;
 }
@@ -1557,7 +1593,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
 
     if (state.draw_category == DrawCategory::Particles)
     {
-        const auto effect = static_cast<int>(GetParticleEffect());
+        const auto effect = static_cast<int>(GetUniformValue<kParticleEffect>());
         program.SetUniform("kParticleEffect", effect);
     }
 
@@ -1572,11 +1608,11 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     }
     if (!IsStatic())
     {
-        SetUniform("kBaseColor",         state.uniforms, GetBaseColor(), program);
-        SetUniform("kTextureScale",      state.uniforms, GetTextureScale(), program);
-        SetUniform("kTextureVelocity",   state.uniforms, GetTextureVelocity(), program);
-        SetUniform("kTextureRotation",   state.uniforms, GetTextureRotation(), program);
-        SetUniform("kAlphaCutoff",       state.uniforms, GetAlphaCutoff(), program);
+        SetUniform("kBaseColor",         state.uniforms, GetUniformValue<kBaseColor>(),       program);
+        SetUniform("kTextureScale",      state.uniforms, GetUniformValue<kTextureScale>(),    program);
+        SetUniform("kTextureVelocity",   state.uniforms, GetUniformValue<kTextureVelocity>(), program);
+        SetUniform("kTextureRotation",   state.uniforms, GetUniformValue<kTextureRotation>(), program);
+        SetUniform("kAlphaCutoff",       state.uniforms, GetUniformValue<kAlphaCutoff>(),     program);
     }
     return true;
 }
@@ -1624,11 +1660,11 @@ bool MaterialClass::ApplyTilemapDynamicState(const State& state, Device& device,
 
     if (!IsStatic())
     {
-        SetUniform("kBaseColor",         state.uniforms, GetBaseColor(), program);
-        SetUniform("kAlphaCutoff",       state.uniforms, GetAlphaCutoff(), program);
-        SetUniform("kTileSize",          state.uniforms, GetTileSize(), program);
-        SetUniform("kTileOffset",        state.uniforms, GetTileOffset(), program);
-        SetUniform("kTilePadding",       state.uniforms, GetTilePadding(), program);
+        SetUniform("kBaseColor",         state.uniforms, GetUniformValue<kBaseColor>(),   program);
+        SetUniform("kAlphaCutoff",       state.uniforms, GetUniformValue<kAlphaCutoff>(), program);
+        SetUniform("kTileSize",          state.uniforms, GetUniformValue<kTileSize>(),    program);
+        SetUniform("kTileOffset",        state.uniforms, GetUniformValue<kTileOffset>(),  program);
+        SetUniform("kTilePadding",       state.uniforms, GetUniformValue<kTilePadding>(), program);
     }
 
     if (state.draw_category == DrawCategory::Basic)
@@ -1674,13 +1710,13 @@ bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device
 
     if (!IsStatic())
     {
-        SetUniform("kParticleStartColor",   state.uniforms, GetParticleStartColor(), program);
-        SetUniform("kParticleEndColor",     state.uniforms, GetParticleEndColor(), program);
-        SetUniform("kParticleMidColor",     state.uniforms, GetParticleMidColor(), program);
-        SetUniform("kParticleBaseRotation", state.uniforms, GetParticleBaseRotation(), program);
-        SetUniform("kAlphaCutoff",          state.uniforms, GetAlphaCutoff(), program);
+        SetUniform("kParticleStartColor",   state.uniforms, GetUniformValue<kParticleStartColor>(), program);
+        SetUniform("kParticleEndColor",     state.uniforms, GetUniformValue<kParticleEndColor>(), program);
+        SetUniform("kParticleMidColor",     state.uniforms, GetUniformValue<kParticleMidColor>(), program);
+        SetUniform("kParticleBaseRotation", state.uniforms, GetUniformValue<kParticleBaseRotation>(), program);
+        SetUniform("kAlphaCutoff",          state.uniforms, GetUniformValue<kAlphaCutoff>(), program);
     }
-    SetUniform("kParticleRotation", state.uniforms, static_cast<unsigned>(GetParticleRotation()), program);
+    SetUniform("kParticleRotation", state.uniforms, static_cast<unsigned>(GetUniformValue<kParticleRotation>()), program);
 
     return true;
 }
@@ -1689,10 +1725,10 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
 {
     if (!IsStatic())
     {
-        SetUniform("kAmbientColor",     state.uniforms, GetAmbientColor(), program);
-        SetUniform("kDiffuseColor",     state.uniforms, GetDiffuseColor(), program);
-        SetUniform("kSpecularColor",    state.uniforms, GetSpecularColor(), program);
-        SetUniform("kSpecularExponent", state.uniforms, GetSpecularExponent(), program);
+        SetUniform("kAmbientColor",     state.uniforms, GetUniformValue<kAmbientColor>(), program);
+        SetUniform("kDiffuseColor",     state.uniforms, GetUniformValue<kDiffuseColor>(), program);
+        SetUniform("kSpecularColor",    state.uniforms, GetUniformValue<kSpecularColor>(), program);
+        SetUniform("kSpecularExponent", state.uniforms, GetUniformValue<kSpecularExponent>(), program);
     }
 
     struct Map {
@@ -1832,10 +1868,10 @@ MaterialClass CreateMaterialClassFromColor(const Color4f& top_left,
                                            const Color4f& bottom_right)
 {
     MaterialClass material(MaterialClass::Type::Gradient, std::string(""));
-    material.SetColor(top_left, GradientClass::ColorIndex::GradientColor0);
-    material.SetColor(top_right, GradientClass::ColorIndex::GradientColor1);
-    material.SetColor(bottom_left, GradientClass::ColorIndex::GradientColor2);
-    material.SetColor(bottom_right, GradientClass::ColorIndex::GradientColor3);
+    material.SetUniform<kGradientColor0>(top_left);
+    material.SetUniform<kGradientColor1>(top_right);
+    material.SetUniform<kGradientColor2>(bottom_left);
+    material.SetUniform<kGradientColor3>(bottom_right);
     return material;
 }
 
@@ -1844,7 +1880,7 @@ MaterialClass CreateMaterialClassFromColor(const Color4f& color)
     const auto alpha = color.Alpha();
 
     MaterialClass material(MaterialClass::Type::Color, std::string(""));
-    material.SetBaseColor(color);
+    material.SetUniform<kBaseColor>(color);
     material.SetSurfaceType(alpha == 1.0f
         ? MaterialClass::SurfaceType::Opaque
         : MaterialClass::SurfaceType::Transparent);

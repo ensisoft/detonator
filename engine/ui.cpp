@@ -371,13 +371,13 @@ UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary*, const Loader
     material->SetName("UIGradient");
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetFlag(gfx::MaterialClass::Flags::EnableSDF, true);
-    material->SetColor(mColorMap[0], ColorIndex::GradientColor0);
-    material->SetColor(mColorMap[1], ColorIndex::GradientColor1);
-    material->SetColor(mColorMap[2], ColorIndex::GradientColor2);
-    material->SetColor(mColorMap[3], ColorIndex::GradientColor3);
-    material->SetGradientType(mGradient);
-    material->SetGradientGamma(mGamma);
-    material->SetGradientWeight(mWeight);
+    material->SetUniform<gfx::kGradientColor0>(mColorMap[0]);
+    material->SetUniform<gfx::kGradientColor1>(mColorMap[1]);
+    material->SetUniform<gfx::kGradientColor2>(mColorMap[2]);
+    material->SetUniform<gfx::kGradientColor3>(mColorMap[3]);
+    material->SetUniform<gfx::kGradientType>(mGradient);
+    material->SetUniform<gfx::kGradientGamma>(mGamma);
+    material->SetUniform<gfx::kGradientWeight>(mWeight);
     return material;
 }
 bool UIGradient::FromJson(const nlohmann::json& json, const UIColorPalette& palette)
@@ -412,7 +412,7 @@ UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary*, const Loader*) 
     auto material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetFlag(gfx::MaterialClass::Flags::EnableSDF, true);
-    material->SetBaseColor(mColor);
+    material->SetUniform<gfx::kBaseColor>(mColor);
     material->SetName("UIColor");
     return material;
 }

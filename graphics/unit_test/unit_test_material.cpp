@@ -146,23 +146,20 @@ void unit_test_material_class()
 
     gfx::ColorClass klass(gfx::MaterialClass::Type::Color);
     klass.SetStatic(false);
-    klass.SetColor(gfx::Color::HotPink,     gfx::MaterialClass::ColorIndex::BaseColor);
-    klass.SetColor(gfx::Color::DarkBlue,    gfx::MaterialClass::ColorIndex::GradientColor0);
-    klass.SetColor(gfx::Color::DarkGreen,   gfx::MaterialClass::ColorIndex::GradientColor1);
-    klass.SetColor(gfx::Color::DarkMagenta, gfx::MaterialClass::ColorIndex::GradientColor2);
-    klass.SetColor(gfx::Color::DarkGray,    gfx::MaterialClass::ColorIndex::GradientColor3);
+    klass.SetUniform<gfx::kBaseColor>(gfx::Color::HotPink);
+    klass.SetUniform<gfx::kGradientColor0>(gfx::Color::DarkBlue);
+    klass.SetUniform<gfx::kGradientColor1>(gfx::Color::DarkGreen);
+    klass.SetUniform<gfx::kGradientColor2>(gfx::Color::DarkMagenta);
+    klass.SetUniform<gfx::kGradientColor3>(gfx::Color::DarkGray);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
     klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
     klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
     klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
     klass.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
     klass.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
-    klass.SetTextureScaleX(2.0f);
-    klass.SetTextureScaleY(3.0f);
-    klass.SetTextureVelocityX(4.0f);
-    klass.SetTextureVelocityY(5.0f);
-    klass.SetTextureVelocityZ(-1.0f);
-    klass.SetTextureRotation(2.5f);
+    klass.SetUniform<gfx::kTextureScale>({2.0f, 3.0f});
+    klass.SetUniform<gfx::kTextureVelocity>({4.0f, 5.0f, -1.0f});
+    klass.SetUniform<gfx::kTextureRotation>(2.5f);
     klass.SetName("my material");
     klass.SetShaderUri("my_shader.glsl");
     klass.SetShaderSrc("some shader source");
@@ -172,10 +169,10 @@ void unit_test_material_class()
     klass.SetUniform("vec3", glm::vec3(1.0f, 2.0f, 3.0f));
     klass.SetUniform("vec4", glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
     klass.SetUniform("color", gfx::Color::DarkCyan);
-    klass.SetAmbientColor(gfx::Color::Red);
-    klass.SetDiffuseColor(gfx::Color::Green);
-    klass.SetSpecularColor(gfx::Color::Blue);
-    klass.SetSpecularExponent(128.0f);
+    klass.SetUniform<gfx::kAmbientColor>(gfx::Color::Red);
+    klass.SetUniform<gfx::kDiffuseColor>(gfx::Color::Green);
+    klass.SetUniform<gfx::kSpecularColor>(gfx::Color::Blue);
+    klass.SetUniform<gfx::kSpecularExponent>(128.0f);
 
     klass.SetActiveTextureMap("123abc");
 
@@ -201,27 +198,24 @@ void unit_test_material_class()
         TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId()   == klass.GetId());
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
-        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::BaseColor)   == gfx::Color::HotPink);
-        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::GradientColor0) == gfx::Color::DarkBlue);
-        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::GradientColor1) == gfx::Color::DarkGreen);
-        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::GradientColor2) == gfx::Color::DarkMagenta);
-        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::GradientColor3) == gfx::Color::DarkGray);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kBaseColor>()        == gfx::Color::HotPink);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kGradientColor0>()   == gfx::Color::DarkBlue);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kGradientColor1>()   == gfx::Color::DarkGreen);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kGradientColor2>()   == gfx::Color::DarkMagenta);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kGradientColor3>()   == gfx::Color::DarkGray);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kTextureScale>()     == glm::vec2(2.0f, 3.0f));
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kTextureVelocity>()  == glm::vec3(4.0f, 5.0f, -1.0f));
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kTextureRotation>()  == real::float32(2.5f));
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kAmbientColor>()     == gfx::Color::Red);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kDiffuseColor>()     == gfx::Color::Green);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kSpecularColor>()    == gfx::Color::Blue);
+        TEST_REQUIRE(ret->GetUniformValue<gfx::kSpecularExponent>() == 128.0f);
         TEST_REQUIRE(ret->IsStatic()            == false);
         TEST_REQUIRE(ret->GetSurfaceType()      == gfx::MaterialClass::SurfaceType::Emissive);
         TEST_REQUIRE(ret->GetTextureMinFilter() == gfx::MaterialClass::MinTextureFilter::Trilinear);
         TEST_REQUIRE(ret->GetTextureMagFilter() == gfx::MaterialClass::MagTextureFilter::Nearest);
         TEST_REQUIRE(ret->GetTextureWrapX()     == gfx::MaterialClass::TextureWrapping::Repeat);
         TEST_REQUIRE(ret->GetTextureWrapY()     == gfx::MaterialClass::TextureWrapping::Repeat);
-        TEST_REQUIRE(ret->GetTextureScaleX()    == real::float32(2.0f));
-        TEST_REQUIRE(ret->GetTextureScaleY()    == real::float32(3.0f));
-        TEST_REQUIRE(ret->GetTextureVelocityX() == real::float32(4.0f));
-        TEST_REQUIRE(ret->GetTextureVelocityY() == real::float32(5.0f));
-        TEST_REQUIRE(ret->GetTextureVelocityZ() == real::float32(-1.0f));
-        TEST_REQUIRE(ret->GetTextureRotation()  == real::float32(2.5f));
-        TEST_REQUIRE(ret->GetAmbientColor()     == gfx::Color::Red);
-        TEST_REQUIRE(ret->GetDiffuseColor()     == gfx::Color::Green);
-        TEST_REQUIRE(ret->GetSpecularColor()    == gfx::Color::Blue);
-        TEST_REQUIRE(ret->GetSpecularExponent() == 128.0f);
         TEST_REQUIRE(ret->GetShaderUri() == "my_shader.glsl");
         TEST_REQUIRE(ret->GetShaderSrc() == "some shader source");
         TEST_REQUIRE(ret->GetActiveTextureMap() == "123abc");
@@ -261,8 +255,7 @@ void unit_test_material_class()
         TEST_REQUIRE(clone->GetHash() != klass.GetHash());
         TEST_REQUIRE(clone->GetId() != klass.GetId());
         TEST_REQUIRE(clone->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
-        TEST_REQUIRE(clone->GetBaseColor() == gfx::Color::HotPink);
-        TEST_REQUIRE(clone->GetColor(gfx::MaterialClass::ColorIndex::BaseColor) == gfx::Color::HotPink);
+        TEST_REQUIRE(clone->GetUniformValue<gfx::kBaseColor>() == gfx::Color::HotPink);
         TEST_REQUIRE(clone->IsStatic() == false);
     }
 }

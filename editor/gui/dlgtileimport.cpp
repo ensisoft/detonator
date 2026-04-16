@@ -256,7 +256,7 @@ void DlgTileImport::on_btnImport_clicked()
         klass.SetName(GetValue(mUI.spriteName));
         klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, premul_alpha_blend);
         if (const auto& cutoff = mUI.alphaCutoff->GetValue())
-            klass.SetAlphaCutoff(cutoff.value());
+            klass.SetUniform<gfx::kAlphaCutoff>(cutoff.value());
 
         unsigned texture_map_index = 0;
         for (size_t index=0; index<mPack.images.size(); ++index)
@@ -336,7 +336,7 @@ void DlgTileImport::on_btnImport_clicked()
 
             if (const auto& cutoff = mUI.alphaCutoff->GetValue())
             {
-                klass.SetAlphaCutoff(cutoff.value());
+                klass.SetUniform<gfx::kAlphaCutoff>(cutoff.value());
             }
 
             ASSERT(klass.GetNumTextureMaps());
@@ -383,7 +383,7 @@ void DlgTileImport::on_btnImport_clicked()
 
         if (const auto& cutoff = mUI.alphaCutoff->GetValue())
         {
-            klass.SetAlphaCutoff(cutoff.value());
+            klass.SetUniform<gfx::kAlphaCutoff>(cutoff.value());
         }
 
         for (const auto& [texture_map_name, image_list] : mapping)
@@ -975,7 +975,7 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
 
     static auto selection_material_class = gfx::CreateMaterialClassFromImage(res::AcceptIcon);
     selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
+    selection_material_class.SetUniform<gfx::kBaseColor>(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     static auto selection_material = gfx::MaterialInstance(selection_material_class);
 
     for (size_t index=0; index<mPack.images.size(); ++index)

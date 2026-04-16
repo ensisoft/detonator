@@ -46,14 +46,12 @@ gfx::MaterialInstance MakeMaterial(const gfx::Color4f& color)
         klass = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
 
     const auto alpha = color.Alpha();
-    klass->SetBaseColor(color);
+    klass->SetUniform<gfx::kBaseColor>(color);
     klass->SetSurfaceType(alpha == 1.0f
                        ? gfx::MaterialClass::SurfaceType::Opaque
                        : gfx::MaterialClass::SurfaceType::Transparent);
     return gfx::MaterialInstance(klass);
 }
-
-
 
 } // namespace
 
@@ -178,10 +176,10 @@ bool DrawTextureSource(Painter& painter, const FRect& rect, const MaterialClass&
 {
     MaterialClass temp(gfx::MaterialClass::Type::Texture);
     temp.SetSurfaceType(material.GetSurfaceType());
-    temp.SetBaseColor(material.GetBaseColor());
+    temp.SetUniform<kBaseColor>(material.GetUniformValue<kBaseColor>());
+    temp.SetUniform<kAlphaCutoff>(material.GetUniformValue<kAlphaCutoff>());
     temp.SetTextureMinFilter(material.GetTextureMinFilter());
     temp.SetTextureMagFilter(material.GetTextureMagFilter());
-    temp.SetAlphaCutoff(material.GetAlphaCutoff());
     temp.AddTexture(texture_source.Copy());
     temp.SetTextureRect(texture_rect);
     return FillRect(painter, rect, MaterialInstance(std::move(temp)));
@@ -330,7 +328,7 @@ bool DrawSDFShapeOutline(const Painter& painter, const FRect& rect,
     if (!klass)
         klass = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
 
-    klass->SetBaseColor(color);
+    klass->SetUniform<kBaseColor>(color);
     klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     klass->SetFlag(MaterialClass::Flags::EnableSDF, true); // enable SDF shader support
 

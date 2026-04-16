@@ -34,6 +34,7 @@
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
 #include "graphics/material_class.h"
+#include "graphics/material_class_api.h"
 
 namespace {
     constexpr unsigned BoxMargin = 20;
@@ -506,9 +507,9 @@ DlgTileChooser::DlgTileChooser(QWidget* parent, std::shared_ptr<const gfx::Mater
         if (texture_width == 0 || texture_height == 0)
             return;
 
-        const auto tile_offset = mMaterial->GetTileOffset();
-        const auto tile_padding = mMaterial->GetTilePadding();
-        const auto tile_size = mMaterial->GetTileSize();
+        const auto tile_offset  = mMaterial->GetUniformValue<gfx::kTileOffset>();
+        const auto tile_padding = mMaterial->GetUniformValue<gfx::kTilePadding>();
+        const auto tile_size    = mMaterial->GetUniformValue<gfx::kTileSize>();
 
         const auto tile_width  = tile_size.x + 2 * tile_padding.x;
         const auto tile_height = tile_size.y + 2 * tile_padding.y;

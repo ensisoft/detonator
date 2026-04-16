@@ -43,6 +43,7 @@
 #include "graphics/paint_context.h"
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
+#include "graphics/material_class_api.h"
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
@@ -1241,10 +1242,10 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
 
     if (type == gfx::MaterialClass::Type::Gradient)
     {
-        other.SetColor(gfx::Color::DarkRed, gfx::MaterialClass::ColorIndex::GradientColor0);
-        other.SetColor(gfx::Color::DarkGreen, gfx::MaterialClass::ColorIndex::GradientColor1);
-        other.SetColor(gfx::Color::DarkBlue, gfx::MaterialClass::ColorIndex::GradientColor2);
-        other.SetColor(gfx::Color::DarkYellow, gfx::MaterialClass::ColorIndex::GradientColor3);
+        other.SetUniform<gfx::kGradientColor0>(gfx::Color::DarkRed);
+        other.SetUniform<gfx::kGradientColor1>(gfx::Color::DarkGreen);
+        other.SetUniform<gfx::kGradientColor2>(gfx::Color::DarkBlue);
+        other.SetUniform<gfx::kGradientColor3>(gfx::Color::DarkYellow);
         mUI.gradientMap->Collapse(false);
     }
     else if (type == gfx::MaterialClass::Type::Texture)
@@ -1725,11 +1726,12 @@ void MaterialWidget::AddNewTextureSrcFromFile()
                     if (ReadImagePack(json_file, &pack))
                     {
                         ImagePack::Tilemap map;
-                        mMaterial->SetTileSize(glm::vec2(pack.tilemap.value_or(map).tile_width,
+                        const gfx::TilemapMaterialClass tilemap(*mMaterial);
+                        tilemap.SetTileSize(glm::vec2(pack.tilemap.value_or(map).tile_width,
                                                          pack.tilemap.value_or(map).tile_height));
-                        mMaterial->SetTileOffset(glm::vec2(pack.tilemap.value_or(map).xoffset,
+                        tilemap.SetTileOffset(glm::vec2(pack.tilemap.value_or(map).xoffset,
                                                            pack.tilemap.value_or(map).yoffset));
-                        mMaterial->SetTilePadding(glm::vec2(pack.padding, pack.padding));
+                        tilemap.SetTilePadding(glm::vec2(pack.padding, pack.padding));
                     }
                     const QFileInfo info(image);
                     image_file = info.absoluteFilePath();
@@ -2444,7 +2446,7 @@ void MaterialWidget::SetMaterialProperties()
     mMaterial->SetFlag(gfx::MaterialClass::Flags::Bloom, GetValue(mUI.chkEnableBloom));
     mMaterial->SetFlag(gfx::MaterialClass::Flags::EnableSDF, GetValue(mUI.chkEnableSDF));
     mMaterial->SetSurfaceType(GetValue(mUI.surfaceType));
-    mMaterial->SetParticleEffect(GetValue(mUI.particleAction));
+    mMaterial->SetUniform<gfx::kParticleEffect>(GetValue(mUI.particleAction));
     mMaterial->SetTextureMinFilter(GetValue(mUI.textureMinFilter));
     mMaterial->SetTextureMagFilter(GetValue(mUI.textureMagFilter));
     mMaterial->SetTextureWrapX(GetValue(mUI.textureWrapX));
@@ -2478,9 +2480,10 @@ void MaterialWidget::SetMaterialProperties()
         tile_padding.x = GetValue(mUI.tileLeftPadding);
         tile_padding.y = GetValue(mUI.tileTopPadding);
 
-        mMaterial->SetTileSize(tile_size);
-        mMaterial->SetTileOffset(tile_offset);
-        mMaterial->SetTilePadding(tile_padding);
+        gfx::TilemapMaterialClass tilemap(*mMaterial);
+        tilemap.SetTileSize(tile_size);
+        tilemap.SetTileOffset(tile_offset);
+        tilemap.SetTilePadding(tile_padding);
     }
     else
     {
@@ -2491,11 +2494,12 @@ void MaterialWidget::SetMaterialProperties()
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
     {
-        mMaterial->SetParticleStartColor(GetValue(mUI.particleStartColor));
-        mMaterial->SetParticleMidColor(GetValue(mUI.particleMidColor));
-        mMaterial->SetParticleEndColor(GetValue(mUI.particleEndColor));
-        mMaterial->SetParticleBaseRotation(qDegreesToRadians((float)GetValue(mUI.particleBaseRotation)));
-        mMaterial->SetParticleRotation(GetValue(mUI.particleRotationMode));
+        const gfx::Particle2DMaterialClass particle(*mMaterial);
+        particle.SetParticleStartColor(GetValue(mUI.particleStartColor));
+        particle.SetParticleMidColor(GetValue(mUI.particleMidColor));
+        particle.SetParticleEndColor(GetValue(mUI.particleEndColor));
+        particle.SetParticleBaseRotation(qDegreesToRadians((float)GetValue(mUI.particleBaseRotation)));
+        particle.SetParticleRotation(GetValue(mUI.particleRotationMode));
     }
     else
     {
@@ -2508,10 +2512,11 @@ void MaterialWidget::SetMaterialProperties()
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
     {
-        mMaterial->SetDiffuseColor(GetValue(mUI.diffuseColor));
-        mMaterial->SetAmbientColor(GetValue(mUI.ambientColor));
-        mMaterial->SetSpecularColor(GetValue(mUI.specularColor));
-        mMaterial->SetSpecularExponent(GetValue(mUI.specularExponent));
+        const gfx::BasicLightMaterialClass light(*mMaterial);
+        light.SetDiffuseColor(GetValue(mUI.diffuseColor));
+        light.SetAmbientColor(GetValue(mUI.ambientColor));
+        light.SetSpecularColor(GetValue(mUI.specularColor));
+        light.SetSpecularExponent(GetValue(mUI.specularExponent));
     }
     else
     {
@@ -2523,12 +2528,8 @@ void MaterialWidget::SetMaterialProperties()
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
     {
-        mMaterial->SetGradientType(GetValue(mUI.cmbGradientType));
-        mMaterial->SetGradientGamma(GetValue(mUI.gradientGamma));
-
-        const float gamma = GetValue(mUI.gradientGamma);
-        if (math::equals(gamma, 1.0f))
-            mMaterial->DeleteUniform("kGradientGamma");
+        mMaterial->SetUniform<gfx::kGradientType>(GetValue(mUI.cmbGradientType));
+        mMaterial->SetUniform<gfx::kGradientGamma>(GetValue(mUI.gradientGamma));
     }
 
     // set of known uniforms if they differ from the defaults.
@@ -2536,56 +2537,33 @@ void MaterialWidget::SetMaterialProperties()
     // of the material class. refactor these names away and the
     // default values away
 
-
     if (auto cutoff = mUI.alphaCutoff->GetValue())
-        mMaterial->SetAlphaCutoff(cutoff.value());
-    else mMaterial->DeleteUniform("kAlphaCutoff");
+        mMaterial->SetUniform<gfx::kAlphaCutoff>(cutoff.value());
+    else mMaterial->DeleteUniform<gfx::kAlphaCutoff>();
 
     glm::vec2 texture_scale;
     texture_scale.x = GetValue(mUI.textureScaleX);
     texture_scale.y = GetValue(mUI.textureScaleY);
-    if (math::equals(texture_scale, glm::vec2(1.0f, 1.0f)))
-        mMaterial->DeleteUniform("kTextureScale");
-    else mMaterial->SetTextureScale(texture_scale);
+    mMaterial->SetUniform<gfx::kTextureScale>(texture_scale);
 
-    if (math::equals((float)GetValue(mUI.textureRotation), 0.0f))
-        mMaterial->DeleteUniform("kTextureRotation");
-    else mMaterial->SetTextureRotation(qDegreesToRadians((float)GetValue(mUI.textureRotation)));
+    mMaterial->SetUniform<gfx::kTextureRotation>(qDegreesToRadians((float)GetValue(mUI.textureRotation)));
 
     glm::vec2 linear_texture_velocity;
     linear_texture_velocity.x = GetValue(mUI.textureVelocityX);
     linear_texture_velocity.y = GetValue(mUI.textureVelocityY);
     const float angular_texture_velocity = qDegreesToRadians((float)GetValue(mUI.textureVelocityZ));
-    if (math::equals(glm::vec3(linear_texture_velocity, angular_texture_velocity), glm::vec3(0.0f, 0.0f, 0.0f)))
-        mMaterial->DeleteUniform("kTextureVelocity");
-    else mMaterial->SetTextureVelocity(linear_texture_velocity, angular_texture_velocity);
+    mMaterial->SetUniform<gfx::kTextureVelocity>(glm::vec3 { linear_texture_velocity, angular_texture_velocity});
 
-    if (Equals(GetValue(mUI.colorMap0), gfx::Color::White))
-        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor0));
-    else mMaterial->SetColor(GetValue(mUI.colorMap0), gfx::MaterialClass::ColorIndex::GradientColor0);
-
-    if (Equals(GetValue(mUI.colorMap1), gfx::Color::White))
-        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor1));
-    else mMaterial->SetColor(GetValue(mUI.colorMap1), gfx::MaterialClass::ColorIndex::GradientColor1);
-
-    if (Equals(GetValue(mUI.colorMap2), gfx::Color::White))
-        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor2));
-    else mMaterial->SetColor(GetValue(mUI.colorMap2), gfx::MaterialClass::ColorIndex::GradientColor2);
-
-    if (Equals(GetValue(mUI.colorMap3), gfx::Color::White))
-        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor3));
-    else mMaterial->SetColor(GetValue(mUI.colorMap3), gfx::MaterialClass::ColorIndex::GradientColor3);
-
-    if (Equals(GetValue(mUI.baseColor), gfx::Color::White))
-        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::BaseColor));
-    else mMaterial->SetColor(GetValue(mUI.baseColor), gfx::MaterialClass::ColorIndex::BaseColor);
+    mMaterial->SetUniform<gfx::kGradientColor0>(GetValue(mUI.colorMap0));
+    mMaterial->SetUniform<gfx::kGradientColor1>(GetValue(mUI.colorMap1));
+    mMaterial->SetUniform<gfx::kGradientColor2>(GetValue(mUI.colorMap2));
+    mMaterial->SetUniform<gfx::kGradientColor3>(GetValue(mUI.colorMap3));
+    mMaterial->SetUniform<gfx::kBaseColor>(GetValue(mUI.baseColor));
 
     glm::vec2 gradient_offset;
     gradient_offset.x = GetNormalizedValue(mUI.gradientOffsetX);
     gradient_offset.y = GetNormalizedValue(mUI.gradientOffsetY);
-    if (math::equals(gradient_offset, glm::vec2(0.5f, 0.5f)))
-        mMaterial->DeleteUniform("kGradientWeight");
-    else mMaterial->SetGradientWeight(gradient_offset);
+    mMaterial->SetUniform<gfx::kGradientWeight>(gradient_offset);
 
     for (auto* widget : mUniforms)
     {
@@ -2727,48 +2705,65 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.chkBlendFrames,       mMaterial->BlendFrames());
 
     // base
-    SetValue(mUI.alphaCutoff,          mMaterial->GetAlphaCutoff());
-    SetValue(mUI.baseColor,            mMaterial->GetBaseColor());
+    SetValue(mUI.alphaCutoff,          mMaterial->GetUniformValue<gfx::kAlphaCutoff>());
+    SetValue(mUI.baseColor,            mMaterial->GetUniformValue<gfx::kBaseColor>());
+    SetValue(mUI.particleAction,       mMaterial->GetUniformValue<gfx::kParticleEffect>());
 
     // tilemap
-    SetValue(mUI.tileWidth,            mMaterial->GetTileSize().x);
-    SetValue(mUI.tileHeight,           mMaterial->GetTileSize().y);
-    SetValue(mUI.tileLeftOffset,       mMaterial->GetTileOffset().x);
-    SetValue(mUI.tileTopOffset,        mMaterial->GetTileOffset().y);
-    SetValue(mUI.tileLeftPadding,      mMaterial->GetTilePadding().x);
-    SetValue(mUI.tileTopPadding,       mMaterial->GetTilePadding().y);
+    {
+        const gfx::TilemapMaterialClass tilemap(*mMaterial);
+        SetValue(mUI.tileWidth,            tilemap.GetTileSize().x);
+        SetValue(mUI.tileHeight,           tilemap.GetTileSize().y);
+        SetValue(mUI.tileLeftOffset,       tilemap.GetTileOffset().x);
+        SetValue(mUI.tileTopOffset,        tilemap.GetTileOffset().y);
+        SetValue(mUI.tileLeftPadding,      tilemap.GetTilePadding().x);
+        SetValue(mUI.tileTopPadding,       tilemap.GetTilePadding().y);
+    }
 
     // particle
-    SetValue(mUI.particleAction,       mMaterial->GetParticleEffect());
-    SetValue(mUI.particleRotationMode, mMaterial->GetParticleRotation());
-    SetValue(mUI.particleStartColor,   mMaterial->GetParticleStartColor());
-    SetValue(mUI.particleMidColor,     mMaterial->GetParticleMidColor());
-    SetValue(mUI.particleEndColor,     mMaterial->GetParticleEndColor());
-    SetValue(mUI.particleBaseRotation, qRadiansToDegrees(mMaterial->GetParticleBaseRotation()));
+    {
+        const gfx::Particle2DMaterialClass particle(*mMaterial);
+        SetValue(mUI.particleRotationMode, particle.GetParticleRotation());
+        SetValue(mUI.particleStartColor,   particle.GetParticleStartColor());
+        SetValue(mUI.particleMidColor,     particle.GetParticleMidColor());
+        SetValue(mUI.particleEndColor,     particle.GetParticleEndColor());
+        SetValue(mUI.particleBaseRotation, qRadiansToDegrees(particle.GetParticleBaseRotation()));
+    }
 
     // gradient values.
-    const auto& offset = mMaterial->GetGradientWeight();
-    SetValue(mUI.colorMap0, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor0));
-    SetValue(mUI.colorMap1, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor1));
-    SetValue(mUI.colorMap2, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor2));
-    SetValue(mUI.colorMap3, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor3));
-    SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
-    SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
-    SetValue(mUI.cmbGradientType, mMaterial->GetGradientType());
-    SetValue(mUI.gradientGamma, mMaterial->GetGradientGamma());
+    {
+        const gfx::GradientMaterialClass gradient(*mMaterial);
+        SetValue(mUI.colorMap0, gradient.GetGradientColor0());
+        SetValue(mUI.colorMap1, gradient.GetGradientColor1());
+        SetValue(mUI.colorMap2, gradient.GetGradientColor2());
+        SetValue(mUI.colorMap3, gradient.GetGradientColor3());
+
+        const auto& offset = gradient.GetGradientWeight();
+        SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
+        SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
+
+        SetValue(mUI.cmbGradientType, gradient.GetGradientType());
+        SetValue(mUI.gradientGamma,   gradient.GetGradientGamma());
+    }
 
     /// basic light material
-    SetValue(mUI.ambientColor, mMaterial->GetAmbientColor());
-    SetValue(mUI.diffuseColor, mMaterial->GetDiffuseColor());
-    SetValue(mUI.specularColor, mMaterial->GetSpecularColor());
-    SetValue(mUI.specularExponent, mMaterial->GetSpecularExponent());
+    {
+        const gfx::BasicLightMaterialClass light(*mMaterial);
+        SetValue(mUI.ambientColor,     light.GetAmbientColor());
+        SetValue(mUI.diffuseColor,     light.GetDiffuseColor());
+        SetValue(mUI.specularColor,    light.GetSpecularColor());
+        SetValue(mUI.specularExponent, light.GetSpecularExponent());
+    }
 
-    SetValue(mUI.textureScaleX,        mMaterial->GetTextureScaleX());
-    SetValue(mUI.textureScaleY,        mMaterial->GetTextureScaleY());
-    SetValue(mUI.textureRotation,      qRadiansToDegrees(mMaterial->GetTextureRotation()));
-    SetValue(mUI.textureVelocityX,     mMaterial->GetTextureVelocityX());
-    SetValue(mUI.textureVelocityY,     mMaterial->GetTextureVelocityY());
-    SetValue(mUI.textureVelocityZ,     qRadiansToDegrees(mMaterial->GetTextureVelocityZ()));
+    const auto texture_velocity = mMaterial->GetUniformValue<gfx::kTextureVelocity>();
+    const auto texture_scale    = mMaterial->GetUniformValue<gfx::kTextureScale>();
+    const auto texture_rotation = mMaterial->GetUniformValue<gfx::kTextureRotation>();
+    SetValue(mUI.textureScaleX,        texture_scale.x);
+    SetValue(mUI.textureScaleY,        texture_scale.y);
+    SetValue(mUI.textureRotation,      qRadiansToDegrees(texture_rotation));
+    SetValue(mUI.textureVelocityX,     texture_velocity.x);
+    SetValue(mUI.textureVelocityY,     texture_velocity.y);
+    SetValue(mUI.textureVelocityZ,     qRadiansToDegrees(texture_velocity.z));
     SetValue(mUI.textureMinFilter,     mMaterial->GetTextureMinFilter());
     SetValue(mUI.textureMagFilter,     mMaterial->GetTextureMagFilter());
     SetValue(mUI.textureWrapX,         mMaterial->GetTextureWrapX());
@@ -2777,8 +2772,8 @@ void MaterialWidget::ShowMaterialProperties()
     ClearList(mUI.activeMap);
 
     mUI.alphaCutoff->ClearValue();
-    if (mMaterial->HasUniform("kAlphaCutoff"))
-        SetValue(mUI.alphaCutoff, mMaterial->GetAlphaCutoff());
+    if (mMaterial->HasUniform<gfx::kAlphaCutoff>())
+        SetValue(mUI.alphaCutoff, mMaterial->GetUniformValue<gfx::kAlphaCutoff>());
 
     SetVisible(mUI.lblTileIndex, false);
     SetVisible(mUI.kTileIndex,   false);
@@ -3211,7 +3206,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
     {
-        const auto tile_size = mMaterial->GetTileSize();
+        const gfx::TilemapMaterialClass tilemap(*mMaterial);
+        const auto tile_size = tilemap.GetTileSize();
         const auto tile_width = tile_size.x > 0.0f ? (unsigned)tile_size.x : 0u;
         const auto tile_height = tile_size.y > 0.0f ? (unsigned)tile_size.y : 0u;
         if (tile_width && tile_height)
@@ -3466,8 +3462,8 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
 {
     if (mDefaultsPossible)
     {
-        mMaterial->DeleteUniform("kAlphaCutoff");
-        mMaterial->SetBaseColor(gfx::Color::White);
+        mMaterial->DeleteUniform<gfx::kAlphaCutoff>();
+        mMaterial->SetUniform<gfx::kBaseColor>(gfx::Color::White);
 
         SetValue(mUI.cmbModel, ListItemId("_rect"));
         SetValue(mUI.cmbScene, PreviewScene::FlatColor);
@@ -3496,10 +3492,10 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
             map->SetTextureSource(7, gfx::LoadTextureFromFile("app://textures/materials/sprite/frame-8.png"));
 
             mMaterial->SetBlendFrames(false);
-            mMaterial->SetAlphaCutoff(0.4f);
             mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
+            mMaterial->SetUniform<gfx::kAlphaCutoff>(0.4f);
+            mMaterial->SetUniform<gfx::kBaseColor>(gfx::Color::White);
             mMaterial->SetActiveTextureMap(map->GetId());
-            mMaterial->SetBaseColor(gfx::Color::White);
 
             mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
         }
@@ -3517,7 +3513,7 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
 
             mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
             mMaterial->SetActiveTextureMap(map->GetId());
-            mMaterial->SetBaseColor(gfx::Color::White);
+            mMaterial->SetUniform<gfx::kBaseColor>(gfx::Color::White);
 
             mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
         }
@@ -3534,12 +3530,13 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
             map->SetNumTextures(1);
             map->SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/materials/tilesheet/forest/tiles_2048_256x256.png"));
 
-            mMaterial->SetTileSize(glm::vec2 { 256.0f, 256.0f });
-            mMaterial->SetTilePadding(glm::vec2 { 2.0f, 2.0f });
-            mMaterial->SetTileOffset(glm::vec2 { 0.0f, 0.0f });
-            mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
-            mMaterial->SetBaseColor(gfx::Color::White);
-            mMaterial->SetActiveTextureMap(map->GetId());
+            const gfx::TilemapMaterialClass tilemap(*mMaterial);
+            tilemap.SetTileSize(glm::vec2 { 256.0f, 256.0f });
+            tilemap.SetTilePadding(glm::vec2 { 2.0f, 2.0f });
+            tilemap.SetTileOffset(glm::vec2 { 0.0f, 0.0f });
+            tilemap.SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
+            tilemap.SetBaseColor(gfx::Color::White);
+            tilemap.SetActiveTextureMap(map->GetId());
 
             SetValue(mUI.kTileIndex, 0);
             mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
@@ -3589,9 +3586,9 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
             map->SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/particles/symbol_02.png"));
 
             mMaterial->SetActiveTextureMap(map->GetId());
-            mMaterial->SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::ParticleStartColor);
-            mMaterial->SetColor(gfx::Color::Green, gfx::MaterialClass::ColorIndex::ParticleMidColor);
-            mMaterial->SetColor(gfx::Color::Blue, gfx::MaterialClass::ColorIndex::ParticleEndColor);
+            mMaterial->SetUniform<gfx::kParticleStartColor>(gfx::Color::Red);
+            mMaterial->SetUniform<gfx::kParticleMidColor>(gfx::Color::Green);
+            mMaterial->SetUniform<gfx::kParticleEndColor>(gfx::Color::Blue);
             mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
         }
         else if (type == gfx::MaterialClass::Type::Custom)

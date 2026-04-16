@@ -116,7 +116,7 @@ void unit_test_ipc_send_recv()
         std::size_t hash = 0;
         {
             gfx::ColorClass test(gfx::MaterialClass::Type::Color);
-            test.SetBaseColor(gfx::Color::DarkGreen);
+            test.SetUniform<gfx::kBaseColor>(gfx::Color::DarkGreen);
             test.SetName("foobar1234");
             id = test.GetId();
             hash = test.GetHash();

@@ -1123,7 +1123,7 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
 
     static auto selection_material_class = gfx::CreateMaterialClassFromImage(res::AcceptIcon);
     selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
+    selection_material_class.SetUniform<gfx::kBaseColor>(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     static auto selection_material = gfx::MaterialInstance(selection_material_class);
 
     const bool draw_rects = GetValue(mUI.chkShowRects);

@@ -226,7 +226,7 @@ bool ModelImporter::LoadModel(const app::AnyString& file)
         auto material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture);
         material->SetName(name);
         material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
-        material->SetBaseColor(gfx::Color::White);
+        material->SetUniform<gfx::kBaseColor>(gfx::Color::White);
 
         if (!diffuse_map.IsEmpty())
         {

@@ -125,47 +125,48 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
         type == gfx::MaterialClass::Type::Tilemap)
     {
         mColorUniforms.push_back({"Base color",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::BaseColor),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::BaseColor)});
+            gfx::kBaseColor::uniform_name,
+            material->GetUniformValue<gfx::kBaseColor>()});
     }
     else if (type == gfx::MaterialClass::Type::Gradient)
     {
         mColorUniforms.push_back({"Gradient color 0",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor0),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::GradientColor0)});
+           gfx::kGradientColor0::uniform_name,
+            material->GetUniformValue<gfx::kGradientColor0>()});
         mColorUniforms.push_back({"Gradient color 1",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor1),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::GradientColor1)});
+           gfx::kGradientColor1::uniform_name,
+            material->GetUniformValue<gfx::kGradientColor1>()});
         mColorUniforms.push_back({"Gradient color 2",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor2),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::GradientColor2)});
+            gfx::kGradientColor2::uniform_name,
+            material->GetUniformValue<gfx::kGradientColor2>()});
         mColorUniforms.push_back({"Gradient color 3",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor3),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::GradientColor3)});
+            gfx::kGradientColor3::uniform_name,
+            material->GetUniformValue<gfx::kGradientColor3>()});
+
     }
     else if (type == gfx::MaterialClass::Type::BasicLight)
     {
         mColorUniforms.push_back({"Ambient color",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::AmbientColor),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::AmbientColor)});
+            gfx::kAmbientColor::uniform_name,
+            material->GetUniformValue<gfx::kAmbientColor>()});
         mColorUniforms.push_back({"Diffuse color",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::DiffuseColor),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::DiffuseColor)});
+            gfx::kDiffuseColor::uniform_name,
+            material->GetUniformValue<gfx::kDiffuseColor>()});
         mColorUniforms.push_back({"Specular color",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::SpecularColor),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::SpecularColor)});
+            gfx::kSpecularColor::uniform_name,
+            material->GetUniformValue<gfx::kSpecularColor>()});
     }
     else if (type == gfx::MaterialClass::Type::Particle2D)
     {
         mColorUniforms.push_back({"Start color",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleStartColor),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::ParticleStartColor)});
+            gfx::kParticleStartColor::uniform_name,
+            material->GetUniformValue<gfx::kParticleStartColor>()});
         mColorUniforms.push_back({"Mid color",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleMidColor),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::ParticleMidColor)});
+            gfx::kParticleMidColor::uniform_name,
+            material->GetUniformValue<gfx::kParticleMidColor>()});
         mColorUniforms.push_back({"End color",
-                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleEndColor),
-                                  material->GetColor(gfx::MaterialClass::ColorIndex::ParticleEndColor)});
+            gfx::kParticleEndColor::uniform_name,
+            material->GetUniformValue<gfx::kParticleEndColor>()});
     }
 
     if (type != gfx::MaterialClass::Type::Custom)
@@ -326,7 +327,7 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                 SetVisible(mUI.textureScaleX,        true);
                 SetVisible(mUI.textureScaleY,        true);
                 SetVisible(mUI.btnResetTextureScale, true);
-                mTextureScale = material->GetTextureScale();
+                mTextureScale = material->GetUniformValue<gfx::kTextureScale>();
 
                 if (const auto* ptr = mItem->GetMaterialParamValue<glm::vec2>("kTextureScale"))
                 {
