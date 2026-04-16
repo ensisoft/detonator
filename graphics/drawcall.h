@@ -26,6 +26,7 @@
 #include <variant>
 #include <memory>
 #include <string>
+#include <cstddef>
 
 #include "graphics/enum.h"
 #include "graphics/vertex.h"
@@ -70,21 +71,45 @@ namespace gfx
     class DrawCall
     {
     public:
+        // Address a sub-mesh in the geometry data by drawing only certain
+        // geometry draw commands.
+        struct SubMesh {
+            // which draw geometry draw command starts drawing the submesh.
+            size_t draw_cmd_start = 0;
+            // how many draw commands does this sub-mesh have. the default (max)
+            // indicates all the commands that follow.
+            size_t draw_cmd_count = std::numeric_limits<size_t>::max();
+        };
+
         DrawCall() = default;
-        explicit DrawCall(const SimpleDraw& draw)
+
+        DrawCall(SimpleDraw draw, SubMesh sub_mesh) noexcept
+            : mValue(draw)
+            , mInstanced(false)
+            , mSubMesh(sub_mesh)
+        {}
+        explicit DrawCall(SimpleDraw draw) noexcept
             : mValue(draw)
             , mInstanced(false)
         {}
-        explicit DrawCall(const GenericInstancedDraw& draw)
-            : mValue(draw)
+        explicit DrawCall(GenericInstancedDraw draw) noexcept
+            : mValue(std::move(draw))
             , mInstanced(true)
         {}
-        explicit DrawCall(GenericInstancedDraw&& draw)
-            : mValue(draw)
-            , mInstanced(true)
+        DrawCall(GenericInstancedDraw draw, SubMesh sub_mesh) noexcept
+          : mValue(std::move(draw))
+          , mInstanced(true)
+          , mSubMesh(sub_mesh)
         {}
-        explicit DrawCall(std::shared_ptr<const DrawCallBase> draw)
-            : mValue(draw)
+
+        explicit DrawCall(std::shared_ptr<const DrawCallBase> draw) noexcept
+          : mValue(draw)
+        {
+            mInstanced = draw->IsInstanced();
+        }
+        DrawCall(std::shared_ptr<const DrawCallBase> draw, SubMesh sub_mesh) noexcept
+          : mValue(draw)
+          , mSubMesh(sub_mesh)
         {
             mInstanced = draw->IsInstanced();
         }
@@ -115,10 +140,29 @@ namespace gfx
             mInstanced = true;
             return *this;
         }
+
+        DrawCall& operator=(SubMesh submesh)
+        {
+            mSubMesh = submesh;
+            return *this;
+        }
+
+        const SubMesh& GetSubMesh() const noexcept
+        {
+            return mSubMesh;
+        }
+
+        static DrawCall MakeSimpleSubMeshDraw(SubMesh submesh) noexcept
+        {
+            return DrawCall {
+                SimpleDraw{}, submesh
+            };
+        }
     private:
         using DrawCallPtr= std::shared_ptr<const DrawCallBase>;
         std::variant<SimpleDraw, GenericInstancedDraw, DrawCallPtr> mValue;
         bool mInstanced = false;
+        SubMesh mSubMesh;
     };
 
     template<typename T>

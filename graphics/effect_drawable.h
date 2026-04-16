@@ -77,7 +77,6 @@ namespace gfx
         bool IsAlive() const override;
         Type GetType() const override;
         void Execute(const Environment& env, const Command& command) override;
-        DrawCmd GetDrawCmd() const override;
 
         static void SetRandomGenerator(std::function<float(float min, float max)> random_function);
 

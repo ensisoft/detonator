@@ -115,11 +115,6 @@ namespace gfx
             const glm::mat4* world_matrix = nullptr;
         };
 
-        struct DrawCmd {
-            size_t draw_cmd_start = 0;
-            size_t draw_cmd_count = std::numeric_limits<size_t>::max();
-        };
-
         virtual ~DrawableClass() = default;
         // Get the drawable spatial mode.
         virtual SpatialMode GetSpatialMode() const = 0;

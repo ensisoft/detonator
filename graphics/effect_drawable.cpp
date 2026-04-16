@@ -174,10 +174,6 @@ void EffectDrawable::Execute(const Environment& env, const Command& command)
     }
     mDrawable->Execute(env, command);
 }
-Drawable::DrawCmd EffectDrawable::GetDrawCmd() const
-{
-    return mDrawable->GetDrawCmd();
-}
 
 // static
 void EffectDrawable::SetRandomGenerator(std::function<float(float min, float max)> rf)

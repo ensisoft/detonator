@@ -60,7 +60,6 @@ namespace gfx
         using Environment           = DrawableClass::Environment;
         using Type                  = DrawableClass::Type;
         using Usage                 = DrawableClass::Usage;
-        using DrawCmd               = DrawableClass::DrawCmd;
         using DrawPrimitive         = DrawableClass::DrawPrimitive;
         using MeshType              = DrawableClass::MeshType;
         using MeshFlags             = DrawableClass::MeshFlags;
@@ -129,13 +128,6 @@ namespace gfx
         // or trigger its function such as particle emission.
         virtual void Execute(const Environment& env, const Command& command)
         {}
-
-        virtual DrawCmd  GetDrawCmd() const
-        {
-            // return the defaults which will then draw every draw
-            // low level command associated with the geometry itself.
-            return {};
-        }
 
         // Get the drawable class instance if any. Warning, this may be null for
         // drawable objects that aren't based on any drawable class!

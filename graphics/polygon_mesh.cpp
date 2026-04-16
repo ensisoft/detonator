@@ -287,12 +287,12 @@ ShaderSource PolygonMeshClass::GetShader(bool instancing, bool effects, const De
     return src;
 }
 
-void PolygonMeshClass::SetSubMeshDrawCmd(const std::string& key, const DrawCmd& cmd)
+void PolygonMeshClass::SetSubMeshDrawCmd(const std::string& key, const SubMeshDrawCmd& cmd)
 {
     mSubMeshes[key] = cmd;
 }
 
-const PolygonMeshClass::DrawCmd* PolygonMeshClass::GetSubMeshDrawCmd(const std::string& key) const noexcept
+const PolygonMeshClass::SubMeshDrawCmd* PolygonMeshClass::GetSubMeshDrawCmd(const std::string& key) const noexcept
 {
     return base::SafeFind(mSubMeshes, key);
 }
@@ -589,7 +589,7 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
         ok &= chunk->Read("key", &key);
         ok &= chunk->Read("count", &count);
         ok &= chunk->Read("start", &start);
-        DrawCmd cmd;
+        SubMeshDrawCmd cmd;
         cmd.draw_cmd_count = count;
         cmd.draw_cmd_start = start;
         mSubMeshes[key] = cmd;
@@ -748,46 +748,26 @@ PolygonMeshInstance::PolygonMeshInstance(PolygonMeshClass&& klass)
     : PolygonMeshInstance(std::make_shared<PolygonMeshClass>(std::move(klass)))
 {}
 
-PolygonMeshInstance::PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass, std::string sub_mesh_key)
-    : PolygonMeshInstance(std::move(klass))
+DrawCall PolygonMeshInstance::CreateSubMeshDraw(size_t draw_cmd_index) const
 {
-    mSubMeshKey = std::move(sub_mesh_key);
+    const auto cmd_count = mClass->GetDrawCmdCount();
+    ASSERT(draw_cmd_index < cmd_count);
+
+    DrawCall::SubMesh submesh;
+    submesh.draw_cmd_start = draw_cmd_index;
+    submesh.draw_cmd_count = 1;
+    return DrawCall::MakeSimpleSubMeshDraw(submesh);
 }
-PolygonMeshInstance::PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass, std::size_t sub_mesh_index)
-    : PolygonMeshInstance(std::move(klass))
+
+DrawCall PolygonMeshInstance::CreateSubMeshDraw(const std::string& submesh_key) const
 {
-    mSubMeshKey = sub_mesh_index;
-}
+    const auto* cmd = mClass->GetSubMeshDrawCmd(submesh_key);
+    ASSERT(cmd);
 
-PolygonMeshInstance::PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key)
-    : PolygonMeshInstance(std::make_shared<PolygonMeshClass>(klass), std::move(sub_mesh_key))
-{}
-
-PolygonMeshInstance::PolygonMeshInstance(const PolygonMeshClass& klass, std::size_t sub_mesh_index)
-    : PolygonMeshInstance(std::make_shared<PolygonMeshClass>(klass), sub_mesh_index)
-{}
-
-PolygonMeshInstance::PolygonMeshInstance(PolygonMeshClass&& klass, std::string sub_mesh_key)
-    : PolygonMeshInstance(std::make_shared<PolygonMeshClass>(std::move(klass)), std::move(sub_mesh_key))
-{}
-
-PolygonMeshInstance::PolygonMeshInstance(PolygonMeshClass&& klass, std::size_t sub_mesh_index)
-    : PolygonMeshInstance(std::make_shared<PolygonMeshClass>(std::move(klass)), sub_mesh_index)
-{}
-
-std::string PolygonMeshInstance::GetSubMeshKey() const
-{
-    if (const auto* ptr = std::get_if<std::string>(&mSubMeshKey))
-        return *ptr;
-
-    return "";
-}
-std::size_t PolygonMeshInstance::GetSubMeshIndex() const noexcept
-{
-    if (const auto* ptr = std::get_if<std::size_t>(&mSubMeshKey))
-        return *ptr;
-
-    return 0;
+    DrawCall::SubMesh submesh;
+    submesh.draw_cmd_start = cmd->draw_cmd_start;
+    submesh.draw_cmd_count = cmd->draw_cmd_count;
+    return DrawCall::MakeSimpleSubMeshDraw(submesh);
 }
 
 bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
@@ -1092,38 +1072,6 @@ void PolygonMeshInstance::Update(const Environment& env, float dt)
 
     if (mEffect)
         mEffect->Update(dt);
-}
-
-Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
-{
-    if (const auto* ptr = std::get_if<std::monostate>(&mSubMeshKey))
-        return Drawable::GetDrawCmd();
-
-    if (const auto* key_name = std::get_if<std::string>(&mSubMeshKey))
-    {
-        if (const auto* cmd = mClass->GetSubMeshDrawCmd(*key_name))
-            return *cmd;
-
-        GFX_PAINT_ERROR("No such polygon-mesh sub-mesh. [mesh='%1', key='%2']",
-                mClass->GetName(), *key_name);
-    }
-    else if (const auto* key_index = std::get_if<std::size_t>(&mSubMeshKey))
-    {
-        const auto cmd_count = mClass->GetDrawCmdCount();
-        if (*key_index < cmd_count)
-        {
-            DrawCmd ret;
-            ret.draw_cmd_start = *key_index;
-            ret.draw_cmd_count = 1;
-            return ret;
-        }
-
-        GFX_PAINT_ERROR("No such polygon-mesh sub-mesh. [mesh='%1', index=%2]",
-                mClass->GetName(), *key_index);
-
-    } else BUG("Bug on sub-mesh key type.");
-
-    return {0, 0};
 }
 
 SpatialMode PolygonMeshInstance::GetSpatialMode() const

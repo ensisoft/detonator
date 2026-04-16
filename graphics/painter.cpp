@@ -180,7 +180,7 @@ bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const
         // The drawable provides the draw command which identifies the
         // sequence of more primitive draw commands set on the geometry
         // in order to render only a part of the geometry. i.e. a sub-mesh.
-        const auto& cmd_params = draw.drawable->GetDrawCmd();
+        const auto& cmd_params = draw.draw_call.GetSubMesh();
 
         // modify the depth testing state since this is per draw right now.
         mDevice->ModifyState(draw.depth_test, Device::StateName::DepthTest);

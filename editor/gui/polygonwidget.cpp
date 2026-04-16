@@ -2357,20 +2357,22 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
 
         if (mSelectedCommand != InvalidIndex)
         {
-            instance.SetSubMeshIndex(mSelectedCommand);
             if (mState.vertex_alpha == 1.0f)
                 color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 0.3f));
             else color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 1.0f));
-            painter.Draw(instance, view, gfx::MaterialInstance(color), state);
+
+            painter.Draw(instance, view, gfx::MaterialInstance(color), state,
+                instance.CreateSubMeshDraw(mSelectedCommand));
         }
         if (mSelectedVertex != InvalidIndex)
         {
-            const auto draw_cmd_index = mState.builder->FindDrawCommand(mSelectedVertex);
-            instance.SetSubMeshIndex(draw_cmd_index);
             if (mState.vertex_alpha == 1.0f)
                 color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 0.3f));
             else color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 1.0f));
-            painter.Draw(instance, view, gfx::MaterialInstance(color), state);
+
+            const auto draw_cmd_index = mState.builder->FindDrawCommand(mSelectedVertex);
+            painter.Draw(instance, view, gfx::MaterialInstance(color), state,
+                instance.CreateSubMeshDraw(draw_cmd_index));
         }
     }
 
