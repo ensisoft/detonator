@@ -254,7 +254,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
         const int percent = 100 * val;
         text = base::FormatString(mText, percent);
     }
-    ps.painter->DrawStaticText(ps.widgetId, p, text, 1.0f, mOrientation, WidgetTextPosition::Left);
+    ps.painter->DrawStaticText(ps.widgetId, p, text, 1.0f, mOrientation, WidgetTextPosition::Right);
 
     p.hovered = paint.hovered;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -757,7 +757,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.style_materials  = ps.style_materials;
     ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight, WidgetOrientation::Horizontal, WidgetTextPosition::Left);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight, WidgetOrientation::Horizontal, WidgetTextPosition::Right);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -796,7 +796,7 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
 
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal, WidgetTextPosition::Left);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal, WidgetTextPosition::Right);
     if (p.focused)
         ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
