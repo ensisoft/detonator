@@ -73,6 +73,7 @@ namespace gui
         app::ModelImporter mImporter;
 
         struct DrawablePair {
+            std::string submesh_key;
             std::unique_ptr<gfx::PolygonMeshInstance> drawable;
             std::unique_ptr<gfx::MaterialInstance> material;
         };

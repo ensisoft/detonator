@@ -1120,8 +1120,8 @@ void unit_test_polygon_data()
     cmds[0].count  = 5;
     klass.SetCommandBuffer(std::move(cmds));
 
-    klass.SetSubMeshDrawCmd("foo", gfx::DrawableClass::DrawCmd { 0, 10 });
-    klass.SetSubMeshDrawCmd("bar", gfx::DrawableClass::DrawCmd { 10, 1 });
+    klass.SetSubMeshDrawCmd("foo", gfx::PolygonMeshClass::SubMeshDrawCmd { 0, 10 });
+    klass.SetSubMeshDrawCmd("bar", gfx::PolygonMeshClass::SubMeshDrawCmd { 10, 1 });
 
     // to/from json
     {

@@ -27,12 +27,14 @@
 #include <optional>
 #include <unordered_map>
 #include <memory>
+#include <limits>
 #include <cstddef>
 
 #include "base/utility.h"
 #include "graphics/drawable.h"
 #include "graphics/vertex.h"
 #include "graphics/types.h"
+#include "graphics/drawcall.h"
 
 namespace gfx
 {
@@ -57,6 +59,11 @@ namespace gfx
             // This mesh type is used for rendering isometric 2D tiles
             // with perceptual 3D support for things such as lights.
             Isometric2DRenderMesh
+        };
+
+        struct SubMeshDrawCmd {
+            size_t draw_cmd_start = 0;
+            size_t draw_cmd_count = std::numeric_limits<size_t>::max();
         };
 
         explicit PolygonMeshClass(std::string id = base::RandomString(10),
@@ -142,10 +149,10 @@ namespace gfx
 
         bool Construct(GeometryBuffer* buffer) const;
 
-        void SetSubMeshDrawCmd(const std::string& key, const DrawCmd& cmd);
+        void SetSubMeshDrawCmd(const std::string& key, const SubMeshDrawCmd& cmd);
 
         // Get a sub-mesh draw command based on the sub-mesh key (name).
-        const DrawCmd* GetSubMeshDrawCmd(const std::string& key) const noexcept;
+        const SubMeshDrawCmd* GetSubMeshDrawCmd(const std::string& key) const noexcept;
 
         void ClearContent();
 
@@ -185,7 +192,7 @@ namespace gfx
         };
         std::optional<InlineData> mData;
         MeshType mMeshType = MeshType::Simple2DRenderMesh;
-        std::unordered_map<std::string, DrawCmd> mSubMeshes;
+        std::unordered_map<std::string, SubMeshDrawCmd> mSubMeshes;
         bool mStatic = true;
         bool mDoubleSided = false;
     };
@@ -220,12 +227,6 @@ namespace gfx
         explicit PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass) noexcept;
         explicit PolygonMeshInstance(const PolygonMeshClass& klass);
         explicit PolygonMeshInstance(PolygonMeshClass&& klass);
-        PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass, std::string sub_mesh_key);
-        PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass, std::size_t sub_mesh_index);
-        PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key);
-        PolygonMeshInstance(const PolygonMeshClass& klass, std::size_t sub_mesh_index);
-        PolygonMeshInstance(PolygonMeshClass&& klass, std::string sub_mesh_key);
-        PolygonMeshInstance(PolygonMeshClass&& klass, std::size_t sub_mesh_index);
 
         auto IsStatic() const noexcept
         { return mClass->IsStatic(); }
@@ -234,19 +235,15 @@ namespace gfx
         auto GetMeshType() const noexcept
         { return mClass->GetMeshType(); }
 
-        std::string GetSubMeshKey() const;
-        std::size_t GetSubMeshIndex() const noexcept;
-
-        void SetSubMeshKey(std::string key) noexcept
-        { mSubMeshKey = std::move(key); }
-        void SetSubMeshIndex(std::size_t index) noexcept
-        { mSubMeshKey = index; }
         void SetTime(double time) noexcept
         { mTime = time; }
         void SetRandomValue(float value) noexcept
         { mRandom = value; }
         void SetPerceptualGeometry(const Perceptual3DGeometry& geometry) noexcept
         { mPerceptualGeometry = geometry; }
+
+        DrawCall CreateSubMeshDraw(size_t draw_cmd_index) const;
+        DrawCall CreateSubMeshDraw(const std::string& submesh_key) const;
 
         void SetFlag(Flags flag, bool on_off) noexcept override
         {
@@ -267,7 +264,6 @@ namespace gfx
         DrawGeometryBuffer Construct(const Environment& env) const override;
         void Update(const Environment& env, float dt) override;
 
-        DrawCmd GetDrawCmd() const override;
         SpatialMode GetSpatialMode() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         Type GetType() const override;
@@ -281,7 +277,6 @@ namespace gfx
     private:
         std::shared_ptr<const PolygonMeshClass> mClass;
         std::optional<Perceptual3DGeometry> mPerceptualGeometry;
-        std::variant<std::monostate, std::string, std::size_t> mSubMeshKey;
         std::optional<DrawableEffect> mEffect;
         std::uint32_t mFlags = 0;
         double mTime = 0.0;

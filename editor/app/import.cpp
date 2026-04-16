@@ -389,7 +389,7 @@ bool ModelImporter::LoadModel(const app::AnyString& file)
         // that define the whole polygon mesh. In other words the mesh
         // has all the data and all the draw commands and a sub-mesh
         // will only draw a sub-sequence of those draw commands.
-        gfx::DrawableClass::DrawCmd cmd;
+        gfx::PolygonMeshClass::SubMeshDrawCmd cmd;
         cmd.draw_cmd_count = draw.draw_cmd_count;
         cmd.draw_cmd_start = draw.draw_cmd_start;
         mesh->SetSubMeshDrawCmd(app::ToUtf8(draw.name), cmd);
