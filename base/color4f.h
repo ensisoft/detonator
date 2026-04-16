@@ -40,7 +40,7 @@ namespace base
 
         // construct a Color4f object from floating point
         // channel values in the range of [0.0f, 1.0f]
-        Color4f(const float red, const float green, const float blue, const float alpha = 1.0f) noexcept
+        constexpr Color4f(const float red, const float green, const float blue, const float alpha = 1.0f) noexcept
         {
             mRed   = math::clamp(0.0f, 1.0f, red);
             mGreen = math::clamp(0.0f, 1.0f, green);
@@ -50,7 +50,7 @@ namespace base
 
         // construct a new color object from integers
         // each integer gets clamped to [0, 255] range
-        Color4f(const int red, const int green, const int blue, const int alpha = 255) noexcept
+        constexpr Color4f(const int red, const int green, const int blue, const int alpha = 255) noexcept
         {
             // note: we take integers (as opposed to some
             // type unsigned) so that the simple syntax of
@@ -63,17 +63,17 @@ namespace base
             mAlpha = math::clamp(0, 255, alpha) / 255.0f;
         }
 
-        explicit Color4f(const int rgb, const int alpha = 255)  noexcept
+        constexpr explicit Color4f(const int rgb, const int alpha = 255)  noexcept
            : Color4f(rgb, rgb , rgb, alpha)
         {}
 
-        explicit Color4f(const float rgb, const float alpha = 1.0f) noexcept
+        constexpr explicit Color4f(const float rgb, const float alpha = 1.0f) noexcept
           : Color4f(rgb, rgb, rgb, alpha)
         {}
 
         // not explicit on purpose to allow for implicit
         // conversion from Color enum.
-        Color4f(const Color c, const float alpha = 1.0f) noexcept
+        constexpr Color4f(const Color c, const float alpha = 1.0f) noexcept
         {
             const auto weights = detail::RGBColorWeights(c);
             mRed   = weights.r;
@@ -138,7 +138,7 @@ namespace base
         const auto g = color.Green();
         const auto b = color.Blue();
         const auto a = color.Alpha();
-        return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+        return {r * scalar, g * scalar, b * scalar, a * scalar};
     }
     inline Color4f operator/(const Color4f& color, float scalar) noexcept
     {
@@ -148,7 +148,7 @@ namespace base
         const auto a = color.Alpha();
 
         scalar = 1.0f / scalar;
-        return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+        return {r * scalar, g * scalar, b * scalar, a * scalar};
     }
 
     inline Color4f operator*(float scalar, const Color4f& color) noexcept
@@ -157,7 +157,7 @@ namespace base
         const auto g = color.Green();
         const auto b = color.Blue();
         const auto a = color.Alpha();
-        return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+        return {r * scalar, g * scalar, b * scalar, a * scalar};
     }
     inline Color4f operator/(float scalar, const Color4f& color) noexcept
     {
@@ -167,24 +167,26 @@ namespace base
         const auto a = color.Alpha();
 
         scalar = 1.0f/ scalar;
-        return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+        return {r * scalar, g * scalar, b * scalar, a * scalar};
     }
 
     inline Color4f operator+(const Color4f& lhs, const Color4f& rhs) noexcept
     {
-        return Color4f(lhs.Red() + rhs.Red(),
-                       lhs.Green() + rhs.Green(),
-                       lhs.Blue() + rhs.Blue(),
-                       lhs.Alpha() + rhs.Alpha());
-
+        return {
+            lhs.Red() + rhs.Red(),
+            lhs.Green() + rhs.Green(),
+            lhs.Blue() + rhs.Blue(),
+            lhs.Alpha() + rhs.Alpha()
+        };
     }
     inline Color4f operator/(const Color4f& lhs, const Color4f& rhs) noexcept
     {
-        return Color4f(lhs.Red() / rhs.Red(),
-                       lhs.Green() / rhs.Green(),
-                       lhs.Blue() / rhs.Blue(),
-                       lhs.Alpha() / rhs.Alpha());
-
+        return {
+            lhs.Red() / rhs.Red(),
+            lhs.Green() / rhs.Green(),
+            lhs.Blue() / rhs.Blue(),
+            lhs.Alpha() / rhs.Alpha()
+        };
     }
 
     inline bool Equals(const Color4f& lhs, const Color4f& rhs, float epsilon = 0.0001) noexcept

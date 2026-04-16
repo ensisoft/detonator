@@ -81,7 +81,7 @@ namespace math
         return detail::signum(x, std::is_signed<T>());
     }
 
-    template<typename T>
+    template<typename T> constexpr
     T wrap(T min, T max, T val) noexcept
     {
         if (val > max)
@@ -91,7 +91,7 @@ namespace math
         return val;
     }
 
-    template<typename T>
+    template<typename T> constexpr
     T clamp(T min, T max, T val) noexcept
     {
         if (val < min)
@@ -101,7 +101,7 @@ namespace math
         return val;
     }
 
-    template<typename T>
+    template<typename T> constexpr
     T lerp(const T& y0, const T& y1, float t) noexcept
     {
         return (1.0f - t) * y0 + t * y1;
