@@ -358,7 +358,7 @@ void GfxWindow::PaintGL()
             //material->SetBaseColor(gfx::Color4f(0x14, 0x8c, 0xD2, 0xFF));
         }
         const auto& palette = QApplication::palette();
-        material->SetBaseColor(ToGfx(palette.color(QPalette::Highlight)));
+        material->SetUniform<gfx::kBaseColor>(ToGfx(palette.color(QPalette::Highlight)));
 
         gfx::Rectangle rect(gfx::SimpleShapeStyle::Outline);
         gfx::Transform transform;
@@ -380,8 +380,8 @@ void GfxWindow::PaintGL()
             crosshair_cursor_material = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromImage(res::CrosshairCursor));
             crosshair_cursor_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         }
-        arrow_cursor_material->SetBaseColor(mArrowCursorColor.value_or(gfx::Color::Silver));
-        crosshair_cursor_material->SetBaseColor(mCrossHairCursorColor.value_or(gfx::Color::HotPink));
+        arrow_cursor_material->SetUniform<gfx::kBaseColor>(mArrowCursorColor.value_or(gfx::Color::Silver));
+        crosshair_cursor_material->SetUniform<gfx::kBaseColor>(mCrossHairCursorColor.value_or(gfx::Color::HotPink));
 
         const auto& mickey = mapFromGlobal(QCursor::pos());
         const auto width = this->width();

@@ -1050,11 +1050,11 @@ void MigrateResource(gfx::MaterialClass& material, ResourceMigrationLog* log, un
             const auto kRotationValue = material.GetUniformValue("kRotation", 0.0f);
             const auto kRotate = material.GetUniformValue("kRotate", 0);
 
-            material.SetParticleStartColor(kStartColor);
-            material.SetParticleEndColor(kEndColor);
-            material.SetParticleBaseRotation(kRotationValue);
+            material.SetUniform<gfx::kParticleStartColor>(kStartColor);
+            material.SetUniform<gfx::kParticleEndColor>(kEndColor);
+            material.SetUniform<gfx::kParticleBaseRotation>(kRotationValue);
             if (kRotate > 0) // 0 = OFF = maps to the same value.
-                material.SetParticleRotation(static_cast<gfx::MaterialClass::ParticleRotation>(kRotate+1));
+                material.SetUniform<gfx::kParticleRotation>(static_cast<gfx::MaterialClass::ParticleRotation>(kRotate+1));
 
             log->WriteLog(material, "Material", "Migrated to built-in Particle2D material and shader.");
             if (material.GetNumTextureMaps())
@@ -1078,10 +1078,10 @@ void MigrateResource(gfx::MaterialClass& material, ResourceMigrationLog* log, un
         {
             if (!material.HasUniform("kParticleMidColor"))
             {
-                const auto& start_color = material.GetParticleStartColor();
-                const auto& end_color = material.GetParticleEndColor();
+                const auto& start_color = material.GetUniformValue<gfx::kParticleStartColor>();
+                const auto& end_color = material.GetUniformValue<gfx::kParticleEndColor>();
                 const auto& mid_color = start_color*0.5f + end_color *0.5f;
-                material.SetParticleMidColor(mid_color);
+                material.SetUniform<gfx::kParticleMidColor>(mid_color);
                 log->WriteLog(material, "Material", "Added new particle mid-way color value.");
             }
         }

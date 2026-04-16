@@ -56,7 +56,7 @@ namespace {
 
         demo_material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Sprite);
         demo_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        demo_material->SetBaseColor(gfx::Color4f(gfx::Color::LightGray, 0.46f));
+        demo_material->SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::LightGray, 0.46f));
         demo_material->SetNumTextureMaps(1);
         demo_material->SetActiveTextureMap(map.GetId());
         demo_material->SetTextureMap(0, std::move(map));
@@ -158,10 +158,10 @@ void SpriteWidget::PaintTexture(const gfx::MaterialClass *klass, gfx::Painter &p
 
         gfx::MaterialClass temp(gfx::MaterialClass::Type::Texture);
         temp.SetSurfaceType(mMaterial->GetSurfaceType());
-        temp.SetBaseColor(mMaterial->GetBaseColor());
         temp.SetTextureMinFilter(mMaterial->GetTextureMinFilter());
         temp.SetTextureMagFilter(mMaterial->GetTextureMagFilter());
-        temp.SetAlphaCutoff(mMaterial->GetAlphaCutoff());
+        temp.SetUniform<gfx::kBaseColor>(mMaterial->GetUniformValue<gfx::kBaseColor>());
+        temp.SetUniform<gfx::kAlphaCutoff>(mMaterial->GetUniformValue<gfx::kAlphaCutoff>());
         temp.AddTexture(texture_src->Copy());
         temp.SetTextureRect(texture_rect);
         gfx::FillRect(painter, rect, gfx::MaterialInstance(std::move(temp)));
@@ -270,8 +270,8 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
         temp.SetSurfaceType(material->GetSurfaceType());
         temp.SetTextureMinFilter(material->GetTextureMinFilter());
         temp.SetTextureMagFilter(material->GetTextureMagFilter());
-        temp.SetBaseColor(material->GetBaseColor());
-        temp.SetAlphaCutoff(material->GetAlphaCutoff());
+        temp.SetUniform<gfx::kBaseColor>(material->GetUniformValue<gfx::kBaseColor>());
+        temp.SetUniform<gfx::kAlphaCutoff>(material->GetUniformValue<gfx::kAlphaCutoff>());
         temp.AddTexture(texture_src->Copy());
 
         for (unsigned row=0; row<sprite_sheet->rows; ++row)
@@ -308,10 +308,10 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
 
             gfx::MaterialClass temp(gfx::MaterialClass::Type::Texture);
             temp.SetSurfaceType(material->GetSurfaceType());
-            temp.SetBaseColor(material->GetBaseColor());
+            temp.SetUniform<gfx::kBaseColor>(material->GetUniformValue<gfx::kBaseColor>());
+            temp.SetUniform<gfx::kAlphaCutoff>(material->GetUniformValue<gfx::kAlphaCutoff>());
             temp.SetTextureMinFilter(material->GetTextureMinFilter());
             temp.SetTextureMagFilter(material->GetTextureMagFilter());
-            temp.SetAlphaCutoff(material->GetAlphaCutoff());
             temp.AddTexture(texture_src->Copy());
             temp.SetTextureRect(texture_rect);
 

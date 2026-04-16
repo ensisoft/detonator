@@ -343,7 +343,7 @@ void DlgFontMap::OnPaintScene(gfx::Painter& painter, double secs)
     const gfx::Color4f grid_color(gfx::Color::HotPink, 0.2);
     auto selection_material_class = gfx::CreateMaterialClassFromImage(res::AcceptIcon);
     selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
+    selection_material_class.SetUniform<gfx::kBaseColor>(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     auto selection_material = gfx::MaterialInstance(selection_material_class);
 
     for (unsigned row=0; row<max_rows; ++row)

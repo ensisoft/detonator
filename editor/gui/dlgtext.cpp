@@ -250,7 +250,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     {
         mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
         mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        mClass->SetBaseColor(gfx::Color::White);
+        mClass->SetUniform<gfx::kBaseColor>(gfx::Color::White);
         mClass->SetTexture(gfx::CreateTextureFromText(mText));
         mClass->GetTextureMap(0)->GetTextureSource(0)->SetName("DlgTextTexture");
         mMaterial = gfx::CreateMaterialInstance(mClass);

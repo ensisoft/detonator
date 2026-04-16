@@ -32,6 +32,27 @@ namespace gfx
 
     using TextureFormat = dev::TextureFormat;
 
+    enum class GradientType : int {
+        Bilinear, Radial, Conical
+    };
+
+    // Action to take on per particle random value. This can
+    // be used when applying the material onto particle
+    // system and to add some variation to the rendered output
+    // in order to make the result visually more appealing.
+    enum class ParticleEffect : int {
+        None   =  0,
+        Rotate =  1
+    };
+
+    enum class ParticleRotation : int {
+        None,
+        BaseRotation,
+        RandomRotation,
+        ParticleDirection,
+        ParticleDirectionAndBase
+    };
+
     enum class MeshEffectType : uint32_t {
         ShardedMeshExplosion = 1
     };
