@@ -38,7 +38,7 @@ namespace base
     };
     namespace detail {
         struct RGBColorWeights {
-            explicit RGBColorWeights(const Color color) noexcept
+            explicit constexpr RGBColorWeights(const Color color) noexcept
             {
                 switch (color)
                 {
