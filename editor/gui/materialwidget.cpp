@@ -131,7 +131,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 {
     DEBUG("Create MaterialWidget");
     mWorkspace = workspace;
-    mMaterial  = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color, base::RandomString(10));
+    mMaterial  = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color, base::RandomString(10));
     mMaterial->SetName("My Material");
     mOriginalHash = mMaterial->GetHash();
 
@@ -380,7 +380,7 @@ bool MaterialWidget::LoadState(const Settings& settings)
     if (!mMaterial)
     {
         WARN("Failed to restore material state.");
-        mMaterial = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color, mMaterial->GetId());
+        mMaterial = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color, mMaterial->GetId());
     }
 
     ApplyShaderDescription();

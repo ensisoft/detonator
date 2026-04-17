@@ -532,12 +532,6 @@ namespace gfx
         std::optional<ValueCache> mCache;
     };
 
-    using ColorClass = MaterialClass;
-    using GradientClass = MaterialClass;
-    using SpriteClass = MaterialClass;
-    using TextureMap2DClass = MaterialClass;
-    using CustomMaterialClass = MaterialClass;
-
         // These functions are intended to use when you just need to create
     // a material quickly on the stack to draw something immediately and
     // don't need keep a material class around long term.

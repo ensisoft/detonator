@@ -590,7 +590,7 @@ Workspace::Workspace(const QString& dir)
     for (const auto& val : values)
     {
         const std::string color_name(magic_enum::enum_name(val));
-        auto color = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color, "_" + color_name);
+        auto color = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color, "_" + color_name);
         color->SetUniform<gfx::kBaseColor>(val);
         color->SetName("_" + color_name);
         color->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);

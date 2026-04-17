@@ -782,7 +782,7 @@ ContentLoaderImpl::ContentLoaderImpl()
     for (const auto& val : values)
     {
         const std::string color_name(magic_enum::enum_name(val));
-        auto ret = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color, "_" + color_name);
+        auto ret = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color, "_" + color_name);
         ret->SetUniform<gfx::kBaseColor>(val);
         ret->SetName("_" + color_name);
         ret->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);

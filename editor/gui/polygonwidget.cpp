@@ -1253,7 +1253,7 @@ public:
         current.SetDoubleSided(mState.builder->IsDoubleSided());
 
         const auto alpha = 0.87f;
-        static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
+        static gfx::MaterialClass color(gfx::MaterialClass::Type::Color);
         color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::LightGray, alpha));
         color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
@@ -2335,7 +2335,7 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
     if (GetValue(mUI.chkShowSurfaces) && mMainView == ViewType::EditView)
     {
         const auto alpha = 0.87f * mState.vertex_alpha;
-        static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
+        static gfx::MaterialClass color(gfx::MaterialClass::Type::Color);
         color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::LightGray, alpha));
         color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 

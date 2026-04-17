@@ -41,9 +41,9 @@
 namespace {
 gfx::MaterialInstance MakeMaterial(const gfx::Color4f& color)
 {
-    static std::shared_ptr<gfx::ColorClass> klass;
+    static std::shared_ptr<gfx::MaterialClass> klass;
     if (!klass)
-        klass = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
+        klass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color);
 
     const auto alpha = color.Alpha();
     klass->SetUniform<gfx::kBaseColor>(color);
@@ -324,9 +324,9 @@ bool DrawSDFShapeOutline(const Painter& painter, const FRect& rect,
                          float line_width, float corner_radius)
 
 {
-    static std::shared_ptr<gfx::ColorClass> klass;
+    static std::shared_ptr<gfx::MaterialClass> klass;
     if (!klass)
-        klass = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
+        klass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color);
 
     klass->SetUniform<kBaseColor>(color);
     klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);

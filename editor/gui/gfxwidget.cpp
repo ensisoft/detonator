@@ -340,10 +340,10 @@ void GfxWindow::PaintGL()
     }
     if (mHasFocus && mDrawFocusRect)
     {
-        static std::shared_ptr<gfx::ColorClass> material;
+        static std::shared_ptr<gfx::MaterialClass> material;
         if (!material)
         {
-            material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
+            material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color);
             // okay, so we've got a QWindow which means it doesn't get the normal
             // QWidget functionality out of the box. For example the Focus rectangle
             // doesn't simply just work.
@@ -369,8 +369,8 @@ void GfxWindow::PaintGL()
 
     if (WindowMouseCursor == MouseCursor::Custom)
     {
-        static std::shared_ptr<gfx::ColorClass> arrow_cursor_material;
-        static std::shared_ptr<gfx::TextureMap2DClass> crosshair_cursor_material;
+        static std::shared_ptr<gfx::MaterialClass> arrow_cursor_material;
+        static std::shared_ptr<gfx::MaterialClass> crosshair_cursor_material;
         if (!arrow_cursor_material)
         {
             arrow_cursor_material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color);
