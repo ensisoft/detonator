@@ -1947,7 +1947,7 @@ MaterialClass CreateMaterialClassFromImages(const std::vector<std::string>& uris
     for (size_t i=0; i<uris.size(); ++i)
         map->SetTextureSource(i, LoadTextureFromFile(uris[i], ""));
 
-    SpriteClass material(MaterialClass::Type::Sprite, std::string(""));
+    MaterialClass material(MaterialClass::Type::Sprite, std::string(""));
     material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
     material.SetNumTextureMaps(1);
     material.SetTextureMap(0, std::move(map));

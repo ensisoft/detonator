@@ -205,13 +205,13 @@ public:
     virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override
     {
         if (id == "pink")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
         else if (id == "red")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Red));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Red));
         else if (id == "green")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Green));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Green));
         else if (id == "blue")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Blue));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Blue));
         else if (id == "red-green")
         {
             gfx::RgbBitmap bmp;
@@ -224,13 +224,13 @@ public:
             src.SetName("bitmap");
             src.SetBitmap(std::move(bmp));
 
-            gfx::TextureMap2DClass klass(gfx::MaterialClass::Type::Texture);
+            gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
             klass.SetTexture(src.Copy());
-            return std::make_shared<gfx::TextureMap2DClass>(klass);
+            return std::make_shared<gfx::MaterialClass>(klass);
         }
         else if (id == "red-green-sprite")
         {
-            gfx::SpriteClass sprite(gfx::MaterialClass::Type::Sprite);
+            gfx::MaterialClass sprite(gfx::MaterialClass::Type::Sprite);
 
             gfx::RgbBitmap red;
             red.Resize(4, 4);
@@ -250,7 +250,7 @@ public:
 
             sprite.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
             sprite.SetBlendFrames(false);
-            return std::make_shared<gfx::SpriteClass>(sprite);
+            return std::make_shared<gfx::MaterialClass>(sprite);
         }
         else if (id == "custom")
         {
@@ -265,10 +265,10 @@ void FragmentShaderMain() {
   fs_out.color = kColor;
 }
 )";
-            gfx::CustomMaterialClass klass(gfx::MaterialClass::Type::Custom);
+            gfx::MaterialClass klass(gfx::MaterialClass::Type::Custom);
             klass.SetShaderSrc(src);
             klass.SetUniform("kColor", gfx::Color::HotPink);
-            return std::make_shared<gfx::CustomMaterialClass>(klass);
+            return std::make_shared<gfx::MaterialClass>(klass);
         }
         TEST_REQUIRE(!"OOPS");
         return nullptr;

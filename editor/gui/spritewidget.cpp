@@ -35,7 +35,7 @@ namespace {
 
     auto MakeDemoMaterial()
     {
-        static std::shared_ptr<gfx::SpriteClass> demo_material;
+        static std::shared_ptr<gfx::MaterialClass> demo_material;
         if (demo_material)
             return demo_material;
 

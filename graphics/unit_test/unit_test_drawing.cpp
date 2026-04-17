@@ -261,7 +261,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::ColorClass test(gfx::MaterialClass::Type::Color);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Color);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetUniform<gfx::kBaseColor>(gfx::Color::Green);
         test.SetStatic(true);
@@ -596,7 +596,7 @@ void unit_test_material_texture()
     TestDevice device;
     gfx::ProgramState program;
 
-    gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
+    gfx::MaterialClass test(gfx::MaterialClass::Type::Texture);
     test.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
     test.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
     test.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
@@ -630,7 +630,7 @@ void unit_test_sprite_texture_blending()
     gfx::RgbBitmap bitmap;
     bitmap.Resize(10, 10);
 
-    gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
+    gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
     test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
     test.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
     test.SetBlendFrames(false);
@@ -918,7 +918,7 @@ void unit_test_material_textures_bind_fail()
 
     // test setting basic texture properties.
     {
-        gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Texture);
         test.SetTexture(gfx::LoadTextureFromFile("no-such-file.png"));
 
         gfx::FlatShadedColorProgram pass;
@@ -929,7 +929,7 @@ void unit_test_material_textures_bind_fail()
     }
 
     {
-        gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
         test.AddTexture( gfx::LoadTextureFromFile("no-such-file.png"));
 
         gfx::FlatShadedColorProgram pass;
@@ -940,7 +940,7 @@ void unit_test_material_textures_bind_fail()
     }
 
     {
-        gfx::CustomMaterialClass test(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
         gfx::SpriteMap sprite;
         sprite.SetType(gfx::SpriteMap::Type::Sprite);
         sprite.SetName("huhu");
@@ -1122,7 +1122,7 @@ void unit_test_custom_uniforms()
 {
     TEST_CASE(test::Type::Feature)
 
-    gfx::CustomMaterialClass klass(gfx::MaterialClass::Type::Custom);
+    gfx::MaterialClass klass(gfx::MaterialClass::Type::Custom);
     klass.SetUniform("float", 56.0f);
     klass.SetUniform("int", 123);
     klass.SetUniform("vec2", glm::vec2(1.0f, 2.0f));
@@ -1162,7 +1162,7 @@ void unit_test_custom_textures()
 {
     TEST_CASE(test::Type::Feature)
 
-    gfx::CustomMaterialClass klass(gfx::MaterialClass::Type::Custom);
+    gfx::MaterialClass klass(gfx::MaterialClass::Type::Custom);
     klass.SetNumTextureMaps(2);
     klass.SetBlendFrames(true);
 
@@ -2155,9 +2155,9 @@ void unit_test_packed_texture_bug()
 
     // several materials
     {
-        gfx::TextureMap2DClass material0(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material0(gfx::MaterialClass::Type::Texture);
         material0.SetTexture(gfx::LoadTextureFromFile("test-texture.png"));
-        gfx::TextureMap2DClass material1(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material1(gfx::MaterialClass::Type::Texture);
         material1.SetTexture(gfx::LoadTextureFromFile("test-texture.png"));
 
         TestDevice device;

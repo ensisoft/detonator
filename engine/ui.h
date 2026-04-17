@@ -181,7 +181,7 @@ namespace engine
         class UIGradient : public UIMaterial
         {
         public:
-            using ColorIndex   = gfx::GradientClass::ColorIndex;
+            using ColorIndex   = gfx::MaterialClass::ColorIndex;
             using GradientType = gfx::MaterialClass::GradientType;
 
             UIGradient() = default;

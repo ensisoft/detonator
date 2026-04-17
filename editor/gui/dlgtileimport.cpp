@@ -325,14 +325,14 @@ void DlgTileImport::on_btnImport_clicked()
             map->SetTextureSource(0, std::move(texture));
             map->SetTextureRect(0, rect);
 
-            gfx::TextureMap2DClass klass(gfx::MaterialClass::Type::Texture, base::RandomString(10));
+            gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture, base::RandomString(10));
             klass.SetSurfaceType(GetValue(mUI.surfaceType));
             klass.SetTextureMinFilter(GetValue(mUI.minFilter));
             klass.SetTextureMagFilter(GetValue(mUI.magFilter));
             klass.SetNumTextureMaps(1);
             klass.SetTextureMap(0, std::move(map));
             klass.SetName(app::ToUtf8(img.name));
-            klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
+            klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, premul_alpha_blend);
 
             if (const auto& cutoff = mUI.alphaCutoff->GetValue())
             {
@@ -377,7 +377,7 @@ void DlgTileImport::on_btnImport_clicked()
         klass.SetSurfaceType(GetValue(mUI.surfaceType));
         klass.SetTextureMinFilter(GetValue(mUI.minFilter));
         klass.SetTextureMagFilter(GetValue(mUI.magFilter));
-        klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
+        klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, premul_alpha_blend);
         klass.SetName(GetValue(mUI.spriteName));
         klass.SetBlendFrames(GetValue(mUI.chkBlendFrames));
 
@@ -783,7 +783,7 @@ void DlgTileImport::LoadImageFile(const QString& ret)
     mFileUri  = std::move(file_uri);
     mFileName = std::move(file_name);
 
-    mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
+    mClass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));

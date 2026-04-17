@@ -113,7 +113,7 @@ namespace gui
         Ui::DlgTileImport mUI;
     private:
         app::Workspace* mWorkspace = nullptr;
-        std::shared_ptr<gfx::TextureMap2DClass> mClass;
+        std::shared_ptr<gfx::MaterialClass> mClass;
         std::unique_ptr<gfx::Material> mMaterial;
         std::string mFileUri;
         std::string mFileName;

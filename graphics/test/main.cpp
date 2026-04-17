@@ -851,7 +851,7 @@ class TextureBlurTest : public GraphicsTest
 public:
     TextureBlurTest()
     {
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
         {
@@ -936,7 +936,7 @@ class TextureEdgeTest : public GraphicsTest
 public:
     TextureEdgeTest()
     {
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
         {
@@ -978,7 +978,7 @@ class TextureColorExtractTest : public GraphicsTest
 public:
     TextureColorExtractTest()
     {
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
         {
             auto source = gfx::LoadTextureFromFile("textures/rgbw_512x512.png");
@@ -1042,7 +1042,7 @@ private:
 
         gfx::algo::ExtractColor(src_texture, dst_texture, device, color_value, threshold);
 
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
         material.AddTexture(gfx::UseExistingTexture(dst_texture, ""));
         return material;
@@ -1255,7 +1255,7 @@ class SpriteTest : public GraphicsTest
 public:
     SpriteTest()
     {
-        mMaterial = std::make_shared<gfx::SpriteClass>(gfx::MaterialClass::Type::Sprite);
+        mMaterial = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Sprite);
         mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
         mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-1.png"));
         mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-2.png"));
@@ -1449,7 +1449,7 @@ private:
     }
 
 private:
-    std::shared_ptr<gfx::SpriteClass> mMaterial;
+    std::shared_ptr<gfx::MaterialClass> mMaterial;
     float mTime = 0.0f;
 };
 
@@ -1458,7 +1458,7 @@ class SpriteSheetTest : public GraphicsTest
 public:
     SpriteSheetTest()
     {
-        mMaterial = std::make_shared<gfx::SpriteClass>(gfx::MaterialClass::Type::Sprite);
+        mMaterial = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Sprite);
         mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         mMaterial->SetBlendFrames(false);
         mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/IdleSheet.png"));
@@ -1553,7 +1553,7 @@ public:
     std::string GetName() const override
     { return "SpriteSheetTest"; }
 private:
-    std::shared_ptr<gfx::SpriteClass> mMaterial;
+    std::shared_ptr<gfx::MaterialClass> mMaterial;
     float mTime = 0.0f;
 };
 
@@ -1917,7 +1917,7 @@ public:
         model.RotateAroundZ(math::Pi);
         model.Translate(150 + 100, 150 + 300);
 
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("textures/BlackSmoke.png"));
         material.SetUniform<gfx::kBaseColor>(gfx::Color4f(35, 35, 35, 20));
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -2405,8 +2405,8 @@ class sRGBWindowTest : public GraphicsTest
 public:
     void Render(gfx::Painter& painter) override
     {
-        gfx::CustomMaterialClass srgb_out(gfx::MaterialClass::Type::Custom);
-        gfx::CustomMaterialClass linear_out(gfx::MaterialClass::Type::Custom);
+        gfx::MaterialClass srgb_out(gfx::MaterialClass::Type::Custom);
+        gfx::MaterialClass linear_out(gfx::MaterialClass::Type::Custom);
 
         // If we choose a reference value of #808080FF in GIMP this is approximately
         // half way gray. But the value that the GIMP shows in the color picker is
@@ -2656,7 +2656,7 @@ void CustomFragmentShaderMain()
         // separately. !
 
         {
-            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
             auto source = std::make_unique<gfx::TextureFileSource>();
             source->SetFileName("textures/black-gray-white.png");
             source->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
@@ -2666,7 +2666,7 @@ void CustomFragmentShaderMain()
         }
 
         {
-            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
             auto source = std::make_unique<gfx::TextureFileSource>();
             source->SetFileName("textures/black-gray-white.png");
             source->SetColorSpace(gfx::TextureSource::ColorSpace::Linear);
@@ -2717,12 +2717,12 @@ void FragmentShaderMain() {
             map.SetSamplerName("kTexture");
             map.SetName("kTexture");
 
-            gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Custom);
             material.SetShaderSrc(src);
             material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
             material.SetNumTextureMaps(1);
             material.SetTextureMap(0, map);
-            material.SetTextureMagFilter(gfx::TextureMap2DClass::MagTextureFilter::Linear);
+            material.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Linear);
             mMaterialStraightAlpha = gfx::CreateMaterialInstance(material);
         }
         {
@@ -2734,10 +2734,10 @@ void FragmentShaderMain() {
             map.SetSamplerName("kTexture");
             map.SetName("kTexture");
 
-            gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Custom);
             material.SetShaderSrc(src);
             material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            material.SetTextureMagFilter(gfx::TextureMap2DClass::MagTextureFilter::Linear);
+            material.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Linear);
             material.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
             material.SetNumTextureMaps(1);
             material.SetTextureMap(0, std::move(map));

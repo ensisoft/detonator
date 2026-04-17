@@ -409,7 +409,7 @@ void UIGradient::IntoJson(nlohmann::json& json) const
 
 UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary*, const Loader*) const
 {
-    auto material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
+    auto material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetFlag(gfx::MaterialClass::Flags::EnableSDF, true);
     material->SetUniform<gfx::kBaseColor>(mColor);
@@ -460,7 +460,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
 {
     ASSERT(loader);
 
-    auto material = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
+    auto material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetTexture(gfx::LoadTextureFromFile(mTextureUri));
     material->SetName("UITexture");

@@ -144,7 +144,7 @@ void unit_test_material_class()
 {
     TEST_CASE(test::Type::Feature)
 
-    gfx::ColorClass klass(gfx::MaterialClass::Type::Color);
+    gfx::MaterialClass klass(gfx::MaterialClass::Type::Color);
     klass.SetStatic(false);
     klass.SetUniform<gfx::kBaseColor>(gfx::Color::HotPink);
     klass.SetUniform<gfx::kGradientColor0>(gfx::Color::DarkBlue);
@@ -235,11 +235,11 @@ void unit_test_material_class()
     }
     // copy and assignment
     {
-        gfx::ColorClass copy(klass);
+        gfx::MaterialClass copy(klass);
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
         TEST_REQUIRE(copy.GetId() == klass.GetId());
 
-        gfx::ColorClass temp(gfx::MaterialClass::Type::Color);
+        gfx::MaterialClass temp(gfx::MaterialClass::Type::Color);
         temp =  klass;
         TEST_REQUIRE(temp.GetHash() == klass.GetHash());
         TEST_REQUIRE(temp.GetId() == klass.GetId());

@@ -106,7 +106,7 @@ void DlgFontMap::LoadImage(const QString& file)
                                 (float)height/(float)img_height);
     mWidth  = img_width;
     mHeight = img_height;
-    mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
+    mClass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));

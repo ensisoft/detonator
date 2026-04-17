@@ -228,7 +228,7 @@ public:
         if (!mouse_material)
         {
             WARN("No such mouse cursor material found. [material='%1']", conf.mouse_cursor.material);
-            auto material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
+            auto material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color);
             material->SetUniform<gfx::kBaseColor>(gfx::Color::HotPink);
             mouse_material = material;
         }

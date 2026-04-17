@@ -58,19 +58,19 @@ public:
     virtual std::shared_ptr<const gfx::MaterialClass> FindMaterialClassById(const std::string& name) const override
     {
         if (name == "uv_test")
-            return std::make_shared<gfx::TextureMap2DClass>(
+            return std::make_shared<gfx::MaterialClass>(
                     gfx::CreateMaterialClassFromImage("assets/textures/uv_test_512.png"));
         else if (name == "checkerboard")
-            return std::make_shared<gfx::TextureMap2DClass>(
+            return std::make_shared<gfx::MaterialClass>(
                     gfx::CreateMaterialClassFromImage("assets/textures/Checkerboard.png"));
         else if (name == "color")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
         else if (name == "object")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Gold));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Gold));
         else if (name == "ground")
-            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::DarkGreen));
+            return std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromColor(gfx::Color::DarkGreen));
         else if (name == "M-6") {
-            auto klass =std::make_shared<gfx::TextureMap2DClass>(
+            auto klass =std::make_shared<gfx::MaterialClass>(
                     gfx::CreateMaterialClassFromImage("assets/textures/M-6_preview.png"));
             klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
             return klass;

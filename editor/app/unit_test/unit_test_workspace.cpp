@@ -189,7 +189,7 @@ void unit_test_resource()
     const auto first_primitive = workspace.GetPrimitiveResource(0).Copy();
     const auto last_primitive  = workspace.GetPrimitiveResource(primitives-1).Copy();
 
-    gfx::ColorClass material(gfx::MaterialClass::Type::Color);
+    gfx::MaterialClass material(gfx::MaterialClass::Type::Color);
     app::MaterialResource material_resource(material, "material");
     workspace.SaveResource(material_resource);
 
@@ -256,7 +256,7 @@ void unit_test_save_load()
         TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 0);
 
         // add some user defined content.
-        gfx::ColorClass material(gfx::MaterialClass::Type::Color, std::string("foo123"));
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Color, std::string("foo123"));
 
         app::MaterialResource resource(material, "TestMaterial");
         resource.SetProperty("int", 123);
@@ -422,11 +422,13 @@ R"(
     workspace.SetProjectSettings(settings);
 
     // setup some content.
-    gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
+    gfx::MaterialClass material(gfx::MaterialClass::Type::Custom);
     material.SetShaderUri(workspace.MapFileToWorkspace(std::string("shaders/es2/my_material.glsl")));
     app::MaterialResource material_resource(material, "material");
+
     gfx::PolygonMeshClass poly;
     app::CustomShapeResource shape_resource(poly, "poly");
+
     gfx::ParticleEngineClass particles;
     app::ParticleSystemResource  particle_resource(particles, "particles");
 
@@ -576,7 +578,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
 
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
         app::MaterialResource resource(material, "material");
 
@@ -615,7 +617,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
 
-        gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
         app::MaterialResource resource(material, "material");
@@ -655,7 +657,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         DeleteDir("TestWorkspace");
         DeleteDir("TestPackage");
 
-        gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
         app::MaterialResource resource(material, "material");
@@ -696,7 +698,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         DeleteDir("TestPackage");
         MakeDir("TestWorkspace");
 
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap3.png"));
         app::MaterialResource resource(material, "material");
 
@@ -730,7 +732,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         DeleteDir("TestPackage");
         MakeDir("TestWorkspace");
 
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap3.png"));
         app::MaterialResource resource(material, "material");
 
@@ -772,7 +774,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         // first material
         {
-            gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
             app::MaterialResource resource(material, "material 1");
@@ -780,7 +782,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         }
         // second material
         {
-            gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap2.png"));
@@ -830,7 +832,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         // first material
         {
-            gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
             app::MaterialResource resource(material, "material 1");
@@ -838,7 +840,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         }
         // second material
         {
-            gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
             material.AddTexture(gfx::LoadTextureFromFile("test_bitmap2.png"));
@@ -918,7 +920,7 @@ void unit_test_packing_texture_composition_format()
         gfx::WritePNG(rgba_textures[0], "test_32bit_bitmap0.png");
         gfx::WritePNG(rgba_textures[1], "test_32bit_bitmap1.png");
 
-        gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
         material.AddTexture(gfx::LoadTextureFromFile("test_8bit_bitmap0.png"));
         material.AddTexture(gfx::LoadTextureFromFile("test_8bit_bitmap1.png"));
         material.AddTexture(gfx::LoadTextureFromFile("test_24bit_bitmap0.png"));
@@ -1015,7 +1017,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         app::Workspace workspace("TestWorkspace");
         workspace.GetProjectSettings().loading_font.clear();
 
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
         material.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
         app::MaterialResource resource(material, "material");
@@ -1052,7 +1054,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         app::Workspace workspace("TestWorkspace");
         workspace.GetProjectSettings().loading_font.clear();
 
-        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
         material.SetTextureRect(gfx::FRect(0.0f, 0.0f, 0.5f, 0.5f));
         app::MaterialResource resource(material, "material");
@@ -1089,7 +1091,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         app::Workspace workspace("TestWorkspace");
         workspace.GetProjectSettings().loading_font.clear();
 
-        gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Sprite);
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap1.png"));
         const auto src_rect0 = gfx::FRect(0.5f, 0.5f, 0.5f, 0.5f);
@@ -1164,8 +1166,8 @@ void unit_test_packing_texture_name_collision()
     gfx::WritePNG(bitmap[1], "TestWorkspace/textures/bar/bitmap.png");
 
     // setup 2 materials
-    gfx::TextureMap2DClass material0(gfx::MaterialClass::Type::Texture);
-    gfx::TextureMap2DClass material1(gfx::MaterialClass::Type::Texture);
+    gfx::MaterialClass material0(gfx::MaterialClass::Type::Texture);
+    gfx::MaterialClass material1(gfx::MaterialClass::Type::Texture);
     material0.SetTexture(gfx::LoadTextureFromFile("ws://textures/foo/bitmap.png"));
     material1.SetTexture(gfx::LoadTextureFromFile("ws://textures/bar/bitmap.png"));
     workspace.SaveResource(app::MaterialResource(material0, "material0"));
@@ -1363,8 +1365,8 @@ void unit_test_packing_texture_name_collision_resample_bug()
     gfx::WritePNG(bitmap[1], "TestWorkspace/textures/bar/bitmap.png");
 
     // setup 2 materials
-    gfx::TextureMap2DClass material0(gfx::MaterialClass::Type::Texture);
-    gfx::TextureMap2DClass material1(gfx::MaterialClass::Type::Texture);
+    gfx::MaterialClass material0(gfx::MaterialClass::Type::Texture);
+    gfx::MaterialClass material1(gfx::MaterialClass::Type::Texture);
     material0.SetTexture(gfx::LoadTextureFromFile("ws://textures/foo/bitmap.png"));
     material1.SetTexture(gfx::LoadTextureFromFile("ws://textures/bar/bitmap.png"));
     workspace.SaveResource(app::MaterialResource(material0, "material0"));
@@ -1551,7 +1553,7 @@ void unit_test_json_export_import()
         app::Workspace workspace("TestWorkspace");
         workspace.GetProjectSettings().loading_font.clear();
         // add some user defined content.
-        gfx::ColorClass material(gfx::MaterialClass::Type::Color, std::string("foo123"));
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Color, std::string("foo123"));
         app::MaterialResource resource(material, "TestMaterial");
         resource.SetProperty("int", 123);
         resource.SetProperty("str", app::AnyString("hello"));
@@ -1597,14 +1599,14 @@ void unit_test_list_deps()
     app::Workspace workspace("TestWorkspace");
 
     {
-        gfx::ColorClass material(gfx::MaterialClass::Type::Color);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Color);
         app::MaterialResource material_resource(material, "mat1");
         workspace.SaveResource(material_resource);
     }
 
     // this is a red-herring and not actually used!
     {
-        gfx::ColorClass material(gfx::MaterialClass::Type::Color);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Color);
         app::MaterialResource material_resource(material, "mat2");
         workspace.SaveResource(material_resource);
     }
@@ -1846,7 +1848,7 @@ void unit_test_export_import_basic()
         texture.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
         texture.SetTextureSource(0, texture_source.Copy());
 
-        gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
+        gfx::MaterialClass material(gfx::MaterialClass::Type::Custom);
         material.SetName("MyMaterial");
         material.SetNumTextureMaps(1);
         material.SetTextureMap(0, std::move(texture));
@@ -2278,8 +2280,8 @@ void unit_test_export_name_dupe()
         gfx::WritePNG(bitmap[1], "TestWorkspace/textures/bar/bitmap.png");
 
         app::Workspace workspace("TestWorkspace");
-        gfx::TextureMap2DClass material0(gfx::MaterialClass::Type::Texture);
-        gfx::TextureMap2DClass material1(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material0(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass material1(gfx::MaterialClass::Type::Texture);
         material0.SetTexture(gfx::LoadTextureFromFile("ws://textures/foo/bitmap.png"));
         material1.SetTexture(gfx::LoadTextureFromFile("ws://textures/bar/bitmap.png"));
         workspace.SaveResource(app::MaterialResource(material0, "material0"));

@@ -141,7 +141,7 @@ void DlgImgView::LoadImage(const QString& file)
     mWidth  = bitmap->GetWidth();
     mHeight = bitmap->GetHeight();
     mDepth  = bitmap->GetDepthBits();
-    mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
+    mClass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
