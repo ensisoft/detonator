@@ -213,25 +213,24 @@ void LuaTheme::SetTheme(Theme theme)
     }
     else if (theme == Theme::CyberFlux)
     {
-        const QColor Violet("#a56eff");     // Soft violet for comments
-        const QColor White("#d8d8d8");      // Off-white for default text
-        const QColor Yellow("#ffbb66");     // Muted warm yellow for properties
-        const QColor Green("#44cc88");      // Softer mint green for brackets
-        const QColor Orange("#ff7755");     // Sunset orange for built-ins
-        const QColor Purple("#bb88ff");     // Pastel purple for literals
-        const QColor Pink("#ff6699");       // Softer hot pink for keywords
-        const QColor Blue("#66ccff");       // Muted neon blue for function calls
+        const QColor Teal("#5cc4d8");       // Bright teal for keywords
+        const QColor TealMid("#7ac4d4");    // Mid teal for function calls
+        const QColor Comment("#638e9e");    // Muted blue-gray for comments
+        const QColor Coral("#d4845a");      // Muted coral for built-ins
+        const QColor Gold("#c8b06a");       // Muted gold for properties
+        const QColor Green("#8aba80");      // Soft green for literals
+        const QColor Steel("#8aa8b4");      // Steel blue-gray for operators/brackets
 
-        mTable[Key::Keyword]      = Pink;
-        mTable[Key::Comment]      = Violet;
-        mTable[Key::BuiltIn]      = Orange;
-        mTable[Key::FunctionBody] = Orange;
-        mTable[Key::FunctionCall] = Blue;
-        mTable[Key::MethodCall]   = Blue;
-        mTable[Key::Property]     = Yellow;
-        mTable[Key::Literal]      = Purple;
-        mTable[Key::Operator]     = Green;
-        mTable[Key::Bracket]      = Green;
+        mTable[Key::Keyword]      = Teal;
+        mTable[Key::Comment]      = Comment;
+        mTable[Key::BuiltIn]      = Coral;
+        mTable[Key::FunctionBody] = Coral;
+        mTable[Key::FunctionCall] = TealMid;
+        mTable[Key::MethodCall]   = TealMid;
+        mTable[Key::Property]     = Gold;
+        mTable[Key::Literal]      = Green;
+        mTable[Key::Operator]     = Steel;
+        mTable[Key::Bracket]      = Steel;
     }
     else if (theme == Theme::OrangeCrush)
     {

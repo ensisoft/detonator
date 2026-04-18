@@ -147,8 +147,9 @@ void DarkStyle::polish(QPalette &palette)
         palette.setColor(QPalette::Base, QColor("#232323"));
         palette.setColor(QPalette::Text, QColor(220, 220, 220));
         palette.setColor(QPalette::Disabled, QPalette::Text, QColor("#555"));
-        palette.setColor(QPalette::Highlight, QColor("#00c8ff"));
-        palette.setColor(QPalette::AlternateBase, QColor(0, 200, 255, 51));
+        palette.setColor(QPalette::Highlight, QColor("#3d9db5"));
+        palette.setColor(QPalette::HighlightedText, QColor(17, 17, 17));
+        palette.setColor(QPalette::AlternateBase, QColor(61, 157, 181, 51));
     }
 }
 
