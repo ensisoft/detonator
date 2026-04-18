@@ -30,10 +30,8 @@
 #include "graphics/device.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
-#include "graphics/geometry.h"
 #include "graphics/painter.h"
-
-#include "material_class.h"
+#include "graphics/material_class.h"
 #include "graphics/paint_log.h"
 #include "graphics/shader_program.h"
 #include "graphics/shader_programs.h"
@@ -57,10 +55,8 @@ void Painter::ClearDepth(float depth) const
     mDevice->ClearDepth(depth, mFrameBuffer);
 }
 
-void Painter::Prime(DrawItemList& cmds) const
+void Painter::PrepareDrawItemList(DrawItemList& cmds) const
 {
-    static const glm::mat4 Identity(1.0f);
-
     if (cmds.mItems.empty())
         return;
 
@@ -68,17 +64,22 @@ void Painter::Prime(DrawItemList& cmds) const
 
     for (size_t i=0; i<cmds.mItems.size(); ++i)
     {
-        const auto& cmd = cmds.mItems[i];
-
-        Drawable::Environment drawable_env;
-        drawable_env.editing_mode   = mEditingMode;
-        drawable_env.pixel_ratio    = mPixelRatio;
-        drawable_env.use_instancing = cmd.draw_call.IsInstanced();
-        drawable_env.view_matrix    = cmd.view       ? cmd.view       : &mViewMatrix;
-        drawable_env.proj_matrix    = cmd.projection ? cmd.projection : &mProjMatrix;
-        drawable_env.model_matrix   = cmd.model      ? cmd.model      : &Identity;
-        cmds.mHandles[i] = cmd.drawable->GetGeometry(drawable_env, *mDevice);
+        cmds.mHandles[i] = PrepareDraw(cmds.mItems[i]);
     }
+}
+
+void Painter::PrepareDrawItem(DrawItemList& list, DrawItem&& item) const
+{
+    auto handle = PrepareDraw(item);
+    list.mItems.push_back(std::move(item));
+    list.mHandles.push_back(std::move(handle));
+}
+
+void Painter::PrepareDrawItem(DrawItemList& list, const DrawItem& item) const
+{
+    auto handle = PrepareDraw(item);
+    list.mItems.push_back(item);
+    list.mHandles.push_back(std::move(handle));
 }
 
 bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const RenderPassState& render_pass_state) const
@@ -454,6 +455,20 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         return nullptr;
 
     return gpu_program;
+}
+
+DrawGeometryHandle Painter::PrepareDraw(const DrawItem& item) const
+{
+    static const glm::mat4 Identity(1.0f);
+
+    Drawable::Environment env;
+    env.editing_mode   = mEditingMode;
+    env.pixel_ratio    = mPixelRatio;
+    env.use_instancing = item.draw_call.IsInstanced();
+    env.view_matrix    = item.view       ? item.view       : &mViewMatrix;
+    env.proj_matrix    = item.projection ? item.projection : &mProjMatrix;
+    env.model_matrix   = item.model      ? item.model      : &Identity;
+    return item.drawable->GetGeometry(env, *mDevice);
 }
 
 IRect Painter::MapToDevice(const IRect& rect) const noexcept

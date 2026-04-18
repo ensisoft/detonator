@@ -285,7 +285,9 @@ namespace gfx
             friend class Painter;
         };
 
-        void Prime(DrawItemList& items) const;
+        void PrepareDrawItemList(DrawItemList& items) const;
+        void PrepareDrawItem(DrawItemList& list, DrawItem&& item) const;
+        void PrepareDrawItem(DrawItemList& list, const DrawItem& item) const;
 
         // Draw multiple objects inside a render pass. Each object has a drawable shape,
         // which provides the geometrical information of the object to be drawn, a material,
@@ -353,6 +355,7 @@ namespace gfx
                               const Material& material,
                               const Drawable::Environment& drawable_environment,
                               const Material::Environment& material_environment) const;
+        DrawGeometryHandle PrepareDraw(const DrawItem& item) const;
 
     private:
         std::shared_ptr<Device> mDeviceInst;

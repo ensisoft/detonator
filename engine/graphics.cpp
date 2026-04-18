@@ -308,26 +308,14 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
 
         RenderLayer& layer = render_layer[packet_index];
         if (packet.pass == DrawPacket::RenderPass::DrawColor)
-            layer.draw_color_list.push_back(draw);
+            scene_painter.PrepareDrawItem(layer.draw_color_list, std::move(draw));
         else if (packet.pass == DrawPacket::RenderPass::MaskCover)
-            layer.mask_cover_list.push_back(draw);
+            scene_painter.PrepareDrawItem(layer.mask_cover_list, std::move(draw));
         else if (packet.pass == DrawPacket::RenderPass::MaskExpose)
-            layer.mask_expose_list.push_back(draw);
+            scene_painter.PrepareDrawItem(layer.mask_expose_list, std::move(draw));
         else BUG("Missing packet render pass mapping.");
     }
     TRACE_LEAVE(CreateDrawCmd);
-
-    TRACE_BLOCK("PrimeCommands",
-        for (auto& layer : layers)
-        {
-            for (auto& render_layer : layer)
-            {
-                scene_painter.Prime(render_layer.draw_color_list);
-                scene_painter.Prime(render_layer.mask_cover_list);
-                scene_painter.Prime(render_layer.mask_expose_list);
-            }
-        }
-    );
 
     gfx::Painter::RenderPassState mask_cover_state;
     mask_cover_state.render_pass = gfx::RenderPass::StencilPass;
