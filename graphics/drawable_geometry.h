@@ -18,6 +18,9 @@
 
 #include "config.h"
 
+#include <cstddef>
+#include <limits>
+
 #include "graphics/texture.h"
 #include "graphics/geometry.h"
 #include "graphics/geometry_buffer.h"
@@ -30,14 +33,33 @@ namespace gfx
     class DrawGeometryHandle
     {
     public:
+        // Address a sub-mesh in the geometry data by drawing only certain
+        // geometry draw commands.
+        struct SubMesh {
+            // which draw geometry draw command starts drawing the submesh.
+            size_t draw_cmd_start = 0;
+            // how many draw commands does this sub-mesh have. the default (max)
+            // indicates all the commands that follow.
+            size_t draw_cmd_count = std::numeric_limits<size_t>::max();
+        };
+
         static DrawGeometryHandle Null;
 
         DrawGeometryHandle(GeometryPtr geometry) noexcept
           : mGeometry(std::move(geometry))
         {}
+        DrawGeometryHandle(GeometryPtr geometry, SubMesh submesh) noexcept
+            : mGeometry(std::move(geometry))
+            , mSubMesh(submesh)
+        {}
         DrawGeometryHandle(GeometryPtr geometry, const Texture* texture) noexcept
           : mGeometry(std::move(geometry))
          , mTexture(texture)
+        {}
+        DrawGeometryHandle(GeometryPtr geometry, const Texture* texture, SubMesh submesh) noexcept
+          : mGeometry(std::move(geometry))
+         , mTexture(texture)
+         , mSubMesh(submesh)
         {}
         DrawGeometryHandle() = default;
 
@@ -68,6 +90,8 @@ namespace gfx
                 return mGeometry->GetName();
             return "";
         }
+        const SubMesh& GetSubMesh() const noexcept
+        { return mSubMesh; }
 
         static DrawGeometryHandle CreateErrorGeometry(const std::string& id,
             std::string message, std::string name,
@@ -75,6 +99,7 @@ namespace gfx
     private:
         GeometryPtr mGeometry;
         const Texture* mTexture = nullptr;
+        SubMesh mSubMesh;
     };
 
     class DrawGeometryBuffer

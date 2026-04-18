@@ -748,28 +748,6 @@ PolygonMeshInstance::PolygonMeshInstance(PolygonMeshClass&& klass)
     : PolygonMeshInstance(std::make_shared<PolygonMeshClass>(std::move(klass)))
 {}
 
-DrawCall PolygonMeshInstance::CreateSubMeshDraw(size_t draw_cmd_index) const
-{
-    const auto cmd_count = mClass->GetDrawCmdCount();
-    ASSERT(draw_cmd_index < cmd_count);
-
-    DrawCall::SubMesh submesh;
-    submesh.draw_cmd_start = draw_cmd_index;
-    submesh.draw_cmd_count = 1;
-    return DrawCall::MakeSimpleSubMeshDraw(submesh);
-}
-
-DrawCall PolygonMeshInstance::CreateSubMeshDraw(const std::string& submesh_key) const
-{
-    const auto* cmd = mClass->GetSubMeshDrawCmd(submesh_key);
-    ASSERT(cmd);
-
-    DrawCall::SubMesh submesh;
-    submesh.draw_cmd_start = cmd->draw_cmd_start;
-    submesh.draw_cmd_count = cmd->draw_cmd_count;
-    return DrawCall::MakeSimpleSubMeshDraw(submesh);
-}
-
 bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
     Device& device, ProgramState& program, RasterState& state) const
 {
@@ -824,6 +802,13 @@ DrawGeometryHandle PolygonMeshInstance::GetGeometry(const Environment& env, Devi
 
     if (mEffect)
     {
+        // not supported.
+        if (!std::holds_alternative<std::monostate>(mSubMeshKey))
+        {
+            GFX_PAINT_ERROR(("Submesh is not supported on polygon effect mesh."));
+            return DrawGeometryHandle::Null;
+        }
+
         // not supported.
         if (env.mesh_type == DrawableClass::MeshType::DebugMesh)
         {
@@ -899,11 +884,23 @@ DrawGeometryHandle PolygonMeshInstance::GetGeometry(const Environment& env, Devi
         std::string name;
         if (env.mesh_type == DrawableClass::MeshType::Wireframe)
         {
+            if (!std::holds_alternative<std::monostate>(mSubMeshKey))
+            {
+                GFX_PAINT_ERROR("Wireframe on polygon submesh is not supported.");
+                return DrawGeometryHandle::Null;
+            }
+
             id = base::FormatString("Wireframe %1", mClass->GetId());
             name = base::FormatString("%1 Wireframe", mClass->GetName());
         }
         else if (env.mesh_type == DrawableClass::MeshType::DebugMesh)
         {
+            if (!std::holds_alternative<std::monostate>(mSubMeshKey))
+            {
+                GFX_PAINT_ERROR("Debug mesh on polygon submesh is not supported.");
+                return DrawGeometryHandle::Null;
+            }
+
             const auto mesh_type = mClass->GetMeshType();
             if (mesh_type != MeshType::Model3DRenderMesh && mesh_type != MeshType::Simple3DRenderMesh)
                 return DrawGeometryHandle::Null;
@@ -929,22 +926,38 @@ DrawGeometryHandle PolygonMeshInstance::GetGeometry(const Environment& env, Devi
             name = mClass->GetName();
         } else BUG("Missing mesh type handling.");
 
+        DrawGeometryHandle::SubMesh submesh;
+        if (const auto* draw_cmd_index = std::get_if<size_t>(&mSubMeshKey))
+        {
+            const auto cmd_count = mClass->GetDrawCmdCount();
+            ASSERT(*draw_cmd_index < cmd_count);
+            submesh.draw_cmd_start = *draw_cmd_index;
+            submesh.draw_cmd_count = 1;
+        }
+        else if (const auto* submesh_name = std::get_if<std::string>(&mSubMeshKey))
+        {
+            const auto* cmd = mClass->GetSubMeshDrawCmd(*submesh_name);
+            ASSERT(cmd);
+            submesh.draw_cmd_start = cmd->draw_cmd_start;
+            submesh.draw_cmd_count = cmd->draw_cmd_count;
+        }
+
         if (auto geometry = device.FindGeometry(id))
         {
             if (static_content)
             {
                 if (!env.editing_mode)
-                    return geometry;
+                    return DrawGeometryHandle { std::move(geometry), submesh };
 
                 const auto content_hash = mClass->GetContentHash();
                 if (geometry->GetContentHash() == content_hash)
-                    return geometry;
+                    return DrawGeometryHandle { std::move(geometry), submesh };
             }
             else
             {
                 const auto content_hash = mClass->GetContentHash();
                 if (geometry->GetContentHash() == content_hash)
-                    return geometry;
+                    return DrawGeometryHandle {std::move(geometry), submesh };
             }
         }
         auto buffer = Construct(env);
@@ -959,7 +972,8 @@ DrawGeometryHandle PolygonMeshInstance::GetGeometry(const Environment& env, Devi
         args.content_hash = mClass->GetContentHash();
         args.content_name = std::move(name);
         args.usage = static_content ? BufferUsage::Static : BufferUsage::Dynamic;
-        return device.CreateGeometry(id, std::move(args));
+        auto geometry = device.CreateGeometry(id, std::move(args));
+        return DrawGeometryHandle { std::move(geometry), submesh };
     }
     return DrawGeometryHandle::Null;
 }
@@ -974,6 +988,9 @@ DrawGeometryBuffer PolygonMeshInstance::Construct(const Environment& env) const
 
     if (mEffect)
     {
+        if (!std::holds_alternative<std::monostate>(mSubMeshKey))
+            return DrawGeometryBuffer::Null;
+
         // not supported.
         if (env.mesh_type == DrawableClass::MeshType::DebugMesh)
             return DrawGeometryBuffer::Null;
@@ -1024,6 +1041,13 @@ DrawGeometryBuffer PolygonMeshInstance::Construct(const Environment& env) const
 
     if (env.mesh_type == DrawableClass::MeshType::Wireframe)
     {
+        // we're not yet supporting wireframe on submesh .
+        // the submesh command data is not directly applicable because
+        // the wireframe computation has a different command topology!
+        // so we'd need to compute the wireframe for the sub-mesh explicitly.
+        if (!std::holds_alternative<std::monostate>(mSubMeshKey))
+            return DrawGeometryBuffer::Null;
+
         GeometryBuffer wireframe;
         CreateWireframe(buffer, wireframe);
 
@@ -1034,6 +1058,13 @@ DrawGeometryBuffer PolygonMeshInstance::Construct(const Environment& env) const
     }
     else if (env.mesh_type == DrawableClass::MeshType::DebugMesh)
     {
+        // we're not yet supporting debug mesh on submesh.
+        // the submesh command data is not directly applicable because
+        // the wireframe computation has a different command topology!
+        // so we'd need to compute the debug  mesh for the sub-mesh explicitly.
+        if (!std::holds_alternative<std::monostate>(mSubMeshKey))
+            return DrawGeometryBuffer::Null;
+
         const auto mesh_type = mClass->GetMeshType();
         if (mesh_type != MeshType::Model3DRenderMesh && mesh_type != MeshType::Simple3DRenderMesh)
             return GeometryBuffer{};
