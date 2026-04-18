@@ -114,35 +114,6 @@ void DarkStyle::polish(QPalette &palette)
     }
     else if (style == "DETONATOR2")
     {
-        // ===== Base surfaces =====
-        palette.setColor(QPalette::Window, QColor(15, 18, 24));        // #0f1218
-        palette.setColor(QPalette::Base, QColor(11, 15, 22));          // #0b0f16 (inputs, views)
-        palette.setColor(QPalette::AlternateBase, QColor(34, 39, 49)); // #0e131d
-        palette.setColor(QPalette::ToolTipBase, QColor(28, 35, 48));   // #1c2330
-
-        // ===== Text =====
-        palette.setColor(QPalette::WindowText, QColor(233, 238, 247)); // #e9eef7
-        palette.setColor(QPalette::Text, QColor(220, 230, 245));       // #dce6f5
-        palette.setColor(QPalette::Disabled, QPalette::Text, QColor("#667084"));
-        palette.setColor(QPalette::ToolTipText, QColor(233, 238, 247));
-
-        // ===== Buttons =====
-        palette.setColor(QPalette::Button, QColor(22, 29, 41));        // #161d29
-        palette.setColor(QPalette::ButtonText, QColor(233, 238, 247));
-
-        // ===== Bright text (warnings, errors) =====
-        palette.setColor(QPalette::BrightText, QColor(255, 92, 122));  // error accent
-
-        // ===== Selection / highlight =====
-        palette.setColor(QPalette::Highlight, QColor(45, 212, 255));   // #2dd4ff
-        palette.setColor(QPalette::HighlightedText, QColor(6, 16, 24));// #061018
-
-        // ===== Links =====
-        palette.setColor(QPalette::Link, QColor(45, 212, 255));
-        palette.setColor(QPalette::LinkVisited, QColor(150, 120, 255));
-    }
-    else if (style == "Cyber Punk")
-    {
         palette.setColor(QPalette::Window, QColor("#1e1e1e"));
         palette.setColor(QPalette::Base, QColor("#232323"));
         palette.setColor(QPalette::Text, QColor(220, 220, 220));
@@ -167,9 +138,6 @@ void DarkStyle::polish(QApplication *app)
     static const char detonator2[] = {
 #include "Detonator2.qss"
     };
-    static const char cyber_punk[] = {
-#include "cyberpunk.qss"
-    };
 
     QString style = property("style").toString();
     if (style == "Fusion-Dark")
@@ -178,8 +146,6 @@ void DarkStyle::polish(QApplication *app)
         app->setStyleSheet(detonator);
     else if (style == "DETONATOR2")
         app->setStyleSheet(detonator2);
-    else if (style == "Cyber Punk")
-        app->setStyleSheet(cyber_punk);
 }
 
 void DarkStyle::unpolish(QApplication *app)
