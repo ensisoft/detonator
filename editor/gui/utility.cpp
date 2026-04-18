@@ -358,7 +358,6 @@ void PopulateQtStyles(QComboBox* cmb)
 
     cmb->addItem("DETONATOR"); //
     cmb->addItem("DETONATOR2");
-    cmb->addItem("Cyber Punk");
 
     // add Qt's built-in / plugin styles.
     const auto& styles = QStyleFactory::keys();
