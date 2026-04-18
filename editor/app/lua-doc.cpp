@@ -17,7 +17,9 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QApplication>
 #  include <QIcon>
+#  include <QPalette>
 #  include <QString>
 #  include <QStringList>
 #  include <QTextStream>
@@ -2528,8 +2530,12 @@ QString GenerateLuaDocHtml()
         table_methods[method.table].insert(method.name);
     }
 
+    const auto palette = QApplication::palette();
+    const auto accent  = palette.color(QPalette::Highlight).name();
+    const auto link    = palette.color(QPalette::Highlight).name();//darker(140).name();
+
     QTextStream stream(&html);
-    stream << R"(
+    stream << QString(R"(
 <!DOCTYPE html>
 <html>
   <head>
@@ -2554,7 +2560,7 @@ QString GenerateLuaDocHtml()
     }
     span.return {
        font-weight: bold;
-       color: orange;
+       color: %1;
     }
     span.method {
        font-style: italic;
@@ -2562,7 +2568,7 @@ QString GenerateLuaDocHtml()
     }
     span.arg {
        font-weight: bold;
-       color: orange;
+       color: %1;
     }
     span.table_name {
        font-weight: bold;
@@ -2571,14 +2577,14 @@ QString GenerateLuaDocHtml()
     }
 
     a {
-       color: darkOrange;
+       color: %2;
        font-style: italic;
     }
 
   </style>
   </head>
   <body>
-)";
+)").arg(accent, link);
 
     // build TOC with unordered lists.
     stream << "<ul>\n";
