@@ -241,9 +241,10 @@ namespace gfx
         { mRandom = value; }
         void SetPerceptualGeometry(const Perceptual3DGeometry& geometry) noexcept
         { mPerceptualGeometry = geometry; }
-
-        DrawCall CreateSubMeshDraw(size_t draw_cmd_index) const;
-        DrawCall CreateSubMeshDraw(const std::string& submesh_key) const;
+        void SetSubMeshKey(size_t draw_cmd_index)
+        { mSubMeshKey = draw_cmd_index; }
+        void SetSubMeshKey(std::string submesh_name)
+        { mSubMeshKey = std::move(submesh_name); }
 
         void SetFlag(Flags flag, bool on_off) noexcept override
         {
@@ -278,6 +279,7 @@ namespace gfx
         std::shared_ptr<const PolygonMeshClass> mClass;
         std::optional<Perceptual3DGeometry> mPerceptualGeometry;
         std::optional<DrawableEffect> mEffect;
+        std::variant<std::monostate, std::string, std::size_t> mSubMeshKey;
         std::uint32_t mFlags = 0;
         double mTime = 0.0;
         float mRandom = 0.0f;

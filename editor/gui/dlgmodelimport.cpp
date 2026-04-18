@@ -254,8 +254,8 @@ void DlgModelImport::PaintScene(gfx::Painter& painter, double secs)
         {
             gfx::PaintContext pc;
 
-            p.Draw(*draw.drawable, transform, *draw.material, state, program,
-                draw.drawable->CreateSubMeshDraw(draw.submesh_key));
+            p.Draw(*draw.drawable, transform, *draw.material, state, program);
+
             if (pc.HasErrors())
             {
                 // we likely have an issues such as textures not being found.
@@ -307,10 +307,10 @@ void DlgModelImport::LoadModel(const QString& file)
         ASSERT(material_info);
 
         auto drawable = std::make_unique<gfx::PolygonMeshInstance>(mesh);
+        drawable->SetSubMeshKey(drawable_info.name);
         auto material = std::make_unique<gfx::MaterialInstance>(material_info->klass);
 
         DrawablePair pair;
-        pair.submesh_key = drawable_info.name;
         pair.material = std::move(material);
         pair.drawable = std::move(drawable);
         mDrawState.push_back(std::move(pair));

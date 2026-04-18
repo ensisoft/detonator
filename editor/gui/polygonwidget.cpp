@@ -2361,8 +2361,8 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
                 color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::DarkGreen, 0.3f));
             else color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::DarkGreen, 1.0f));
 
-            painter.Draw(instance, view, gfx::MaterialInstance(color), state,
-                instance.CreateSubMeshDraw(mSelectedCommand));
+            instance.SetSubMeshKey(mSelectedCommand);
+            painter.Draw(instance, view, gfx::MaterialInstance(color), state);
         }
         if (mSelectedVertex != InvalidIndex)
         {
@@ -2371,8 +2371,8 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
             else color.SetUniform<gfx::kBaseColor>(gfx::Color4f(gfx::Color::DarkGreen, 1.0f));
 
             const auto draw_cmd_index = mState.builder->FindDrawCommand(mSelectedVertex);
-            painter.Draw(instance, view, gfx::MaterialInstance(color), state,
-                instance.CreateSubMeshDraw(draw_cmd_index));
+            instance.SetSubMeshKey(draw_cmd_index);
+            painter.Draw(instance, view, gfx::MaterialInstance(color), state);
         }
     }
 
