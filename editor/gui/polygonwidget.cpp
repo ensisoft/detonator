@@ -2479,12 +2479,6 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
         floor.MoveTo(-tile_size, -tile_size);
         tile_painter.Draw(gfx::Rectangle(), floor, checkerboard);
 
-        gfx::PolygonMeshInstance instance(poly);
-        gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
-        geometry.enable_perceptual_3D_override  = true;
-        instance.SetPerceptualGeometry(geometry);
-        //tile_painter.Draw(instance, floor, checkerboard);
-
         const auto& projection_matrix_3d = tile_painter.GetProjMatrix();
         const auto& view_matrix_3d = tile_painter.GetViewMatrix();
 
@@ -2513,10 +2507,9 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
     axonometric_model_to_view.Resize(tile_base_size);
 
     gfx::PolygonMeshInstance instance(poly);
-    gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
-    geometry.axonometric_model_view = axonometric_model_to_view;
-    geometry.enable_perceptual_3D_override = false;
-    instance.SetPerceptualGeometry(geometry);
+    gfx::PolygonMeshInstance::Perceptual3DGeometry draw_geometry;
+    draw_geometry.axonometric_model_view = axonometric_model_to_view;
+    draw_geometry.enable_perceptual_3D_override = false;
 
     gfx::BasicLightProgram lit_program;
     if (mLightType != LightType::None)
@@ -2552,8 +2545,15 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
     gfx::Transform render_model_to_view;
     render_model_to_view.Resize(view_width, view_height);
     if (mBlueprint)
-        painter.Draw(instance, render_model_to_view, *mBlueprint, state, lit_program);
-    else painter.Draw(instance, render_model_to_view, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, lit_program);
+    {
+        painter.Draw(instance, render_model_to_view, *mBlueprint, state, lit_program,
+            instance.CreatePerceptualDraw(draw_geometry));
+    }
+    else
+    {
+        painter.Draw(instance, render_model_to_view, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, lit_program,
+            instance.CreatePerceptualDraw(draw_geometry));
+    }
 
     if (mMainView == ViewType::LitView)
     {
@@ -2629,18 +2629,20 @@ void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassH
     tile_painter.Draw(gfx::Rectangle(), model, checkerboard, state, flat_program);
 
     gfx::PolygonMeshInstance instance(polygon);
-    gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
-    geometry.enable_perceptual_3D_override  = true;
-    instance.SetPerceptualGeometry(geometry);
+    gfx::PolygonMeshInstance::Perceptual3DGeometry draw_geometry;
+    draw_geometry.enable_perceptual_3D_override  = true;
+
     if (mWireframe)
     {
         tile_painter.Draw(gfx::WireframePtr(&instance), model,
-            gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, flat_program);
+            gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, flat_program,
+            instance.CreatePerceptualDraw(draw_geometry));
     }
     else
     {
         tile_painter.Draw(instance, model,
-            gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, flat_program);
+            gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, flat_program,
+            instance.CreatePerceptualDraw(draw_geometry));
     }
 
     if (mMainView == ViewType::Axo3DView)
