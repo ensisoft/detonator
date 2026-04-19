@@ -895,7 +895,7 @@
           <enum>QTabWidget::North</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <property name="documentMode">
           <bool>false</bool>
@@ -1192,7 +1192,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QProgressBar" name="paletteCapacity">
+               <widget class="QProgressBar" name="paletteUsage">
                 <property name="maximumSize">
                  <size>
                   <width>16777215</width>
@@ -1200,10 +1200,10 @@
                  </size>
                 </property>
                 <property name="value">
-                 <number>24</number>
+                 <number>0</number>
                 </property>
                 <property name="format">
-                 <string>Palette Capacity %p%</string>
+                 <string>Palette Usage %p%</string>
                 </property>
                </widget>
               </item>
