@@ -1606,11 +1606,13 @@ void TilemapWidget::on_btnNewLayer_clicked()
     layer_class->SetCache(dlg.GetLayerCache());
     layer_class->SetResolution(dlg.GetLayerResolution());
 
+    // set the default values. the default tile value is used when
+    // there's no actual tile data available and new block of data
+    // must be initialized.
     if (layer_class->HasRenderComponent())
     {
-        const auto& material = dlg.GetMaterialId();
-        const auto tile_index = dlg.GetTileIndex();
-        if (material.empty())
+        const auto palette_index = dlg.GetTilePaletteIndex();
+        if (palette_index == -1)
         {
             // the max palette index value indicates "no value set"
             const auto max_palette_index = layer_class->GetMaxPaletteIndex();
@@ -1618,17 +1620,15 @@ void TilemapWidget::on_btnNewLayer_clicked()
         }
         else
         {
-            // set the first material in the palette at index to the
-            // material that was chosen in the new layer dialog.
-            layer_class->SetDefaultTilePaletteMaterialIndex(0);
-            layer_class->SetPaletteMaterialId(material, 0);
-            layer_class->SetPaletteMaterialTileIndex(tile_index, 0);
+            layer_class->SetDefaultTilePaletteMaterialIndex(palette_index);
         }
     }
     if (layer_class->HasDataComponent())
     {
-        layer_class->SetDefaultTileDataValue(dlg.GetDataValue());
+        const auto data_value = dlg.GetTileDataValue();
+        layer_class->SetDefaultTileDataValue(data_value);
     }
+
     mModel->AddLayer(layer_class);
 
     // create scratch layer data buffer for storing the edits
@@ -2273,11 +2273,14 @@ void TilemapWidget::DisplayLayerProperties()
 
     if (const auto* layer = GetCurrentLayer())
     {
-        const auto type = layer->GetType();
-        const auto palette_max = game::TilemapLayerClass::GetMaxPaletteIndex(type);
-        const auto palette_size = layer->GetCurrentPaletteSize();
-        SetMinMax(mUI.paletteUsage, 0, palette_max);
-        SetValue(mUI.paletteUsage, palette_size);
+        if (layer->HasRenderComponent())
+        {
+            const auto type = layer->GetType();
+            const auto palette_max = game::TilemapLayerClass::GetMaxPaletteIndex(type);
+            const auto palette_size = layer->GetCurrentPaletteSize();
+            SetMinMax(mUI.paletteUsage, 0, palette_max);
+            SetValue(mUI.paletteUsage, palette_size);
+        }
 
         const auto* inst = GetCurrentLayerInstance();
 

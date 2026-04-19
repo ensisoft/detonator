@@ -541,7 +541,7 @@ std::size_t TilemapLayerClass::GetHash() const noexcept
     hash = base::hash_combine(hash, GetType());
     hash = base::hash_combine(hash, mCache);
     hash = base::hash_combine(hash, mResolution);
-    hash = base::hash_combine(hash, mDefault);
+    hash = base::hash_combine(hash, mDefaultTile);
     hash = base::hash_combine(hash, mDepth);
     hash = base::hash_combine(hash, mLayer);
 
@@ -644,14 +644,14 @@ void TilemapLayerClass::SetDefaultTilePaletteMaterialIndex(uint8_t index)
 {
     std::visit([&index](auto& tile) {
         ASSERT(detail::SetTilePaletteIndex(tile, index));
-    }, mDefault);
+    }, mDefaultTile);
 }
 
 void TilemapLayerClass::SetDefaultTileDataValue(int32_t value)
 {
     std::visit([&value](auto& tile) {
         ASSERT(detail::SetTileValue(tile, value));
-    }, mDefault);
+    }, mDefaultTile);
 }
 
 uint8_t TilemapLayerClass::GetDefaultTilePaletteMaterialIndex() const
@@ -659,7 +659,7 @@ uint8_t TilemapLayerClass::GetDefaultTilePaletteMaterialIndex() const
     uint8_t index = 0;
     std::visit([&index](const auto& tile) {
         ASSERT(detail::GetTilePaletteIndex(tile, &index));
-    }, mDefault);
+    }, mDefaultTile);
     return index;
 }
 
@@ -668,7 +668,7 @@ int32_t TilemapLayerClass::GetDefaultTileDataValue() const
     int32_t value = 0;
     std::visit([&value](const auto& tile) {
         ASSERT(detail::GetTileValue(tile, &value));
-    }, mDefault);
+    }, mDefaultTile);
     return value;
 }
 
@@ -698,27 +698,27 @@ bool TilemapLayerClass::TestPaletteFlag(PaletteFlags flag, size_t palette_index)
 void TilemapLayerClass::SetType(Type type) noexcept
 {
     if (type == Type::Render)
-        mDefault = detail::Render_Tile {};
+        mDefaultTile = detail::Render_Tile {};
     else if (type == Type::Render_DataSInt4)
-        mDefault = detail::Render_Data_Tile_UInt4 {};
+        mDefaultTile = detail::Render_Data_Tile_UInt4 {};
     else if (type == Type::Render_DataUInt4)
-        mDefault = detail::Render_Data_Tile_UInt4 {};
+        mDefaultTile = detail::Render_Data_Tile_UInt4 {};
     else if (type == Type::Render_DataSInt8)
-        mDefault = detail::Render_Data_Tile_SInt8 {};
+        mDefaultTile = detail::Render_Data_Tile_SInt8 {};
     else if (type == Type::Render_DataUInt8)
-        mDefault = detail::Render_Data_Tile_UInt8 {};
+        mDefaultTile = detail::Render_Data_Tile_UInt8 {};
     else if (type == Type::Render_DataSInt24)
-        mDefault = detail::Render_Data_Tile_UInt24 {};
+        mDefaultTile = detail::Render_Data_Tile_UInt24 {};
     else if (type == Type::Render_DataUInt24)
-        mDefault = detail::Render_Data_Tile_UInt24 {};
+        mDefaultTile = detail::Render_Data_Tile_UInt24 {};
     else if (type == Type::DataSInt8)
-        mDefault = detail::Data_Tile_SInt8 {};
+        mDefaultTile = detail::Data_Tile_SInt8 {};
     else if (type == Type::DataUInt8)
-        mDefault = detail::Data_Tile_UInt8 {};
+        mDefaultTile = detail::Data_Tile_UInt8 {};
     else if (type == Type::DataSInt16)
-        mDefault = detail::Data_Tile_SInt16 {};
+        mDefaultTile = detail::Data_Tile_SInt16 {};
     else if (type == Type::DataUInt16)
-        mDefault = detail::Data_Tile_UInt16 {};
+        mDefaultTile = detail::Data_Tile_UInt16 {};
     else BUG("Missing tilemap layer type mapping.");
 }
 
@@ -728,7 +728,7 @@ TilemapLayerClass::Type TilemapLayerClass::GetType() const noexcept
     std::visit([&ret](const auto& variant_value) {
         using VariantValueType = std::decay_t<decltype(variant_value)>;
         ret = detail::TilemapLayerTraits<VariantValueType>::LayerType;
-    }, mDefault);
+    }, mDefaultTile);
     return ret;
 }
 
@@ -737,7 +737,7 @@ const void* TilemapLayerClass::GetDefaultTileValue() const
     const void* ret = nullptr;
     std::visit([&ret](const auto& variant_value) {
         ret = &variant_value;
-    }, mDefault);
+    }, mDefaultTile);
     return ret;
 }
 
@@ -749,14 +749,14 @@ void TilemapLayerClass::Initialize(unsigned map_width, unsigned map_height,
         std::visit([&data, this, map_width, map_height](const auto& variant_value) {
             using TileType = std::decay_t<decltype(variant_value)>;
             DenseTilemapLayer<TileType>::Initialize(*this, data, map_width, map_height);
-        }, mDefault);
+        }, mDefaultTile);
     }
     else
     {
         std::visit([&data, this, map_width, map_height](const auto& variant_value) {
             using TileType = std::decay_t<decltype(variant_value)>;
             SparseTilemapLayer<TileType>::Initialize(*this, data, map_width, map_height);
-        }, mDefault);
+        }, mDefaultTile);
     }
 }
 
@@ -770,14 +770,14 @@ void TilemapLayerClass::ResizeCopy(const USize& src_map_size,
         std::visit([&src_map_size, &dst_map_size, &src, &dst, this](const auto& variant_value) {
             using TileType = std::decay_t<decltype(variant_value)>;
             DenseTilemapLayer<TileType>::ResizeCopy(*this, src_map_size, dst_map_size, src, dst);
-        }, mDefault);
+        }, mDefaultTile);
     }
     else
     {
         std::visit([&src_map_size, &dst_map_size, &src, &dst, this](const auto& variant_value) {
             using TileType = std::decay_t<decltype(variant_value)>;
             SparseTilemapLayer<TileType>::ResizeCopy(*this, src_map_size, dst_map_size, src, dst);
-        }, mDefault);
+        }, mDefaultTile);
     }
 }
 
@@ -818,7 +818,7 @@ void TilemapLayerClass::IntoJson(data::Writer& data) const
     std::visit([&value](auto variant_value) {
         ASSERT(sizeof(variant_value) <= 4);
         std::memcpy(&value, &variant_value, sizeof(variant_value));
-    }, mDefault);
+    }, mDefaultTile);
     const unsigned hi = (value >> 16) & 0xffff;
     const unsigned lo = (value >> 0 ) & 0xffff;
     auto chunk = data.NewWriteChunk();
@@ -890,7 +890,7 @@ bool TilemapLayerClass::FromJson(const data::Reader& data)
     const uint32_t value = ((hi & 0xffff) << 16) | (lo & 0xffff);
     std::visit([&value](auto& variant_value) {
         std::memcpy(&variant_value, &value, sizeof(variant_value));
-    }, mDefault);
+    }, mDefaultTile);
 
     return ok;
 }
