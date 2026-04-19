@@ -2184,8 +2184,8 @@ void TilemapWidget::PaletteMaterialChanged(const PaletteMaterial* material)
         const auto type = layer->GetType();
         const auto palette_size = layer->GetCurrentPaletteSize();
         const auto palette_max = game::TilemapLayerClass::GetMaxPaletteIndex(type);
-        SetMinMax(mUI.paletteCapacity, 0, palette_max);
-        SetValue(mUI.paletteCapacity, palette_max - palette_size);
+        SetMinMax(mUI.paletteUsage, 0, palette_max);
+        SetValue(mUI.paletteUsage, palette_size);
     }
 }
 
@@ -2269,8 +2269,16 @@ void TilemapWidget::DisplayLayerProperties()
     SetEnabled(mUI.layerProperties,     false);
     SetEnabled(mUI.layerPalette,        false);
 
+    SetValue(mUI.paletteUsage, 0);
+
     if (const auto* layer = GetCurrentLayer())
     {
+        const auto type = layer->GetType();
+        const auto palette_max = game::TilemapLayerClass::GetMaxPaletteIndex(type);
+        const auto palette_size = layer->GetCurrentPaletteSize();
+        SetMinMax(mUI.paletteUsage, 0, palette_max);
+        SetValue(mUI.paletteUsage, palette_size);
+
         const auto* inst = GetCurrentLayerInstance();
 
         SetValue(mUI.layerName,          layer->GetName());
@@ -2368,8 +2376,8 @@ void TilemapWidget::UpdateLayerPalette()
     }
 
     const auto palette_size = layer->GetCurrentPaletteSize();
-    SetMinMax(mUI.paletteCapacity, 0, palette_max);
-    SetValue(mUI.paletteCapacity, palette_max - palette_size);
+    SetMinMax(mUI.paletteUsage, 0, palette_max);
+    SetValue(mUI.paletteUsage, palette_size);
 }
 
 void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
