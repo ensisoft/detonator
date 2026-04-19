@@ -255,6 +255,8 @@ namespace gfx
             return base::TestFlag(mFlags, flag);
         }
 
+        DrawCall CreatePerceptualDraw(const Perceptual3DGeometry& geometry) const;
+
         bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
             Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;

@@ -41,6 +41,16 @@
 #include "graphics/shader_source.h"
 #include "graphics/paint_log.h"
 
+namespace gfx {
+    struct Perceptual3DDraw : public gfx::DrawCallBase {
+        gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
+        bool IsInstanced() const override
+        {
+            return false;
+        }
+    };
+} // namespace
+
 namespace gfx
 {
 
@@ -748,15 +758,36 @@ PolygonMeshInstance::PolygonMeshInstance(PolygonMeshClass&& klass)
     : PolygonMeshInstance(std::make_shared<PolygonMeshClass>(std::move(klass)))
 {}
 
+DrawCall PolygonMeshInstance::CreatePerceptualDraw(const Perceptual3DGeometry& geometry) const
+{
+      auto draw = std::make_shared<Perceptual3DDraw>();
+      draw->geometry = geometry;
+      return DrawCall { std::move(draw) };
+}
+
 bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
     Device& device, ProgramState& program, RasterState& state) const
 {
     unsigned flags = mFlags;
 
-    if (const auto* geom = base::GetOpt(mPerceptualGeometry))
+    const auto type = GetMeshType();
+    if (type == MeshType::Dimetric2DRenderMesh || type == MeshType::Isometric2DRenderMesh)
     {
-        if (geom->enable_perceptual_3D_override)
+        const Perceptual3DGeometry* perceptual_geometry = nullptr;
+        if (const auto*  perceptual_draw = draw.Get<Perceptual3DDraw>())
+            perceptual_geometry = &perceptual_draw->geometry;
+        else if (mPerceptualGeometry.has_value())
+            perceptual_geometry = &mPerceptualGeometry.value();
+
+        ASSERT(perceptual_geometry);
+
+        if (perceptual_geometry->enable_perceptual_3D_override)
             flags |= static_cast<unsigned>(DrawableFlags::EnablePerceptual3DOverride);
+
+        if (!perceptual_geometry->enable_perceptual_3D_override)
+        {
+            program.SetUniform("kAxonometricModelViewMatrix", perceptual_geometry->axonometric_model_view);
+        }
     }
 
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
@@ -778,15 +809,6 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, const DrawCa
         program.SetInstanceData(std::move(instance_data));
     }
 
-    const auto type = GetMeshType();
-    if (type == MeshType::Dimetric2DRenderMesh || type == MeshType::Isometric2DRenderMesh)
-    {
-        ASSERT(mPerceptualGeometry.has_value());
-        const auto& geometry = mPerceptualGeometry.value();
-
-        if (!geometry.enable_perceptual_3D_override)
-            program.SetUniform("kAxonometricModelViewMatrix", geometry.axonometric_model_view);
-    }
     return true;
 }
 
