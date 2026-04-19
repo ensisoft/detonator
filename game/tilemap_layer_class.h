@@ -80,7 +80,7 @@ namespace game
             UpScale4,
             UpScale8
         };
-        using DefaultValue = std::variant<
+        using TileDefaultValue = std::variant<
                 detail::Data_Tile_SInt8,
                 detail::Data_Tile_UInt8,
                 detail::Data_Tile_SInt16,
@@ -195,21 +195,21 @@ namespace game
         template<typename T>
         const T& GetDefaultTileValue() const
         {
-            ASSERT(std::holds_alternative<T>(mDefault));
-            return std::get<T>(mDefault);
+            ASSERT(std::holds_alternative<T>(mDefaultTile));
+            return std::get<T>(mDefaultTile);
         }
         template<typename T>
         T& GetDefaultTileValue()
         {
-            ASSERT(std::holds_alternative<T>(mDefault));
-            return std::get<T>(mDefault);
+            ASSERT(std::holds_alternative<T>(mDefaultTile));
+            return std::get<T>(mDefaultTile);
         }
 
         template<typename T>
         void SetDefaultTileValue(const T& val)
         {
-            ASSERT(std::holds_alternative<T>(mDefault));
-            mDefault = val;
+            ASSERT(std::holds_alternative<T>(mDefaultTile));
+            mDefaultTile = val;
         }
         const void* GetDefaultTileValue() const;
 
@@ -275,7 +275,7 @@ namespace game
         Storage mStorage = Storage::Dense;
         Cache mCache = Cache::Cache64;
         Resolution mResolution = Resolution::Original;
-        DefaultValue  mDefault;
+        TileDefaultValue  mDefaultTile;
         int mDepth = 0;
         unsigned mLayer = 0;
     };

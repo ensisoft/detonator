@@ -895,7 +895,7 @@
           <enum>QTabWidget::North</enum>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <property name="documentMode">
           <bool>false</bool>
@@ -917,50 +917,6 @@
               <bool>true</bool>
              </property>
              <layout class="QGridLayout" name="gridLayout_2">
-              <item row="9" column="0">
-               <widget class="QLabel" name="label_10">
-                <property name="text">
-                 <string>Cache</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="1" colspan="2">
-               <widget class="QComboBox" name="cmbLayerResolution">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="12" column="0">
-               <widget class="QLabel" name="label_34">
-                <property name="text">
-                 <string>Flags</string>
-                </property>
-               </widget>
-              </item>
-              <item row="12" column="1">
-               <widget class="QCheckBox" name="chkLayerVisible">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Visible</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1" colspan="2">
-               <widget class="QLineEdit" name="layerName">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
               <item row="3" column="1" colspan="2">
                <widget class="QLineEdit" name="layerFileName">
                 <property name="enabled">
@@ -980,10 +936,102 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_23">
+              <item row="16" column="1">
+               <spacer name="verticalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>139</width>
+                  <height>39</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="1" colspan="2">
+               <widget class="QLineEdit" name="layerName">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1" colspan="2">
+               <widget class="QComboBox" name="cmbLayerStorage">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="11" column="0">
+               <widget class="QLabel" name="label_8">
                 <property name="text">
-                 <string>File</string>
+                 <string>Layer</string>
+                </property>
+               </widget>
+              </item>
+              <item row="13" column="1">
+               <widget class="QCheckBox" name="chkLayerVisible">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Visible</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_24">
+                <property name="text">
+                 <string>Size</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>Type</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="0">
+               <widget class="QLabel" name="label_11">
+                <property name="text">
+                 <string>Resolution</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="1" colspan="2">
+               <widget class="QComboBox" name="cmbLayerCache">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="1" colspan="2">
+               <widget class="QComboBox" name="cmbLayerResolution">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="10" column="0">
+               <widget class="QLabel" name="label_33">
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string>ID</string>
                 </property>
                </widget>
               </item>
@@ -997,49 +1045,6 @@
                 </property>
                 <property name="text">
                  <string>Name</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1" colspan="2">
-               <widget class="QLineEdit" name="layerID">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="label_24">
-                <property name="text">
-                 <string>Size</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="0">
-               <widget class="QLabel" name="label_7">
-                <property name="text">
-                 <string>Storage</string>
-                </property>
-               </widget>
-              </item>
-              <item row="10" column="1" colspan="2">
-               <widget class="QSpinBox" name="layerDepth">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimum">
-                 <number>-99</number>
                 </property>
                </widget>
               </item>
@@ -1062,27 +1067,7 @@
                 </property>
                </widget>
               </item>
-              <item row="13" column="1">
-               <widget class="QCheckBox" name="chkLayerEnabled">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Enabled</string>
-                </property>
-               </widget>
-              </item>
-              <item row="10" column="0">
-               <widget class="QLabel" name="label_33">
-                <property name="text">
-                 <string>Height</string>
-                </property>
-               </widget>
-              </item>
-              <item row="14" column="1">
+              <item row="15" column="1">
                <widget class="QCheckBox" name="chkLayerReadOnly">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1095,10 +1080,33 @@
                 </property>
                </widget>
               </item>
-              <item row="9" column="1" colspan="2">
-               <widget class="QComboBox" name="cmbLayerCache">
-                <property name="enabled">
-                 <bool>true</bool>
+              <item row="11" column="1" colspan="2">
+               <widget class="QSpinBox" name="layerIndex"/>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_23">
+                <property name="text">
+                 <string>File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="10" column="1" colspan="2">
+               <widget class="QSpinBox" name="layerDepth">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimum">
+                 <number>-99</number>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="label_7">
+                <property name="text">
+                 <string>Storage</string>
                 </property>
                </widget>
               </item>
@@ -1109,63 +1117,55 @@
                 </property>
                </widget>
               </item>
-              <item row="15" column="1">
-               <spacer name="verticalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>139</width>
-                  <height>39</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="8" column="0">
-               <widget class="QLabel" name="label_11">
+              <item row="9" column="0">
+               <widget class="QLabel" name="label_10">
                 <property name="text">
-                 <string>Resolution</string>
+                 <string>Cache</string>
                 </property>
                </widget>
               </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_6">
-                <property name="text">
-                 <string>Type</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="1" colspan="2">
-               <widget class="QComboBox" name="cmbLayerStorage">
+              <item row="1" column="1" colspan="2">
+               <widget class="QLineEdit" name="layerID">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_14">
-                <property name="text">
-                 <string>ID</string>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
-              <item row="11" column="0">
-               <widget class="QLabel" name="label_8">
+              <item row="14" column="1">
+               <widget class="QCheckBox" name="chkLayerEnabled">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
-                 <string>Layer</string>
+                 <string>Enabled</string>
                 </property>
                </widget>
               </item>
-              <item row="11" column="1" colspan="2">
-               <widget class="QSpinBox" name="layerIndex"/>
+              <item row="13" column="0">
+               <widget class="QLabel" name="label_34">
+                <property name="text">
+                 <string>Flags</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tabLayerPaelette">
+         <widget class="QWidget" name="tabLayerPalette">
           <attribute name="title">
            <string>Layer Palette</string>
           </attribute>

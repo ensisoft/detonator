@@ -27,6 +27,7 @@
 
 #include "base/assert.h"
 #include "game/tilemap.h"
+#include "game/tilemap_types.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgmaterial.h"
@@ -147,13 +148,10 @@ namespace gui
             SetValue(mUI.cmbLayerStorage,    game::TilemapLayerClass::Storage::Dense);
             SetValue(mUI.cmbLayerCache,      game::TilemapLayerClass::Cache::Automatic);
             SetValue(mUI.cmbLayerResolution, game::TilemapLayerClass::Resolution::Original);
-            SetList(mUI.cmbMaterial, mWorkspace->ListAllMaterials());
-            SetValue(mUI.cmbMaterial, -1);
-            SetRange(mUI.value, -0x800000, 0xFFFFFF); // min is 24 bit signed and max is 24bit unsigned
+            SetRange(mUI.tilePaletteIndex, -1, 254);
+            SetRange(mUI.tileDataValue, -0x800000, 0xFFFFFF); // min is 24 bit signed and max is 24bit unsigned
             on_cmbLayerType_currentIndexChanged(0);
         }
-        std::string GetMaterialId() const
-        { return GetItemId(mUI.cmbMaterial); }
         std::string GetName() const
         { return GetValue(mUI.layerName); }
         game::TilemapLayerClass::Type GetLayerType() const
@@ -164,10 +162,10 @@ namespace gui
         { return GetValue(mUI.cmbLayerCache); }
         game::TilemapLayerClass::Resolution GetLayerResolution() const
         { return GetValue(mUI.cmbLayerResolution); }
-        std::int32_t GetDataValue() const
-        { return GetValue(mUI.value); }
-        std::uint8_t GetTileIndex() const
-        { return GetValue(mUI.tileIndex); }
+        std::int32_t GetTileDataValue() const
+        { return GetValue(mUI.tileDataValue); }
+        std::int32_t GetTilePaletteIndex() const
+        { return GetValue(mUI.tilePaletteIndex); }
     private slots:
         void on_btnAccept_clicked()
         {
@@ -179,29 +177,38 @@ namespace gui
         {
             reject();
         }
-        void on_btnResetMaterial_clicked()
+        void on_btnResetPaletteIndex_clicked()
         {
-            SetValue(mUI.cmbMaterial, -1);
-            SetValue(mUI.tileIndex, 0);
-        }
-        void on_btnSelectMaterial_clicked()
-        {
-            DlgMaterial dlg(this, mWorkspace, false);
-            dlg.SetSelectedMaterialId(GetItemId(mUI.cmbMaterial));
-            dlg.SetTileIndex(GetValue(mUI.tileIndex));
-            if (dlg.exec() == QDialog::Rejected)
-                return;
-            SetValue(mUI.cmbMaterial, ListItemId(dlg.GetSelectedMaterialId()));
-            SetValue(mUI.tileIndex, dlg.GetTileIndex());
+            SetValue(mUI.tilePaletteIndex, -1);
         }
         void on_cmbLayerType_currentIndexChanged(int)
         {
             const game::TilemapLayerClass::Type type = GetValue(mUI.cmbLayerType);
-            const bool render = game::TilemapLayerClass::HasRenderComponent(type);
-            const bool data   = game::TilemapLayerClass::HasDataComponent(type);
-            SetEnabled(mUI.cmbMaterial, render);
-            SetEnabled(mUI.btnSelectMaterial, render);
-            SetEnabled(mUI.value, data);
+            if (game::TilemapLayerClass::HasRenderComponent(type))
+            {
+                SetEnabled(mUI.tilePaletteIndex, true);
+            }
+            else
+            {
+                SetValue(mUI.tilePaletteIndex, -1);
+                SetEnabled(mUI.tilePaletteIndex, false);
+            }
+
+            if ( game::TilemapLayerClass::HasDataComponent(type))
+            {
+                const auto [data_min, data_max] = game::detail::GetTileDataRange(type);
+                const uint32_t value = GetValue(mUI.tileDataValue);
+                if (value < data_min || value > data_max)
+                    SetValue(mUI.tileDataValue, 0);
+
+                SetRange(mUI.tileDataValue, data_min, data_max);
+                SetEnabled(mUI.tileDataValue, true);
+            }
+            else
+            {
+                SetValue(mUI.tileDataValue, 0);
+                SetEnabled(mUI.tileDataValue, false);
+            }
         }
     private:
         Ui::DlgTileLayer mUI;

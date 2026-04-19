@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>547</width>
-    <height>767</height>
+    <width>475</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -85,7 +85,7 @@
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Dense storage allocates memory for every tile even if tile has no data set. &lt;br/&gt;Use this when you expect to have most tiles contain data.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Sparse storage allocates memory in smaller blocks and saves on memory when large clusters of adjacent tiles have no data set. &lt;br/&gt;Use this when you expect to have just a little bit of scattered data.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Dense storage allocates memory for every tile even if tile has no data set. Use this when you expect to have most tiles contain data.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Sparse storage allocates memory in smaller blocks and saves on memory when large clusters of adjacent tiles have no data set. &lt;br/&gt;Use this when you expect to have just a little bit of scattered data.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="textFormat">
          <enum>Qt::RichText</enum>
@@ -137,7 +137,7 @@
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer_3">
+    <spacer name="verticalSpacer_4">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -150,130 +150,83 @@
     </spacer>
    </item>
    <item>
-    <spacer name="verticalSpacer_5">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_5">
+    <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>Default material (applies when no material set on tile)</string>
+      <string>Tile defaults to initialize data with</string>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_6">
-      <property name="topMargin">
-       <number>4</number>
-      </property>
-      <property name="bottomMargin">
-       <number>20</number>
-      </property>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QComboBox" name="cmbMaterial">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="placeholderText">
-           <string>Nothing</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="tileIndex">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="btnSelectMaterial">
-          <property name="toolTip">
-           <string>Select material</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
-          </property>
-          <property name="arrowType">
-           <enum>Qt::NoArrow</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="btnSetMaterialParams">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="toolTip">
-           <string>Edit material parameters</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="btnResetMaterial">
-          <property name="toolTip">
-           <string>Reset entity script to nothing</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
-          <property name="arrowType">
-           <enum>Qt::NoArrow</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="tilePaletteIndex">
+        <property name="specialValueText">
+         <string>Nothing</string>
+        </property>
+        <property name="prefix">
+         <string>Palette Index </string>
+        </property>
+        <property name="minimum">
+         <number>-1</number>
+        </property>
+        <property name="maximum">
+         <number>254</number>
+        </property>
+        <property name="value">
+         <number>-1</number>
+        </property>
+       </widget>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_6">
-     <property name="title">
-      <string>Default data value  (applies when no data value set on tile)</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_7">
-      <item>
-       <widget class="QSpinBox" name="value">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>Data value</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_12">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Palette</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="tileDataValue">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="stepType">
          <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QToolButton" name="btnResetPaletteIndex">
+        <property name="toolTip">
+         <string>Reset entity script to nothing</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../resource/resource.qrc">
+          <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+        </property>
+        <property name="autoRaise">
+         <bool>false</bool>
+        </property>
+        <property name="arrowType">
+         <enum>Qt::NoArrow</enum>
         </property>
        </widget>
       </item>
@@ -281,7 +234,7 @@
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer_4">
+    <spacer name="verticalSpacer_3">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -332,11 +285,9 @@
   <tabstop>cmbLayerStorage</tabstop>
   <tabstop>cmbLayerCache</tabstop>
   <tabstop>cmbLayerResolution</tabstop>
-  <tabstop>cmbMaterial</tabstop>
-  <tabstop>btnSelectMaterial</tabstop>
-  <tabstop>btnSetMaterialParams</tabstop>
-  <tabstop>btnResetMaterial</tabstop>
-  <tabstop>value</tabstop>
+  <tabstop>tilePaletteIndex</tabstop>
+  <tabstop>btnResetPaletteIndex</tabstop>
+  <tabstop>tileDataValue</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>

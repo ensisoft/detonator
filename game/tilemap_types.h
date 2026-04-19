@@ -20,9 +20,12 @@
 
 #include <limits>
 #include <cstdint>
+#include <tuple>
 
 #include "warnpush.h"
 #include "warnpop.h"
+
+#include "base/assert.h"
 
 namespace game
 {
@@ -279,6 +282,35 @@ namespace game
             constexpr float range   = max_val - min_val;
             const float val = tile.data;
             return (val - min_val) / range;
+        }
+
+        inline std::tuple<int32_t, int32_t> GetTileDataRange(TilemapLayerType type)
+        {
+            switch (type)
+            {
+                case TilemapLayerType::Render_DataSInt4:
+                    return {TilemapLayerTraits<Render_Data_Tile_SInt4>::MinValue,  TilemapLayerTraits<Render_Data_Tile_SInt4>::MaxValue};
+                case TilemapLayerType::Render_DataSInt8:
+                    return {TilemapLayerTraits<Render_Data_Tile_SInt8>::MinValue,  TilemapLayerTraits<Render_Data_Tile_SInt8>::MaxValue};
+                case TilemapLayerType::Render_DataSInt24:
+                    return {TilemapLayerTraits<Render_Data_Tile_SInt24>::MinValue, TilemapLayerTraits<Render_Data_Tile_SInt24>::MaxValue};
+                case TilemapLayerType::Render_DataUInt4:
+                    return {TilemapLayerTraits<Render_Data_Tile_UInt4>::MinValue,  TilemapLayerTraits<Render_Data_Tile_UInt4>::MaxValue};
+                case TilemapLayerType::Render_DataUInt8:
+                    return {TilemapLayerTraits<Render_Data_Tile_UInt8>::MinValue,  TilemapLayerTraits<Render_Data_Tile_UInt8>::MaxValue};
+                case TilemapLayerType::Render_DataUInt24:
+                    return {TilemapLayerTraits<Render_Data_Tile_UInt24>::MinValue, TilemapLayerTraits<Render_Data_Tile_UInt24>::MaxValue};
+                case TilemapLayerType::DataSInt8:
+                    return {TilemapLayerTraits<Data_Tile_SInt8>::MinValue,  TilemapLayerTraits<Data_Tile_SInt8>::MaxValue};
+                case TilemapLayerType::DataSInt16:
+                    return {TilemapLayerTraits<Data_Tile_SInt16>::MinValue, TilemapLayerTraits<Data_Tile_SInt16>::MaxValue};
+                case TilemapLayerType::DataUInt8:
+                    return {TilemapLayerTraits<Data_Tile_UInt8>::MinValue,  TilemapLayerTraits<Data_Tile_UInt8>::MaxValue};
+                case TilemapLayerType::DataUInt16:
+                    return {TilemapLayerTraits<Data_Tile_UInt16>::MinValue, TilemapLayerTraits<Data_Tile_UInt16>::MaxValue};
+                 default: ASSERT("Unexpected data layer type.");
+            }
+            return {0, 0};
         }
 
     } // namespace
