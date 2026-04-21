@@ -16,7 +16,7 @@ QWidget {
 }
 
 QWidget:disabled {
-	color: #555;
+	color: #a0a0a0;
 }
 
 QDockWidget {
@@ -53,7 +53,7 @@ QMenu {
 	color: #e0e0e0;
 }
 QMenuBar:disabled {
-	color: #555;
+	color: #a0a0a0;
 }
 
 QMenu::item {
@@ -66,7 +66,7 @@ QMenu::separator {
 	height: 1px;
 }
 QMenu::item:disabled {
-    color: #555;
+    color: #a0a0a0;
     background-color: transparent;
     padding: 2px 20px 2px 20px;
 }
@@ -92,7 +92,7 @@ QToolButton[popupMode="1"] { /* only for MenuButtonPopup */
 }
 
 QToolButton:disabled {
-	color: #555;
+	color: #a0a0a0;
 }
 QToolButton:hover {
 	background-color: rgba(61,157,181,20%);
@@ -119,7 +119,7 @@ QPushButton::flat {
 }
 QPushButton::disabled {
 	background-color: #2a2a2a;
-	color: #656565;
+	color: #a0a0a0;
 	border-color: #333;
 }
 QPushButton::hover {
@@ -185,7 +185,7 @@ QComboBox {
 }
 QComboBox::disabled {
 	background-color: #404040;
-	color: #656565;
+	color: #a0a0a0;
 	border-color: #333;
 }
 QComboBox:on {
@@ -285,7 +285,7 @@ QHeaderView::section {
 }
 QHeaderView::section:disabled {
     background-color: #525251;
-    color: #656565;
+    color: #a0a0a0;
 }
 QHeaderView::section:checked {
     background-color: #333;
@@ -349,7 +349,7 @@ QCheckBox::indicator:unchecked:hover {
 	border: 1px solid #3d9db5;
 }
 QCheckBox::disabled {
-	color: #656565;
+	color: #a0a0a0;
 }
 
 QRadioButton {
