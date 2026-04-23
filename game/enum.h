@@ -28,6 +28,17 @@ namespace game {
         Top, Left, None, Bottom, Right
     };
 
+    // What type of materials to support in the palette.
+    enum class TilemapPaletteType {
+        // The palette is based on a tilemap and each palette entry
+        // refers to a specific tilemap index in a single tilemap material.
+        Tilemap,
+        // The palette is based on multiple materials and each palette
+        // entry can refer to any material.
+        MultiMaterial
+    };
+
+
     enum class BasicLightType {
         Ambient, Directional, Spot, Point
     };

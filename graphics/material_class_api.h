@@ -19,12 +19,15 @@
 #include "config.h"
 
 #include <memory>
+#include <tuple>
 
 #include "graphics/material_uniform.h"
 #include "graphics/material_class.h"
 
 namespace gfx
 {
+    class IBitmap;
+
     namespace detail {
         class MaterialClassBase
         {
@@ -171,6 +174,8 @@ namespace gfx
                 velocity.z = angle_radians;
                 SetTextureVelocity(velocity);
             }
+
+            std::shared_ptr<const IBitmap> ExtractPreview() const;
         private:
         };
     }
@@ -311,7 +316,34 @@ namespace gfx
         { return mClass->GetUniformValue<kTileOffset>(); }
         auto GetTilePadding() const noexcept
         { return mClass->GetUniformValue<kTilePadding>(); }
+
+        auto GetTileSizeU() const noexcept
+        {
+            auto size = GetTileSize();
+            return std::make_tuple(static_cast<unsigned>(size.x),
+                                   static_cast<unsigned>(size.y));
+        }
+        auto GetTileOffsetU() const noexcept
+        {
+            auto offset = GetTileOffset();
+            return std::make_tuple(static_cast<unsigned>(offset.x),
+                                   static_cast<unsigned>(offset.y));
+        }
+        auto GetTilePaddingU() const noexcept
+        {
+            auto padding = GetTilePadding();
+            return std::make_tuple(static_cast<unsigned>(padding.x),
+                                   static_cast<unsigned>(padding.y));
+        }
+
+        size_t GetTileCount() const noexcept;
+
+        std::shared_ptr<const IBitmap> ExtractTile(size_t index) const;
     private:
+        const IBitmap* GetTilemap() const;
+    private:
+
+        mutable std::shared_ptr<const IBitmap> mTilemap;
     };
 
     class Particle2DMaterialClass : public detail::MaterialClassBase

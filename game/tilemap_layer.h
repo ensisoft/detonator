@@ -21,6 +21,7 @@
 #include <limits>
 #include <cstdint>
 
+#include "base/assert.h"
 #include "game/tilemap_layer_class.h"
 
 namespace game
@@ -33,6 +34,7 @@ namespace game
     public:
         using PaletteFlags  = TilemapLayerClass::PaletteFlags;
         using TileOcclusion = TilemapLayerClass::TileOcclusion;
+        using PaletteType   = TilemapLayerClass::PaletteType;
         using Flags = TilemapLayerClass::Flags;
         using Type  = TilemapLayerClass::Type;
         using Class = TilemapLayerClass;
@@ -40,9 +42,14 @@ namespace game
         virtual ~TilemapLayer() = default;
         virtual std::string GetClassId() const = 0;
         virtual std::string GetClassName() const = 0;
+        virtual std::string GetTilemapMaterialId() const = 0;
+
+        virtual PaletteType GetPaletteType() const = 0;
+
         virtual std::string GetPaletteMaterialId(size_t palette_index) const = 0;
         virtual std::uint8_t GetPaletteFlags(size_t palette_index) const = 0;
         virtual TileOcclusion GetPaletteOcclusion(size_t palette_index) const = 0;
+
         virtual base::bitflag<Flags> GetFlags() const = 0;
         virtual Type GetType() const = 0;
         virtual bool TestFlag(Flags flag) const = 0;
@@ -76,20 +83,32 @@ namespace game
 
         virtual size_t GetByteCount() const = 0;
 
-        inline unsigned GetMaxPaletteIndex() const
+        // helpers
+        unsigned GetMaxPaletteIndex() const
         { return TilemapLayerClass::GetMaxPaletteIndex(GetType()); }
-        inline bool HasRenderComponent() const
+        bool HasRenderComponent() const
         { return TilemapLayerClass::HasRenderComponent(GetType()); }
-        inline bool HasDataComponent() const
+        bool HasDataComponent() const
         { return TilemapLayerClass::HasDataComponent(GetType()); }
-        inline bool IsEnabled() const
+        bool IsEnabled() const
         { return TestFlag(Flags::Enabled); }
-        inline bool IsVisible() const
+        bool IsVisible() const
         { return TestFlag(Flags::Visible); }
-        inline bool IsReadOnly() const
+        bool IsReadOnly() const
         { return TestFlag(Flags::ReadOnly); }
-        inline const Class* operator->() const
+        const Class* operator->() const
         { return &GetClass(); }
+
+        std::string GetEffectiveMaterialId(size_t palette_index) const
+        {
+            const auto type = GetPaletteType();
+            if (type == PaletteType::Tilemap)
+                return GetTilemapMaterialId();
+            else if (type == PaletteType::MultiMaterial)
+                return GetPaletteMaterialId(palette_index);
+            else BUG("Missing palette type handling.");
+            return "";
+        }
     private:
     };
 

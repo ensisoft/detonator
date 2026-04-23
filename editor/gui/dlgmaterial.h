@@ -57,9 +57,11 @@ namespace gui
 
         void SetSelectedMaterialId(const app::AnyString& id);
         void SetSelectedTextureMapId(const app::AnyString& id);
+        void SetFilterSet(std::unordered_set<std::string> set);
 
         unsigned GetTileIndex() const;
         void SetTileIndex(unsigned index);
+        void ShowTileIndex(bool show);
 
     private slots:
         void on_btnAccept_clicked();
@@ -94,7 +96,9 @@ namespace gui
         std::vector<Material> mMaterials;
         Size2Df mPreviewScale;
         std::unordered_set<std::string> mFailedMaterials;
+        std::unordered_set<std::string> mFilterSet;
         bool mExpandMaps = false;
+        bool mUseFilterSet = false;
     };
 
     class DlgTileChooser : public QDialog

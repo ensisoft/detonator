@@ -43,6 +43,7 @@ namespace game
     public:
         using TileOcclusion = game::TileOcclusion;
         using Type = detail::TilemapLayerType;
+        using PaletteType = game::TilemapPaletteType;
 
         static constexpr size_t InvalidPaletteIndex = 0xff;
 
@@ -103,6 +104,8 @@ namespace game
         { return mDataUri; }
         std::string GetDataId() const
         { return mDataId; }
+        std::string GetTilemapMaterialId() const
+        { return mTilemapMaterialId; }
         base::bitflag<Flags> GetFlags() const noexcept
         { return mFlags; }
         bool IsReadOnly() const noexcept
@@ -131,6 +134,8 @@ namespace game
         { mDataUri = std::move(uri); }
         void SetDataId(std::string id) noexcept
         { mDataId = std::move(id); }
+        void SetTilemapMaterialId(std::string id) noexcept
+        { mTilemapMaterialId = std::move(id); }
         void ResetDataId() noexcept
         { mDataId.clear(); }
         void ResetDataUri() noexcept
@@ -155,15 +160,11 @@ namespace game
         { mDepth = depth; }
         void SetLayer(unsigned layer) noexcept
         { mLayer = layer; }
-        size_t GetCacheSize() const noexcept
-        { return GetCacheSize(mCache); }
 
-        void SetPaletteMaterialId(std::string material, std::size_t palette_index) noexcept
-        { mPalette[palette_index].materialId = std::move(material); }
-        void SetPaletteDrawableId(std::string drawable, std::size_t palette_index) noexcept
-        { mPalette[palette_index].drawableId = std::move(drawable); }
-        void SetPaletteMaterialTileIndex(std::uint8_t tile_index, std::size_t palette_index)
-        { mPalette[palette_index].tile_index = tile_index; }
+        void SetPaletteMaterialId(std::string material, std::size_t palette_index) noexcept;
+        void SetPaletteDrawableId(std::string drawable, std::size_t palette_index) noexcept;
+        void SetPaletteMaterialTileIndex(std::uint8_t tile_index, std::size_t palette_index);
+
         void ClearPalette() noexcept
         { mPalette.clear(); }
         bool DeletePaletteIndex(std::size_t index) noexcept
@@ -171,10 +172,15 @@ namespace game
         auto GetCurrentPaletteSize() const noexcept
         { return mPalette.size(); }
 
+        void SetPaletteType(PaletteType palette_type) noexcept
+        { mPaletteType = palette_type; }
+
         void SetPaletteFlag(PaletteFlags flag, bool on_off, std::size_t palette_index);
         void SetPaletteOcclusion(TileOcclusion occlusion, std::size_t palette_index);
 
         bool TestPaletteFlag(PaletteFlags flag, size_t palette_index) const;
+
+        bool HasPaletteIndex(size_t palette_index) const;
 
         void SetType(Type type) noexcept;
 
@@ -189,6 +195,11 @@ namespace game
         std::size_t FindMaterialIndexInPalette(const std::string& materialId) const;
         std::size_t FindMaterialIndexInPalette(const std::string& materialId, std::uint8_t tile_index) const;
         std::size_t FindNextAvailablePaletteIndex() const;
+        std::size_t GetCacheSize() const noexcept
+        { return GetCacheSize(mCache); }
+
+        PaletteType GetPaletteType() const noexcept
+        { return mPaletteType; }
 
         TileOcclusion GetPaletteOcclusion(size_t palette_index) const;
 
@@ -257,11 +268,25 @@ namespace game
                                        unsigned layer_height_tiles,
                                        unsigned* block_width_tiles,
                                        unsigned* block_height_tiles);
+
+        std::string GetEffectiveMaterialId(size_t palette_index) const
+        {
+            const auto type = GetPaletteType();
+            if (type == PaletteType::Tilemap)
+                return GetTilemapMaterialId();
+            else if (type == PaletteType::MultiMaterial)
+                return GetPaletteMaterialId(palette_index);
+            else BUG("Missing palette type handling.");
+            return "";
+        }
     private:
         std::string mId;
         std::string mName;
         std::string mDataUri;
         std::string mDataId;
+        // When using a Tilemap material palette this is the ID of the
+        // tilemap material associated with this layer.
+        std::string mTilemapMaterialId;
         base::bitflag<Flags> mFlags;
 
         struct PaletteEntry {
@@ -272,6 +297,8 @@ namespace game
             TileOcclusion occlusion = TileOcclusion::None;
         };
         std::unordered_map<std::size_t, PaletteEntry> mPalette;
+        PaletteType mPaletteType = PaletteType::MultiMaterial;
+
         Storage mStorage = Storage::Dense;
         Cache mCache = Cache::Cache64;
         Resolution mResolution = Resolution::Original;

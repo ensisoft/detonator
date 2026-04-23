@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>475</width>
-    <height>598</height>
+    <width>495</width>
+    <height>594</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,6 +42,21 @@
          <bool>true</bool>
         </property>
        </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Material palette</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QComboBox" name="cmbPaletteType"/>
       </item>
      </layout>
     </widget>
@@ -282,6 +297,7 @@
  <tabstops>
   <tabstop>layerName</tabstop>
   <tabstop>cmbLayerType</tabstop>
+  <tabstop>cmbPaletteType</tabstop>
   <tabstop>cmbLayerStorage</tabstop>
   <tabstop>cmbLayerCache</tabstop>
   <tabstop>cmbLayerResolution</tabstop>

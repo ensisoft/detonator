@@ -1517,6 +1517,32 @@ ResourceList Workspace::ListTileShapes() const
     return list;
 }
 
+ ResourceList Workspace::ListTilemapMaterials() const
+{
+    ResourceList list;
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Material)
+            continue;
+
+        const gfx::MaterialClass* material_class = nullptr;
+        resource->GetContent(&material_class);
+
+        if (!material_class->IsTilemap())
+            continue;
+
+        ResourceListItem item;
+        item.name = resource->GetName();
+        item.id   = resource->GetId();
+        item.resource = resource.get();
+        list.push_back(item);
+    }
+    std::sort(list.begin(), list.end(), [](const auto& a, const auto& b) {
+        return a.name < b.name;
+    });
+    return list;
+}
+
 Workspace::ResourceList Workspace::ListAllMaterials() const
 {
     ResourceList list;

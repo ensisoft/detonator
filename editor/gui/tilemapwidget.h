@@ -17,6 +17,8 @@
 #pragma once
 
 #include "warnpush.h"
+#  include <QMenu>
+#  include <QToolBar>
 #  include "ui_tilemapwidget.h"
 #include "warnpop.h"
 
@@ -85,12 +87,12 @@ namespace gui
         void on_tileScaleY_valueChanged(double);
         void on_btnApplyMapSize_clicked();
         void on_actionSave_triggered();
-        void on_actionTools_triggered();
         void on_actionNewLayer_triggered();
         void on_actionEditLayer_triggered();
         void on_actionDeleteLayer_triggered();
         void on_actionMoveLayerUp_triggered();
         void on_actionMoveLayerDown_triggered();
+        void on_btnEditBrushes_clicked();
         void on_btnNewLayer_clicked();
         void on_btnDeleteLayer_clicked();
         void on_btnEditLayer_clicked();
@@ -102,6 +104,8 @@ namespace gui
         void on_layers_doubleClicked(const QModelIndex& index);
         void on_layerName_textChanged();
         void on_cmbLayerCache_currentIndexChanged(int);
+        void on_cmbPaletteType_currentIndexChanged(int);
+        void on_cmbTilemap_currentIndexChanged(int);
         void on_layerDepth_valueChanged(int);
         void on_layerIndex_valueChanged(int);
         void on_renderLayer_valueChanged(int);
@@ -128,6 +132,7 @@ namespace gui
         void DisplayLayerProperties();
         void DisplaySelection();
         void UpdateLayerPalette();
+        void UpdateLayerPaletteUsage();
         void PaintScene(gfx::Painter& painter, double sec);
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
@@ -141,18 +146,19 @@ namespace gui
         const game::TilemapLayerClass* GetCurrentLayer() const;
         const game::TilemapLayer* GetCurrentLayerInstance() const;
         size_t GetCurrentLayerIndex() const;
-        void GenerateTools();
+        void GenerateLayerTools(const game::TilemapLayerClass& klass);
         void UpdateToolToolbar();
         void UncheckTools();
-        void SetCurrentTool(const QString& id);
         void ModifyCurrentLayer();
         void ReplaceDeletedResources();
-        void ClearUnusedPaletteEntries();
         bool SelectLayerOnKey(unsigned index);
 
         using Tool = TileTool;
-        Tool* GetCurrentTool(size_t* index = nullptr);
+        Tool* GetTool(const QString& id, size_t* index = nullptr);
         bool ValidateToolAgainstLayer(const Tool& tool, const game::TilemapLayer& layer);
+        void UpdateMaterialLists();
+        void RefreshPreviews(bool force);
+        void InitializePaletteEntry(game::TilemapLayerClass& klass, size_t palette_index) const;
 
         struct Tile {
             unsigned col = 0;
@@ -166,6 +172,8 @@ namespace gui
     private:
         Ui::Tilemap mUI;
         QMenu* mHamburger = nullptr;
+        QMenu* mBrushMenu = nullptr;
+        QToolBar* mButtonBar = nullptr;
     private:
         class LayerModel;
         class LayerData;
@@ -177,10 +185,6 @@ namespace gui
         using ToolShape    = TileToolShape;
         std::vector<std::shared_ptr<Tool>> mTools;
 
-        std::vector<QAction*> mToolActions;
-
-        QString mCurrentToolId;
-
         struct State {
             app::Workspace* workspace = nullptr;
             std::shared_ptr<game::TilemapClass> klass;
@@ -191,7 +195,6 @@ namespace gui
             engine::Renderer renderer;
         } mState;
 
-        std::unique_ptr<DlgTileTool> mDlgTileTool;
         Settings mTileToolSettings;
 
         std::unique_ptr<MouseTool> mCurrentTool;

@@ -99,6 +99,7 @@ add_executable(UnitTest
     ../graphics/texture_text_buffer_source.cpp
     ../graphics/text_material.cpp
     ../graphics/material_class.cpp
+    ../graphics/material_class_api.cpp
     ../graphics/material_instance.cpp
     ../engine/audio.cpp
     ../engine/camera.cpp
@@ -373,6 +374,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/loader.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/material.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/material_class.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../graphics/material_class_api.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/material_instance.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/painter.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/paint_context.cpp

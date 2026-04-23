@@ -204,6 +204,8 @@ namespace gfx
         { return mType != Type::Custom; }
         bool IsSprite() const noexcept
         { return mType == Type::Sprite; }
+        bool IsTilemap() const noexcept
+        { return mType == Type::Tilemap; }
 
         // Set the surface type of the material.
         void SetSurfaceType(SurfaceType surface) noexcept

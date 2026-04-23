@@ -605,6 +605,7 @@ QStringList ListResourceDependencies(const game::TilemapClass& map, const QVaria
     {
         const auto& layer = map.GetLayer(i);
         PushBack(ret, layer.GetDataId());
+        PushBack(ret, layer.GetTilemapMaterialId());
 
         if (!layer.HasRenderComponent())
             continue;
