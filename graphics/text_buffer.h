@@ -22,7 +22,6 @@
 #include <vector>
 #include <memory>
 
-#include "base/assert.h"
 #include "base/utility.h"
 #include "data/fwd.h"
 #include "graphics/bitmap.h"
@@ -68,7 +67,7 @@ namespace gfx
 
         // Rasterize the text buffer contents into a bitmap.
         // Returns nullptr if the rasterization fails.
-        std::shared_ptr<AlphaMask> RasterizeBitmap() const;
+        std::shared_ptr<const AlphaMask> RasterizeBitmap() const;
 
         Texture* RasterizeTexture(const std::string& gpu_id, const std::string& name, Device& device, bool transient) const;
 

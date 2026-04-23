@@ -34,6 +34,7 @@
 #include <unordered_map>
 #include <cwctype>
 
+#include "base/assert.h"
 #include "base/logging.h"
 #include "base/utility.h"
 #include "base/json.h"
@@ -372,6 +373,18 @@ LineRaster RasterizeLine(const std::string& line, const gfx::TextBuffer::Text& t
         pen_y += ya;
     }
 
+    // surprise, surprise.. if the text is whitespace some fonts produce
+    // zero height for the line bitmap in the code above. In this case
+    // let's try to use the fontsize as the backup line height.
+    if (height == 0)
+        height = text.fontsize;
+
+    if (height == 0 || width == 0)
+    {
+        WARN("Failed to rasterize line of text. [text='%1', fon='%2']", line, text.font);
+        return {};
+    }
+
     // offset to the baseline. if negative then it's below the baseline
     // if positive it's above the baseline.
     const auto underline_position  = face->underline_position / EFFIN_MAGIC_SCALE;
@@ -459,7 +472,7 @@ TextBuffer::RasterFormat TextBuffer::GetRasterFormat() const
     return RasterFormat::None;
 }
 
-std::shared_ptr<AlphaMask> TextBuffer::RasterizeBitmap() const
+std::shared_ptr<const AlphaMask> TextBuffer::RasterizeBitmap() const
 {
     static FontLibrary freetype;
 
@@ -500,57 +513,58 @@ std::shared_ptr<AlphaMask> TextBuffer::RasterizeBitmap() const
     block.halign = mHorizontalAlign;
     block.valign = mVerticalAlign;
 
-    std::vector<TextComposite> blocks;
     std::stringstream ss(mText.text);
     std::string line;
     while (std::getline(ss, line))
     {
         LineRaster raster;
         if (!line.empty())
+        {
             raster = RasterizeLine(line, mText, face);
+            if (!raster.bitmap)
+                continue;
+        }
         block.lines.push_back(std::move(raster));
     }
-    blocks.push_back(CompositeTextBlock(block, face));
+    const auto text_composite = CompositeTextBlock(block, face);
+    if (!text_composite.bitmap)
+        ERROR_RETURN(nullptr, "Failed to composite text block.");
+
+    if (mBufferHeight == 0 || mBufferWidth == 0)
+        return text_composite.bitmap;
 
     // compute total combined size for text blocks to be laid out vertically.
-    int text_width_px  = 0;
-    int text_height_px = 0;
-    for (const auto& block : blocks)
-    {
-        text_width_px   = std::max((int)block.bitmap->GetWidth(), text_width_px);
-        text_height_px += block.bitmap->GetHeight();
-    }
+    const int block_width_px  = text_composite.bitmap->GetWidth();
+    const int block_height_px = text_composite.bitmap->GetHeight();
 
     // if we have some fixed/expected final image size then use that
     // otherwise create use the image size based on the combined text
     // block sizes.
-    const int image_width_px  = mBufferWidth  ? (int)mBufferWidth  : text_width_px;
-    const int image_height_px = mBufferHeight ? (int)mBufferHeight : text_height_px;
+    const int image_width_px  = mBufferWidth;
+    const int image_height_px = mBufferHeight;
 
-    auto out = AllocateBitmap<2>(image_width_px, image_height_px);
+    auto out = AllocateBitmap<2>(mBufferWidth, mBufferHeight);
 
     int block_ypos = 0;
-    if (mVerticalAlign == VerticalAlignment::AlignCenter)
-        block_ypos = (image_height_px - text_height_px) / 2;
+    if (mVerticalAlign == VerticalAlignment::AlignTop)
+        block_ypos = 0;
+    else if (mVerticalAlign == VerticalAlignment::AlignCenter)
+        block_ypos = (image_height_px - block_height_px) / 2;
     else if (mVerticalAlign == VerticalAlignment::AlignBottom)
-        block_ypos = image_height_px - text_height_px;
+        block_ypos = image_height_px - block_height_px;
+    else BUG("Missing vertical alignment handling.");
 
     // the base line values have already been "fixed" when the text
     // blocks have been composited. This means that we can just do the
     // final composite pass here using the bitmap sizes directly.
-    for (const auto& block : blocks)
-    {
-        const int block_width_px  = block.bitmap->GetWidth();
-        const int block_height_px = block.bitmap->GetHeight();
-        if (mHorizontalAlign == HorizontalAlignment::AlignLeft)
-            out->Copy(0, block_ypos, *block.bitmap);
-        else if (mHorizontalAlign == HorizontalAlignment::AlignCenter)
-            out->Copy((image_width_px - block_width_px) / 2, block_ypos, *block.bitmap);
-        else if (mHorizontalAlign == HorizontalAlignment::AlignRight)
-            out->Copy((image_width_px - block_width_px), block_ypos, *block.bitmap);
 
-        block_ypos += block_height_px;
-    }
+    if (mHorizontalAlign == HorizontalAlignment::AlignLeft)
+        out->Copy(0, block_ypos, *text_composite.bitmap);
+    else if (mHorizontalAlign == HorizontalAlignment::AlignCenter)
+        out->Copy((image_width_px - block_width_px) / 2, block_ypos, *text_composite.bitmap);
+    else if (mHorizontalAlign == HorizontalAlignment::AlignRight)
+        out->Copy((image_width_px - block_width_px), block_ypos, *text_composite.bitmap);
+    else BUG("Missing horizontal alignment handling.");
 
     // for debugging purposes dump the rasterized bitmap as .ppm file
 #if 0
