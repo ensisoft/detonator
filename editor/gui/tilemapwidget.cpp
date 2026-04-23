@@ -50,9 +50,9 @@
 #include "editor/gui/dlgtiletool.h"
 #include "editor/gui/palettematerial.h"
 #include "editor/gui/translation.h"
+#include "graphics/material_class_api.h"
 
 namespace{
-    constexpr auto PaletteIndexAutomatic = -1;
 
     gui::Size2Df GetMaterialPreviewScale(const game::TilemapClass& klass)
     {
@@ -353,9 +353,15 @@ public:
             if (palette_index == mLayer.GetMaxPaletteIndex())
                 continue;
 
-            const auto& materialId = mLayer->GetPaletteMaterialId(palette_index);
-            const auto& materialCls = mState.workspace->GetMaterialClassById(materialId);
-            mTiles[i].material = gfx::CreateMaterialInstance(materialCls);
+            std::shared_ptr<const gfx::MaterialClass> klass;
+            const auto& materialId = mLayer.GetEffectiveMaterialId(palette_index);
+            if (materialId.empty())
+                klass = mState.workspace->GetMaterialClassById("_checkerboard");
+            else if (!mState.workspace->IsValidMaterial(materialId))
+                klass = mState.workspace->GetMaterialClassById("_checkerboard");
+            else klass = mState.workspace->GetMaterialClassById(materialId);
+
+            mTiles[i].material = gfx::CreateMaterialInstance(klass);
             mTiles[i].material->SetUniform("kBaseColor", gfx::Color::HotPink);
             mTiles[i].tile_index    = mLayer->GetPaletteMaterialTileIndex(palette_index);
             mTiles[i].palette_index = palette_index;
@@ -633,7 +639,6 @@ public:
       , mState(state)
       , mLayer(layer)
     {}
-
     void Render(gfx::Painter& scene_painter, gfx::Painter& tile_painter) const override
     {
 
@@ -656,6 +661,10 @@ public:
                                                                perspective);
         gfx::FRect tool_bounds;
 
+        const auto* layer = mState.klass->FindLayerById(mTool->layer);
+        ASSERT(layer);
+        const auto max_index = layer->GetMaxPaletteIndex();
+
         for (unsigned row=0; row<mTool->height; ++row)
         {
             for (unsigned col=0; col<mTool->width; ++col)
@@ -669,12 +678,17 @@ public:
                 const auto& tile_data = mTool->tiles[row * mTool->width + col];
                 if (!tile_data.apply_material)
                     continue;
+                if (tile_data.palette_index == max_index)
+                    continue;
+
+                const auto materialId = layer->GetEffectiveMaterialId(tile_data.palette_index);
+                const auto tile_index = layer->GetPaletteMaterialTileIndex(tile_data.palette_index);
 
                 gfx::TileBatch::Tile tile;
                 tile.pos.y = tile_row;
                 tile.pos.x = tile_col;
                 tile.pos.z = mLayer.GetDepth();
-                tile.data.x = tile_data.tile_index;
+                tile.data.x = tile_index;
 
                 gfx::TileBatch batch;
                 batch.AddTile(tile);
@@ -691,9 +705,15 @@ public:
                 else BUG("missing tile projection.");
 
                 if (!tile_data.material_instance ||
-                     tile_data.material_instance->GetClassId() != tile_data.material)
+                     tile_data.material_instance->GetClassId() != materialId)
                 {
-                    auto klass = mState.workspace->GetMaterialClassById(tile_data.material);
+                    std::shared_ptr<const gfx::MaterialClass> klass;
+                    if (materialId.empty())
+                        klass = mState.workspace->GetMaterialClassById("_checkerboard");
+                    else if (!mState.workspace->IsValidMaterial(materialId))
+                        klass = mState.workspace->GetMaterialClassById("_checkerboard");
+                    else klass = mState.workspace->GetMaterialClassById(materialId);
+
                     tile_data.material_instance = gfx::CreateMaterialInstance(klass);
                 }
 
@@ -737,33 +757,6 @@ public:
 
         mActive = true;
 
-        // resolve tile material palette index
-        for (const auto& tile : mTool->tiles)
-        {
-            if (mLayer->HasRenderComponent() && tile.apply_material)
-            {
-                // Figure out a new palette entry if needed.
-                if (tile.palette_index == PaletteIndexAutomatic)
-                {
-                    tile.material_palette_index = mLayer->FindMaterialIndexInPalette(tile.material, tile.tile_index);
-                    if (tile.material_palette_index == 0xff)
-                        tile.material_palette_index = mLayer->FindNextAvailablePaletteIndex();
-                }
-                else
-                {
-                    tile.material_palette_index = tile.palette_index;
-                }
-                // validation should have been done before the tool was started.
-                ASSERT(tile.material_palette_index >= 0 && tile.material_palette_index < 0xff);
-
-                auto* layer_klass = mState.klass->FindLayerById(mLayer.GetClassId());
-                layer_klass->SetPaletteMaterialId(tile.material, tile.material_palette_index);
-                layer_klass->SetPaletteDrawableId(tile.drawable, tile.material_palette_index);
-                layer_klass->SetPaletteMaterialTileIndex(tile.tile_index, tile.material_palette_index);
-            }
-            tile.data_value = tile.value;
-        }
-
         // apply tool on the spot already, so that if the user simply
         // clicks the button without moving the mouse the tile under
         // the mouse is edited as expected
@@ -783,17 +776,6 @@ public:
 
     bool Validate() const override
     {
-        for (const auto& tile : mTool->tiles)
-        {
-            if (!mState.workspace->IsValidMaterial(tile.material))
-                return false;
-
-            if (!tile.drawable.empty())
-            {
-                if (!mState.workspace->IsValidDrawable(tile.drawable))
-                    return false;
-            }
-        }
         return true;
     }
 
@@ -815,7 +797,11 @@ public:
                 // apply the material assigned to the tool onto the tiles
                 // in the current layer's render component.
                 if (mLayer->HasRenderComponent() && tile.apply_material)
-                    mLayer.SetTilePaletteIndex(tile.material_palette_index, tile_row, tile_col);
+                {
+                    const auto palette_index = tile.palette_index;
+                    if (mLayer->HasPaletteIndex(palette_index))
+                        mLayer.SetTilePaletteIndex(tile.palette_index, tile_row, tile_col);
+                }
 
                 // apply the data value assigned to the tool onto the tiles
                 // in the current layer's data component.
@@ -877,13 +863,17 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     PopulateFromEnum<game::TilemapLayerClass::Storage>(mUI.cmbLayerStorage);
     PopulateFromEnum<game::TilemapLayerClass::Cache>(mUI.cmbLayerCache);
     PopulateFromEnum<game::TilemapLayerClass::Resolution>(mUI.cmbLayerResolution);
+    PopulateFromEnum<game::TilemapLayerClass::PaletteType>(mUI.cmbPaletteType);
 
-    SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-    SetValue(mUI.zoom, 1.0f);
-    const auto& materials = mState.workspace->ListAllMaterials();
-    const auto& drawables = mState.workspace->ListTileShapes();
-    SetRange(mUI.tileValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
-    SetVisible(mUI.transform, false);
+    mBrushMenu = new QMenu(this);
+    mBrushMenu->menuAction()->setIcon(QIcon("level:brush.png"));
+    mBrushMenu->menuAction()->setText("Brushes");
+
+    mButtonBar = new QToolBar(this);
+    mButtonBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+    mButtonBar->setIconSize(QSize(16, 16));
+    mButtonBar->addAction(mBrushMenu->menuAction());
+    mUI.toolbarLayout->addWidget(mButtonBar);
 
     // generate a list of widgets for the layer color palette.
     // we have a maximum of 254 palette entries for our use since
@@ -892,20 +882,23 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     {
         auto* widget = new PaletteMaterial(mState.workspace, this);
         widget->SetPaletteIndex(i);
+        widget->SetTileIndex(i);
+        widget->SetOcclusion(game::TileOcclusion::None);
+        widget->SetPaletteType(game::TilemapPaletteType::MultiMaterial);
         widget->SetLabel(QString("#%1").arg(i));
         widget->SetMaterialPreviewScale(Size2Df(1.0f, 1.0f));
         widget->setObjectName(QString::number(i));
-        widget->UpdateMaterialList(materials);
-        widget->UpdateDrawableList(drawables);
-
         mUI.layout->addWidget(widget);
         mPaletteMaterialWidgets.push_back(widget);
         connect(widget, &PaletteMaterial::ValueChanged, this, &TilemapWidget::PaletteMaterialChanged);
     }
 
-    GenerateTools();
-    UpdateToolToolbar();
-    SetCurrentTool(mTools[0]->id);
+    UpdateMaterialLists();
+
+    SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.zoom, 1.0f);
+    SetRange(mUI.tileValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
+    SetVisible(mUI.transform, false);
 
     DisplayMapProperties();
     DisplayLayerProperties();
@@ -1013,15 +1006,25 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
         QJsonObject json;
         GetProperty(resource, PropertyKey("tool", i), &json);
         auto tool = std::make_shared<Tool>();
-        ToolFromJson(*tool, json);
-        mTools.push_back(std::move(tool));
+        if (ToolFromJson(*tool, json))
+            mTools.push_back(std::move(tool));
+    }
+
+    if (mTools.empty())
+    {
+        WARN("Previous tilemap tools are no longer compatible.");
+        INFO("Generating new layer tools.");
+        for (size_t i=0; i<mState.klass->GetNumLayers(); ++i)
+        {
+            const auto& layer = mState.klass->GetLayer(i);
+            GenerateLayerTools(layer);
+        }
     }
 
     mModel->Reset();
     SelectRow(mUI.layers, current_layer);
     ReplaceDeletedResources();
     UpdateToolToolbar();
-    SetCurrentTool(mTools.empty() ? "" : mTools[0]->id);
 
     DisplayMapProperties();
     DisplayLayerProperties();
@@ -1056,22 +1059,15 @@ void TilemapWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
     bar.addAction(mUI.actionNewLayer);
-    bar.addSeparator();
-    for (auto* action : mToolActions)
-        bar.addAction(action);
-    bar.addAction(mUI.actionTools);
-
 }
+
 void TilemapWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
     menu.addAction(mUI.actionNewLayer);
-    menu.addSeparator();
-    for (auto* action : mToolActions)
-        menu.addAction(action);
-    menu.addAction(mUI.actionTools);
 }
+
 bool TilemapWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
@@ -1175,8 +1171,19 @@ bool TilemapWidget::LoadState(const Settings& settings)
         QJsonObject json;
         settings.GetValue("Tilemap", PropertyKey("tool", i), &json);
         auto tool = std::make_shared<Tool>();
-        ToolFromJson(*tool, json);
-        mTools.push_back(std::move(tool));
+        if (ToolFromJson(*tool, json))
+            mTools.push_back(std::move(tool));
+    }
+
+    if (mTools.empty())
+    {
+        WARN("Previous tilemap tools are no longer compatible.");
+        INFO("Generating new layer tools.");
+        for (size_t i=0; i<mState.klass->GetNumLayers(); ++i)
+        {
+            const auto& layer = mState.klass->GetLayer(i);
+            GenerateLayerTools(layer);
+        }
     }
 
     const auto map_width = mState.klass->GetMapWidth();
@@ -1222,7 +1229,6 @@ bool TilemapWidget::LoadState(const Settings& settings)
     mModel->Reset();
     SelectRow(mUI.layers, current_layer);
     UpdateToolToolbar();
-    SetCurrentTool(mTools.empty() ? "" : mTools[0]->id);
 
     DisplayMapProperties();
     DisplayLayerProperties();
@@ -1271,12 +1277,6 @@ void TilemapWidget::ReloadTextures()
 }
 void TilemapWidget::Shutdown()
 {
-    if (mDlgTileTool)
-    {
-        mDlgTileTool->close();
-        mDlgTileTool.reset();
-    }
-
     mUI.widget->Dispose();
 }
 void TilemapWidget::Update(double dt)
@@ -1373,7 +1373,9 @@ bool TilemapWidget::GetStats(Stats* stats) const
     return true;
 }
 void TilemapWidget::Refresh()
-{}
+{
+    RefreshPreviews(false);
+}
 
 void TilemapWidget::on_mapName_textChanged()
 {
@@ -1524,29 +1526,6 @@ void TilemapWidget::on_actionSave_triggered()
     mHash = hash;
 }
 
-void TilemapWidget::on_actionTools_triggered()
-{
-    if (mDlgTileTool) {
-        mDlgTileTool->activateWindow();
-        return;
-    }
-
-    mDlgTileTool = std::make_unique<DlgTileTool>(mState.workspace, this, &mTools);
-    mDlgTileTool->SetClass(mState.klass);
-    mDlgTileTool->setWindowFlag(Qt::WindowStaysOnTopHint, false);
-    mDlgTileTool->show();
-    mDlgTileTool->NotifyToolBoxUpdate = [this]() {
-        UpdateToolToolbar();
-    };
-
-    connect(mDlgTileTool.get(), &QDialog::finished, this, [this]() {
-        mDlgTileTool->SaveState(mTileToolSettings);
-        mDlgTileTool.reset();
-    });
-
-    mDlgTileTool->LoadState(mTileToolSettings);
-}
-
 void TilemapWidget::on_actionMoveLayerUp_triggered()
 {
     const auto index = GetSelectedIndex(mUI.layers);
@@ -1589,6 +1568,36 @@ void TilemapWidget::on_actionDeleteLayer_triggered()
     on_btnDeleteLayer_clicked();
 }
 
+void TilemapWidget::on_btnEditBrushes_clicked()
+{
+    if (const auto* layer = GetCurrentLayer())
+    {
+        const auto& layerId = layer->GetId();
+
+        std::vector<std::shared_ptr<Tool>> tools;
+        for (const auto& tool : mTools)
+        {
+            if (tool->layer != layerId)
+                continue;
+            tools.push_back(tool);
+        }
+        DlgTileTool dlg(mState.workspace, mState.klass.get(), layer, this, &tools);
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        for (auto& tool : tools)
+        {
+            tool->layer = layerId;
+        }
+
+        base::EraseRemove(mTools, [layerId](const auto& tool) {
+            return tool->layer == layerId;
+        });
+        base::AppendVector(mTools, tools);
+
+        UpdateToolToolbar();
+    }
+}
 
 void TilemapWidget::on_btnNewLayer_clicked()
 {
@@ -1605,6 +1614,7 @@ void TilemapWidget::on_btnNewLayer_clicked()
     layer_class->SetStorage(dlg.GetLayerStorage());
     layer_class->SetCache(dlg.GetLayerCache());
     layer_class->SetResolution(dlg.GetLayerResolution());
+    layer_class->SetPaletteType(dlg.GetPaletteType());
 
     // set the default values. the default tile value is used when
     // there's no actual tile data available and new block of data
@@ -1628,6 +1638,7 @@ void TilemapWidget::on_btnNewLayer_clicked()
         const auto data_value = dlg.GetTileDataValue();
         layer_class->SetDefaultTileDataValue(data_value);
     }
+    GenerateLayerTools(*layer_class);
 
     mModel->AddLayer(layer_class);
 
@@ -1645,6 +1656,7 @@ void TilemapWidget::on_btnNewLayer_clicked()
     SelectLastRow(mUI.layers);
     DisplayLayerProperties();
     DisplayMapProperties();
+    UpdateToolToolbar();
 }
 
 void TilemapWidget::on_btnDeleteLayer_clicked()
@@ -1736,6 +1748,84 @@ void TilemapWidget::on_cmbLayerCache_currentIndexChanged(int)
 {
     ModifyCurrentLayer();
 }
+
+void TilemapWidget::on_cmbPaletteType_currentIndexChanged(int)
+{
+    ModifyCurrentLayer();
+}
+
+void TilemapWidget::on_cmbTilemap_currentIndexChanged(int)
+{
+    auto* layer = GetCurrentLayer();
+    if (layer == nullptr)
+        return;
+
+    const std::string old_tilemap_id = layer->GetTilemapMaterialId();
+    const std::string new_tilemap_id = GetItemId(mUI.cmbTilemap);
+
+    const auto tilemap_material = mState.workspace->GetMaterialClassById(new_tilemap_id);
+
+    // hack
+    auto* material_class = const_cast<gfx::MaterialClass*>(tilemap_material.get());
+    const gfx::TilemapMaterialClass tilemap(*material_class);
+    const unsigned tile_count = tilemap.GetTileCount();
+    const unsigned max_palette_size = layer->GetMaxPaletteIndex();
+
+    if (tile_count > max_palette_size)
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Icon::Question);
+        msg.setText("The selected tilemap contains more tiles than the layer can support.\n"
+            "Are you sure you want to continue?");
+        msg.setWindowTitle("Change Tilemap Palette");
+        if (msg.exec() == QMessageBox::No)
+        {
+            SetValue(mUI.cmbTilemap, ListItemId(old_tilemap_id));
+            return;
+        }
+    }
+
+    if (layer->GetCurrentPaletteSize() > 0)
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setIcon(QMessageBox::Icon::Question);
+        msg.setText("Are you sure you want to change the tilemap?\n"
+            "This will reset the current palette.");
+        msg.setWindowTitle("Change Tilemap Palette");
+        if (msg.exec() == QMessageBox::No)
+        {
+            SetValue(mUI.cmbTilemap, ListItemId(old_tilemap_id));
+            return;
+        }
+
+        layer->ClearPalette();
+    }
+
+    ModifyCurrentLayer();
+
+    for (auto* widget : mPaletteMaterialWidgets)
+    {
+        widget->ClearPreview();
+        widget->SetDrawable("");
+        widget->SetMaterial("");
+        widget->SetOcclusion(game::TileOcclusion::None);
+    }
+    const auto max_count = std::min(tile_count, max_palette_size);
+
+    for (size_t tile_index=0; tile_index<max_count; ++tile_index)
+    {
+        const auto palette_index = tile_index;
+        layer->SetPaletteOcclusion(game::TileOcclusion::None, palette_index);
+        layer->SetPaletteDrawableId("", palette_index);
+        layer->SetPaletteMaterialTileIndex(tile_index, palette_index);
+    }
+
+    RefreshPreviews(false);
+    UpdateLayerPaletteUsage();
+}
+
 void TilemapWidget::on_layerDepth_valueChanged(int)
 {
     ModifyCurrentLayer();
@@ -1783,8 +1873,8 @@ void TilemapWidget::on_tilePaletteIndex_valueChanged(int)
         ASSERT(layer->SetTilePaletteIndex(palette_index, tile.y, tile.x));
     }
 
-    ClearUnusedPaletteEntries();
-    UpdateLayerPalette();
+    InitializePaletteEntry(*klass, palette_index);
+    DisplaySelection();
 }
 
 void TilemapWidget::SelectSelectedTileMaterial()
@@ -1801,12 +1891,13 @@ void TilemapWidget::SelectSelectedTileMaterial()
 
     const auto did_have_focus = mUI.widget->HasInputFocus();
 
-    DlgMaterial dlg(this, mState.workspace, false);
-    dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
-
-    // indicate the current tile material when possible.
-    {
+    // try to figure a common palette index for the current selection.
+    // if there are multiple tiles selected with different palette
+    // indices then the palette index will be indeterminate.
+    const uint8_t current_palette_index = [&selection, &layer, &klass]() {
         uint8_t current_palette_index = 0;
+        const auto& tile_one = selection.GetTile(0);
+        ASSERT(layer->GetTilePaletteIndex(&current_palette_index, tile_one.y, tile_one.x));
 
         for (size_t i = 1; i < selection.GetTileCount(); ++i)
         {
@@ -1820,75 +1911,109 @@ void TilemapWidget::SelectSelectedTileMaterial()
             if (palette_index_one != palette_index_two)
             {
                 current_palette_index = klass->GetMaxPaletteIndex();
-                break;
-            } else current_palette_index = palette_index_one;
+                return klass->GetMaxPaletteIndex();
+            }
+            current_palette_index = palette_index_one;
+        }
+        return static_cast<unsigned>(current_palette_index);
+    }();
+
+    const auto palette_type = layer->GetPaletteType();
+    if (palette_type == game::TilemapLayer::PaletteType::MultiMaterial)
+    {
+        std::unordered_set<std::string> filter_set;
+        for (const auto* widget : mPaletteMaterialWidgets)
+        {
+            const auto palette_index = widget->GetPaletteIndex();
+            const auto materialId = widget->GetMaterialId();
+            if (materialId.IsEmpty())
+                continue;
+            else if (!mState.workspace->IsValidMaterial(materialId))
+                continue;
+            filter_set.insert(materialId);
         }
 
+        DlgMaterial dlg(this, mState.workspace, false);
+        dlg.ShowTileIndex(false);
+        dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
+        dlg.SetFilterSet(std::move(filter_set));
         if (current_palette_index != klass->GetMaxPaletteIndex())
-        {
             dlg.SetSelectedMaterialId(klass->GetPaletteMaterialId(current_palette_index));
-            dlg.SetTileIndex(klass->GetPaletteMaterialTileIndex(current_palette_index));
-        }
-    }
 
-    if (dlg.exec() == QDialog::Rejected)
-    {
-        if (did_have_focus)
-            mUI.widget->SetFocus();
-        return;
-    }
-
-    const auto& material = dlg.GetSelectedMaterialId();
-    const auto tile_index = dlg.GetTileIndex();
-
-    auto palette_index = klass->FindMaterialIndexInPalette(material, tile_index);
-
-    if (palette_index == 0xff)
-    {
-        const auto next_available_palette_index = klass->FindNextAvailablePaletteIndex();
-        if (next_available_palette_index == 0xff)
+        if (dlg.exec() == QDialog::Rejected)
         {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Warning);
-            msg.setWindowTitle("Layer Palette is Full");
-            msg.setText(app::toString("The material palette on current layer '%1' is full and no more materials can be added to it.\n\n"
-                                      "You can select a material index to overwrite manually in the tool setting.\n"
-                                      "Reusing a material index *will* overwrite that material.", klass->GetName()));
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.exec();
+            if (did_have_focus)
+                mUI.widget->SetFocus();
+            return;
+        }
+        const auto& materialId = dlg.GetSelectedMaterialId();
+        if (materialId.IsEmpty())
+        {
             if (did_have_focus)
                 mUI.widget->SetFocus();
             return;
         }
 
-        // look if there's a shape associated with this material
-        const auto& shapes = mState.workspace->ListTileShapes();
-        for (const auto& shape : shapes)
+        unsigned palette_index = 0;
+        for (const auto* widget : mPaletteMaterialWidgets)
         {
-            QString shape_material;
-            shape.resource->GetProperty("material", &shape_material);
-            if (shape_material == material)
-                klass->SetPaletteDrawableId(shape.id, next_available_palette_index);
+            if (widget->GetMaterialId() == materialId)
+            {
+                palette_index = widget->GetPaletteIndex();
+                break;
+            }
         }
 
-        klass->SetPaletteMaterialId(material, next_available_palette_index);
-        klass->SetPaletteMaterialTileIndex(tile_index, next_available_palette_index);
-        palette_index = next_available_palette_index;
-    }
+        InitializePaletteEntry(*klass, palette_index);
 
-    // assign the palette index to the selected tiles.
-    for (unsigned i=0; i<selection.GetTileCount(); ++i)
+        // assign the palette index to the selected tiles.
+        for (unsigned i=0; i<selection.GetTileCount(); ++i)
+        {
+            const auto& tile = selection.GetTile(i);
+            ASSERT(layer->SetTilePaletteIndex(palette_index, tile.y, tile.x));
+        }
+    }
+    else if (palette_type == game::TilemapLayer::PaletteType::Tilemap)
     {
-        const auto& tile = selection.GetTile(i);
-        ASSERT(layer->SetTilePaletteIndex(palette_index, tile.y, tile.x));
+        const auto& materialId = layer->GetTilemapMaterialId();
+        const auto tilemap = mState.workspace->FindMaterialClassById(materialId);
+        if (!tilemap)
+        {
+            NOTE("Current tilemap is not a valid material.");
+            WARN("Cannot open tile chooser since the current tilemap material is not a valid material.");
+            return;
+        }
+
+        DlgTileChooser dlg(this, tilemap);
+        if (current_palette_index != klass->GetMaxPaletteIndex())
+            dlg.SetTileIndex(klass->GetPaletteMaterialTileIndex(current_palette_index));
+
+        if (dlg.exec() == QDialog::Rejected)
+        {
+            if (did_have_focus)
+                mUI.widget->SetFocus();
+            return;
+        }
+        const auto tile_index = dlg.GetTileIndex();
+        const auto palette_index = tile_index;
+        InitializePaletteEntry(*klass, palette_index);
+
+        // assign the palette index to the selected tiles.
+        for (unsigned i=0; i<selection.GetTileCount(); ++i)
+        {
+            const auto& tile = selection.GetTile(i);
+            ASSERT(layer->SetTilePaletteIndex(palette_index, tile.y, tile.x));
+        }
     }
 
-    ClearUnusedPaletteEntries();
-    UpdateLayerPalette();
     DisplaySelection();
 
     if (did_have_focus)
-        mUI.widget->SetFocus();
+    {
+        QTimer::singleShot(0, this, [this]() {
+            mUI.widget->SetFocus();
+        });
+    }
 }
 
 void TilemapWidget::DeleteSelectedTileMaterial()
@@ -1911,8 +2036,6 @@ void TilemapWidget::DeleteSelectedTileMaterial()
         ASSERT(layer->SetTilePaletteIndex(nothing_index, tile.y, tile.x));
     }
 
-    ClearUnusedPaletteEntries();
-    UpdateLayerPalette();
     DisplaySelection();
 }
 
@@ -1979,10 +2102,7 @@ void TilemapWidget::StopTool()
     if (mCurrentTool)
     {
         mCurrentTool.reset();
-        ClearUnusedPaletteEntries();
         DisplaySelection();
-        DisplayLayerProperties();
-        DisplayMapProperties();
         UncheckTools();
     }
 }
@@ -1991,17 +2111,16 @@ void TilemapWidget::StartTool(const QString& id)
 {
     StopTool();
 
-    SetCurrentTool(id);
-
     size_t tool_index = 0;
-    auto* tool  = GetCurrentTool(&tool_index);
-    auto* layer = GetCurrentLayerInstance();
+    auto* tool  = GetTool(id, &tool_index);
+    auto* layer_instance = GetCurrentLayerInstance();
+    auto* layer_class = GetCurrentLayer();
     ASSERT(tool);
-    ASSERT(layer);
+    ASSERT(layer_instance && layer_class);
 
     const auto tile_width  = mState.klass->GetTileWidth();
     const auto tile_height = mState.klass->GetTileHeight();
-    const auto tile_scaler = layer->GetTileSizeScaler();
+    const auto tile_scaler = layer_instance->GetTileSizeScaler();
     const auto layer_tile_width = tile_width * tile_scaler;
     const auto layer_tile_height = tile_height * tile_scaler;
 
@@ -2021,13 +2140,29 @@ void TilemapWidget::StartTool(const QString& id)
 
     if (tool->tool == ToolFunction::TileBrush)
     {
-        auto mouse_tool = std::make_unique<TileBrushTool>(mTools[tool_index], mState, *layer);
+        const auto tile_tool = mTools[tool_index];
+        const auto palette_type = layer_class->GetPaletteType();
+        if (palette_type == game::TilemapPaletteType::Tilemap)
+        {
+            for (unsigned row=0; row<tile_tool->height; ++row)
+            {
+                for (unsigned col=0; col<tile_tool->width; ++col)
+                {
+                    const auto& tile = tile_tool->tiles[row * tile_tool->width + col];
+                    const auto palette_index = tile.palette_index;
+                    InitializePaletteEntry(*layer_class, palette_index);
+                }
+            }
+        }
+
+        auto mouse_tool = std::make_unique<TileBrushTool>(mTools[tool_index], mState, *layer_instance);
         mouse_tool->SetTileCol(tile_col);
         mouse_tool->SetTileRow(tile_row);
         mCurrentTool = std::move(mouse_tool);
     }
 
-    for (auto* action : mToolActions)
+    auto actions = mBrushMenu->actions();
+    for (auto* action : actions)
     {
         if (action->data().toString() == id)
         {
@@ -2044,20 +2179,13 @@ void TilemapWidget::OnAddResource(const app::Resource* resource)
 {
     if (resource->IsMaterial())
     {
-        const auto& materials = mState.workspace->ListAllMaterials();
-        for (auto* widget : mPaletteMaterialWidgets)
-            widget->UpdateMaterialList(materials);
+        UpdateMaterialLists();
     }
     else if (resource->IsCustomShape())
     {
         const auto& shapes = mState.workspace->ListTileShapes();
         for (auto* widget : mPaletteMaterialWidgets)
             widget->UpdateDrawableList(shapes);
-    }
-
-    if (mDlgTileTool)
-    {
-        mDlgTileTool->ResourceAdded(resource);
     }
 }
 void TilemapWidget::OnRemoveResource(const app::Resource* resource)
@@ -2065,14 +2193,21 @@ void TilemapWidget::OnRemoveResource(const app::Resource* resource)
     if (resource->IsMaterial())
     {
         ReplaceDeletedResources();
-
-        const auto& materials = mState.workspace->ListAllMaterials();
-        for (auto* widget : mPaletteMaterialWidgets)
-            widget->UpdateMaterialList(materials);
+        UpdateMaterialLists();
 
         mState.renderer.ClearPaintState();
 
         DisplayLayerProperties();
+
+        for (const auto& tool : mTools)
+        {
+            for (auto& tile : tool->tiles)
+            {
+                if (tile.material_instance &&
+                    tile.material_instance->GetClassId() == resource->GetId())
+                    tile.material_instance.reset();
+            }
+        }
     }
     else if (resource->IsCustomShape())
     {
@@ -2094,27 +2229,38 @@ void TilemapWidget::OnRemoveResource(const app::Resource* resource)
             StopTool();
         }
     }
-
-    if (mDlgTileTool)
-    {
-        mDlgTileTool->ResourceRemoved(resource);
-    }
 }
 void TilemapWidget::OnUpdateResource(const app::Resource* resource)
 {
     if (resource->IsMaterial())
     {
-        const auto& materials = mState.workspace->ListAllMaterials();
-        for (auto* widget : mPaletteMaterialWidgets)
-            widget->UpdateMaterialList(materials);
+        UpdateMaterialLists();
 
         mState.renderer.ClearPaintState();
 
         if (const auto* layer = GetCurrentLayer())
         {
+            bool generate_previews = false;
             for (auto* widget : mPaletteMaterialWidgets)
             {
-                widget->UpdateMaterialPreview(resource->GetId());
+                const auto preview_id = widget->GetPreviewId();
+                if (preview_id == resource->GetId())
+                {
+                    generate_previews = true;
+                    break;
+                }
+            }
+            if (generate_previews)
+                RefreshPreviews(true);
+        }
+
+        for (const auto& tool : mTools)
+        {
+            for (auto& tile : tool->tiles)
+            {
+                if (tile.material_instance &&
+                    tile.material_instance->GetClassId() == resource->GetId())
+                    tile.material_instance.reset();
             }
         }
     }
@@ -2125,14 +2271,6 @@ void TilemapWidget::OnUpdateResource(const app::Resource* resource)
             widget->UpdateDrawableList(shapes);
 
         mState.renderer.ClearPaintState();
-
-        if (const auto* layer = GetCurrentLayer())
-        {
-            for (auto* widget : mPaletteMaterialWidgets)
-            {
-                widget->UpdateMaterialPreview(resource->GetId());
-            }
-        }
     }
 
     if (mCurrentTool)
@@ -2142,50 +2280,63 @@ void TilemapWidget::OnUpdateResource(const app::Resource* resource)
             StopTool();
         }
     }
-
-    if (mDlgTileTool)
-    {
-        mDlgTileTool->ResourceUpdated(resource);
-    }
-
 }
 
 void TilemapWidget::LayerSelectionChanged(const QItemSelection&, const QItemSelection&)
 {
-    const auto* current = GetCurrentLayer();
-    if (!current)
-    {
-        StopTool();
-        mState.selection.Clear();
-    }
-    else
-    {
-        if (mState.selection.GetResolution() != current->GetResolution())
-            mState.selection.Clear();
-    }
+    StopTool();
+
+    mState.selection.Clear();
 
     DisplayLayerProperties();
     DisplaySelection();
-
-    for (auto* action : mToolActions)
-        SetEnabled(action, current != nullptr);
+    RefreshPreviews(false);
+    UpdateToolToolbar();
 }
 
-void TilemapWidget::PaletteMaterialChanged(const PaletteMaterial* material)
+void TilemapWidget::PaletteMaterialChanged(const PaletteMaterial* widget)
 {
     if (auto* layer = GetCurrentLayer())
     {
-        const auto palette_index = material->GetPaletteIndex();
-        layer->SetPaletteDrawableId(material->GetDrawableId(), palette_index);
-        layer->SetPaletteMaterialId(material->GetMaterialId(), palette_index);
-        layer->SetPaletteOcclusion(material->GetOcclusion(), palette_index);
-        layer->SetPaletteMaterialTileIndex(material->GetTileIndex(), palette_index);
+        const auto palette_type = layer->GetPaletteType();
 
-        const auto type = layer->GetType();
-        const auto palette_size = layer->GetCurrentPaletteSize();
-        const auto palette_max = game::TilemapLayerClass::GetMaxPaletteIndex(type);
-        SetMinMax(mUI.paletteUsage, 0, palette_max);
-        SetValue(mUI.paletteUsage, palette_size);
+        const auto palette_index = widget->GetPaletteIndex();
+        layer->SetPaletteDrawableId(widget->GetDrawableId(), palette_index);
+        layer->SetPaletteOcclusion(widget->GetOcclusion(), palette_index);
+        if (palette_type == game::TilemapPaletteType::MultiMaterial)
+            layer->SetPaletteMaterialId(widget->GetMaterialId(), palette_index);
+        else if (palette_type == game::TilemapPaletteType::Tilemap)
+            layer->SetPaletteMaterialTileIndex(widget->GetTileIndex(), palette_index);
+
+        if (palette_type == game::TilemapPaletteType::MultiMaterial)
+        {
+            const auto& materialId = widget->GetMaterialId();
+            if (materialId.IsEmpty())
+            {
+                auto* inst = GetCurrentLayerInstance();
+                bool palette_entry_used = false;
+                for (unsigned row=0; row<inst->GetHeight(); ++row)
+                {
+                    for (unsigned col=0; col<inst->GetWidth(); ++col)
+                    {
+                        uint8_t tile_palette_index = 0;
+                        ASSERT(inst->GetTilePaletteIndex(&tile_palette_index, row, col));
+                        if (tile_palette_index == palette_index)
+                        {
+                            palette_entry_used = true;
+                            break;
+                        }
+                    }
+                }
+                if (!palette_entry_used)
+                {
+                    layer->DeletePaletteIndex(palette_index);
+                    UpdateLayerPaletteUsage();
+                }
+            }
+        }
+
+        UpdateLayerPaletteUsage();
     }
 }
 
@@ -2257,29 +2408,35 @@ void TilemapWidget::DisplayLayerProperties()
     SetValue(mUI.cmbLayerType,       -1);
     SetValue(mUI.cmbLayerStorage,    -1);
     SetValue(mUI.cmbLayerResolution, -1);
+    SetValue(mUI.cmbPaletteType,     -1);
     SetValue(mUI.cmbLayerCache,      -1);
+    SetValue(mUI.cmbPaletteType,     -1);
     SetValue(mUI.layerDepth,          0);
     SetValue(mUI.layerIndex,          0);
     SetValue(mUI.chkLayerVisible,   false);
     SetValue(mUI.chkLayerEnabled,   false);
     SetValue(mUI.chkLayerReadOnly,  false);
-    SetEnabled(mUI.btnDeleteLayer,      false);
     SetEnabled(mUI.btnEditLayer,        false);
     SetEnabled(mUI.btnDeleteLayer,      false);
+    SetEnabled(mUI.btnEditBrushes,      false);
     SetEnabled(mUI.layerProperties,     false);
     SetEnabled(mUI.layerPalette,        false);
+    SetEnabled(mUI.cmbTilemap,          false);
 
     SetValue(mUI.paletteUsage, 0);
+    SetEnabled(mUI.paletteUsage, false);
 
     if (const auto* layer = GetCurrentLayer())
     {
         if (layer->HasRenderComponent())
         {
-            const auto type = layer->GetType();
-            const auto palette_max = game::TilemapLayerClass::GetMaxPaletteIndex(type);
-            const auto palette_size = layer->GetCurrentPaletteSize();
-            SetMinMax(mUI.paletteUsage, 0, palette_max);
-            SetValue(mUI.paletteUsage, palette_size);
+            const auto palette_type = layer->GetPaletteType();
+            if (palette_type == game::TilemapLayerClass::PaletteType::Tilemap)
+            {
+                SetEnabled(mUI.cmbTilemap, true);
+                SetList(mUI.cmbTilemap, mState.workspace->ListTilemapMaterials());
+                SetValue(mUI.cmbTilemap, ListItemId(layer->GetTilemapMaterialId()));
+            }
         }
 
         const auto* inst = GetCurrentLayerInstance();
@@ -2290,6 +2447,7 @@ void TilemapWidget::DisplayLayerProperties()
         SetValue(mUI.cmbLayerType,       layer->GetType());
         SetValue(mUI.cmbLayerStorage,    layer->GetStorage());
         SetValue(mUI.cmbLayerCache,      layer->GetCache());
+        SetValue(mUI.cmbPaletteType,     layer->GetPaletteType());
         SetValue(mUI.cmbLayerResolution, layer->GetResolution());
         SetValue(mUI.layerDepth,         layer->GetDepth() * -1);
         SetValue(mUI.layerIndex,         layer->GetLayer());
@@ -2305,8 +2463,10 @@ void TilemapWidget::DisplayLayerProperties()
         }
 
         UpdateLayerPalette();
+        UpdateLayerPaletteUsage();
 
         SetEnabled(mUI.btnDeleteLayer,  true);
+        SetEnabled(mUI.btnEditBrushes,  true);
         SetEnabled(mUI.layerProperties, true);
         SetEnabled(mUI.layerPalette,    true);
     }
@@ -2314,10 +2474,13 @@ void TilemapWidget::DisplayLayerProperties()
     {
         for (auto* widget : mPaletteMaterialWidgets)
         {
+            widget->SetPaletteType(game::TilemapPaletteType::MultiMaterial);
+            widget->ClearPreview();
             widget->ResetMaterial();
             widget->ResetDrawable();
             widget->setEnabled(false);
         }
+        UpdateLayerPaletteUsage();
     }
 }
 
@@ -2363,24 +2526,57 @@ void TilemapWidget::UpdateLayerPalette()
 {
     const auto* layer = GetCurrentLayer();
     if (!layer || !layer->HasRenderComponent())
+    {
+        SetValue(mUI.paletteUsage, 0);
+        SetEnabled(mUI.paletteUsage, false);
         return;
+    }
+
+    for (auto* widget : mPaletteMaterialWidgets)
+    {
+        widget->setEnabled(false);
+    }
 
     const auto type = layer->GetType();
     const auto palette_max = game::TilemapLayerClass::GetMaxPaletteIndex(type);
+    const auto tilemap_material_id = layer->GetTilemapMaterialId();
+    const auto palette_type = layer->GetPaletteType();
 
     for (unsigned i = 0; i < palette_max; ++i)
     {
         auto* widget = mPaletteMaterialWidgets[i];
         widget->setEnabled(true);
+        widget->SetPaletteType(palette_type);
         widget->SetDrawable(layer->GetPaletteDrawableId(i));
-        widget->SetMaterial(layer->GetPaletteMaterialId(i));
-        widget->SetTileIndex(layer->GetPaletteMaterialTileIndex(i));
+        widget->SetTileIndex(i); //layer->GetPaletteMaterialTileIndex(i));
         widget->SetOcclusion(layer->GetPaletteOcclusion(i));
+
+        if (palette_type == game::TilemapLayerClass::PaletteType::MultiMaterial)
+        {
+            widget->SetMaterial(layer->GetPaletteMaterialId(i));
+        }
+        else if (palette_type == game::TilemapLayerClass::PaletteType::Tilemap)
+        {
+            widget->SetTilemapMaterialId(tilemap_material_id);
+        }
+    }
+}
+
+void TilemapWidget::UpdateLayerPaletteUsage()
+{
+    const auto* layer = GetCurrentLayer();
+    if (!layer || !layer->HasRenderComponent())
+    {
+        SetValue(mUI.paletteUsage, 0);
+        SetEnabled(mUI.paletteUsage, false);
+        return;
     }
 
+    const auto palette_max = layer->GetMaxPaletteIndex();
     const auto palette_size = layer->GetCurrentPaletteSize();
     SetMinMax(mUI.paletteUsage, 0, palette_max);
     SetValue(mUI.paletteUsage, palette_size);
+    SetEnabled(mUI.paletteUsage, true);
 }
 
 void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
@@ -2409,6 +2605,106 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     scene_painter.SetPixelRatio({1.0f*xs*zoom, 1.0f*ys*zoom});
     scene_painter.SetViewport(0, 0, width, height);
     scene_painter.SetSurfaceSize(width, height);
+
+    // validation
+    {
+        struct ValidationMessage {
+            std::string message;
+            unsigned priority = 0;
+        };
+        std::vector<ValidationMessage> msgs;
+
+        for (size_t i=0; i<mState.klass->GetNumLayers(); ++i)
+        {
+            const auto& layer = mState.klass->GetLayer(i);
+            const auto palette_type = layer.GetPaletteType();
+            if (palette_type == game::TilemapPaletteType::Tilemap)
+            {
+                const auto materialId = layer.GetTilemapMaterialId();
+                if (materialId.empty())
+                {
+                    ValidationMessage msg;
+                    msg.message = base::FormatString("Layer '%1' has no tilemap material selected.", layer.GetName());
+                    msgs.push_back(std::move(msg));
+                }
+                else if (!mState.workspace->IsValidMaterial(materialId))
+                {
+                    ValidationMessage msg;
+                    msg.message = base::FormatString("Layer '%1' has invalid tilemap material.", layer.GetName());
+                    msgs.push_back(std::move(msg));
+                }
+                else
+                {
+                    const auto klass = mState.workspace->GetMaterialClassById(materialId);
+                    if (!klass->IsTilemap())
+                    {
+                        ValidationMessage msg;
+                        msg.message = base::FormatString("Layer '%1' has invalid tilemap material.", layer.GetName());
+                        msgs.push_back(std::move(msg));
+                    }
+                    else
+                    {
+                        if (klass->GetNumTextureMaps() == 0)
+                        {
+                            ValidationMessage msg;
+                            msg.message = base::FormatString("Layer '%1' tilemap material has no texture maps.", layer.GetName());
+                            msgs.push_back(std::move(msg));
+                        }
+                        else
+                        {
+                            for (unsigned i=0; i<klass->GetNumTextureMaps(); ++i)
+                            {
+                                const auto* map = klass->GetTextureMap(i);
+                                if (map->GetNumTextures() == 0)
+                                {
+                                    ValidationMessage msg;
+                                    msg.message = base::FormatString("Layer '%1' tilemap material texture map '%2' is missing texture.",
+                                        layer.GetName(), map->GetName());
+                                    msgs.push_back(std::move(msg));
+                                }
+                            }
+                        }
+                        const auto active_texture_map_id = klass->GetActiveTextureMap();
+                        if (!active_texture_map_id.empty() && klass->FindTextureMapById(active_texture_map_id) == nullptr)
+                        {
+                            ValidationMessage msg;
+                            msg.message = base::FormatString("Layer '%1' tilemap material has invalid active texture map.",
+                                layer.GetName());
+                            msgs.push_back(std::move(msg));
+                        }
+                    }
+                }
+            }
+            else if (palette_type == game::TilemapPaletteType::MultiMaterial)
+            {
+                const auto palette_size = layer.GetCurrentPaletteSize();
+                if (palette_size == 0)
+                {
+                    ValidationMessage msg;
+                    msg.priority = 2;
+                    msg.message = base::FormatString("Layer %1 has no materials in palette", layer.GetName());
+                    msgs.push_back(std::move(msg));
+                }
+            }
+        }
+        float xpos = 10.0f;
+        float ypos = 10.0f;
+        for (const auto& msg : msgs)
+        {
+            if (msg.priority == 0)
+                ShowError(msg.message, QPointF(xpos, ypos), painter);
+            else if (msg.priority == 1)
+                ShowWarning(msg.message, QPointF(xpos, ypos), painter);
+            else if (msg.priority == 2)
+                ShowMessage(msg.message, QPointF(xpos, ypos), painter);
+            ypos += 20.0f;
+        }
+        for (const auto& msg : msgs)
+        {
+            if (msg.priority == 0)
+                return;
+        }
+    }
 
     // render the actual tilemap
     {
@@ -2857,16 +3153,7 @@ void TilemapWidget::MousePress(QMouseEvent* event)
 
     if (mCurrentTool && mickey->button() == Qt::LeftButton)
     {
-        const auto* layer = GetCurrentLayerInstance();
-        const auto* tool  = GetCurrentTool();
-        if (tool && !ValidateToolAgainstLayer(*tool, *layer))
-        {
-            mCurrentTool.reset();
-            UncheckTools();
-            return;
-        }
         mCurrentTool->MousePress(mickey);
-        UpdateLayerPalette();
     }
 
     if (mCameraTool && mickey->button() == Qt::RightButton)
@@ -2906,32 +3193,6 @@ void TilemapWidget::MouseDoubleClick(QMouseEvent* mickey)
 
 void TilemapWidget::MouseWheel(QWheelEvent* wheel)
 {
-    if (!mCurrentTool)
-        return;
-
-    auto* layer = GetCurrentLayerInstance();
-    if (!layer)
-        return;
-
-    // a bit of a kludge but the GfxWidget transforms Ctrl+mouse wheel to
-    // zoom in/out events.
-    if (wheel->modifiers() == Qt::ControlModifier)
-        return;
-
-    const QPoint& num_degrees = wheel->angleDelta() / 8;
-    const QPoint& num_steps = num_degrees / 15;
-    // only consider the wheel scroll steps on the vertical axis.
-    // if steps are positive the wheel is scrolled away from the user
-    // and if steps are negative the wheel is scrolled towards the user.
-    const int num_vertical_steps = num_steps.y();
-
-    size_t tool_index = 0;
-    auto* tool = GetCurrentTool(&tool_index);
-    ASSERT(tool);
-
-    const int curr_tool_index = tool_index;
-    const int next_tool_index = math::wrap(0, (int)(mTools.size() - 1), curr_tool_index - num_vertical_steps);
-    StartTool(mTools[next_tool_index]->id);
 
 }
 
@@ -3060,23 +3321,22 @@ size_t TilemapWidget::GetCurrentLayerIndex() const
     return indices[0].row();
 }
 
-void TilemapWidget::GenerateTools()
+void TilemapWidget::GenerateLayerTools(const game::TilemapLayerClass& klass)
 {
-    if (!mTools.empty())
-        return;
-
+    DEBUG("Generating default tools for layer. [layer='%1']", klass.GetName());
     {
         auto tool = std::make_shared<Tool>();
-        tool->id     = app::RandomString();
+        tool->id     = base::RandomString(10);
         tool->tool   = ToolFunction::TileBrush;
         tool->shape  = ToolShape::Rectangle;
-        tool->name   = "Brush 1";
+        tool->name   = "Stamp";
         tool->width  = 1;
         tool->height = 1;
+        tool->layer = klass.GetId();
 
         TileTool::Tile tile;
-        tile.material       = "_checkerboard";
-        tile.palette_index  = PaletteIndexAutomatic;
+        tile.data_value     = 0;
+        tile.palette_index  = 0;
         tile.apply_material = true;
         tile.apply_value    = false;
         tool->tiles.push_back(std::move(tile));
@@ -3087,59 +3347,55 @@ void TilemapWidget::GenerateTools()
 
 void TilemapWidget::UpdateToolToolbar()
 {
-    for (auto* action : mToolActions)
-    {
-        delete action;
-    }
-    mToolActions.clear();
+    mBrushMenu->clear();
 
     const auto* layer = GetCurrentLayer();
+    if (layer == nullptr)
+        return;
 
-    for (unsigned i=0; i<mTools.size(); ++i)
+    unsigned shortcut_key_index = 0;
+
+    for (const auto& tool : mTools)
     {
-        const auto& tool = mTools[i];
+        if (tool->layer != layer->GetId())
+            continue;
+
         auto* action = new QAction(this);
-        action->setText(tool->name);
-        action->setData(tool->id);
+        action->setText(app::FromUtf8(tool->name));
+        action->setData(app::FromUtf8(tool->id));
         action->setCheckable(true);
         action->setChecked(false);
         action->setEnabled(layer != nullptr);
-        if (i < 9)
-            action->setShortcut(QKeySequence(Qt::CTRL | (Qt::Key_1 + i)));
+        if (shortcut_key_index < 9)
+        {
+            action->setShortcut(QKeySequence(Qt::CTRL | (Qt::Key_1 + shortcut_key_index)));
+            shortcut_key_index++;
+        }
 
         if (tool->tool == ToolFunction::TileBrush)
             action->setIcon(QIcon("level:brush.png"));
 
         connect(action, &QAction::triggered,this, &TilemapWidget::StartToolAction);
-        mToolActions.push_back(action);
+        mBrushMenu->addAction(action);
     }
-
-    emit RefreshActions();
 }
 
 void TilemapWidget::UncheckTools()
 {
-    for (auto* action : mToolActions)
+    auto actions = mBrushMenu->actions();
+    for (auto* action : actions)
         action->setChecked(false);
 }
 
-void TilemapWidget::SetCurrentTool(const QString& id)
+TileTool* TilemapWidget::GetTool(const QString& id, size_t* index)
 {
-    mCurrentToolId = id;
-}
-
-TileTool* TilemapWidget::GetCurrentTool(size_t* index)
-{
-    if (mCurrentToolId.isEmpty())
-        return nullptr;
-
     size_t counter = 0;
     if (index == nullptr)
         index = &counter;
 
     for (*index=0; *index<mTools.size(); ++*index)
     {
-        if (mTools[*index]->id == mCurrentToolId)
+        if (mTools[*index]->id == app::ToUtf8(id))
             return mTools[*index].get();
     }
     BUG("No such tool was found.");
@@ -3157,6 +3413,8 @@ void TilemapWidget::ModifyCurrentLayer()
         layer->SetReadOnly(GetValue(mUI.chkLayerReadOnly));
         layer->SetDepth(GetValue(mUI.layerDepth)*-1);
         layer->SetLayer(GetValue(mUI.layerIndex));
+        layer->SetPaletteType(GetValue(mUI.cmbPaletteType));
+        layer->SetTilemapMaterialId(GetItemId(mUI.cmbTilemap));
 
         auto* instance = GetCurrentLayerInstance();
         instance->SetFlags(layer->GetFlags());
@@ -3168,32 +3426,9 @@ void TilemapWidget::ModifyCurrentLayer()
 
 bool TilemapWidget::ValidateToolAgainstLayer(const Tool& tool, const game::TilemapLayer& layer)
 {
-    if (!layer.HasRenderComponent())
-        return true;
+    if (tool.layer != layer->GetId())
+        return false;
 
-    for (const auto& tile : tool.tiles)
-    {
-        if (tile.palette_index == PaletteIndexAutomatic)
-        {
-            const auto& klass = layer.GetClass();
-            if (klass.FindMaterialIndexInPalette(tile.material, tile.tile_index) != 0xff)
-                return true;
-
-            if (klass.FindNextAvailablePaletteIndex() == 0xff)
-            {
-                QMessageBox msg(this);
-                msg.setIcon(QMessageBox::Warning);
-                msg.setWindowTitle("Layer Palette is Full");
-                msg.setText(app::toString(
-                        "The material palette on current layer '%1' is full and no more materials can be added to it.\n\n"
-                        "You can select a material index to overwrite manually in the tool setting.\n"
-                        "Reusing a material index *will* overwrite that material.", klass.GetName()));
-                msg.setStandardButtons(QMessageBox::Ok);
-                msg.exec();
-                return false;
-            }
-        }
-    }
     return true;
 }
 
@@ -3204,8 +3439,10 @@ void TilemapWidget::ToolIntoJson(const Tool& tool, QJsonObject& json)
     app::JsonWrite(json, "shape",          tool.shape);
     app::JsonWrite(json, "id",             tool.id);
     app::JsonWrite(json, "name",           tool.name);
+    app::JsonWrite(json, "layer",          tool.layer);
     app::JsonWrite(json, "width",          tool.width);
     app::JsonWrite(json, "height",         tool.height);
+    app::JsonWrite(json, "version",       2);
 
     QJsonArray tiles;
     for (size_t i=0; i<tool.height*tool.width; ++i)
@@ -3213,11 +3450,8 @@ void TilemapWidget::ToolIntoJson(const Tool& tool, QJsonObject& json)
         ASSERT(i < tool.tiles.size());
         const auto& tile = tool.tiles[i];
         QJsonObject foo;
-        app::JsonWrite(foo, "material"      , tile.material);
-        app::JsonWrite(foo, "drawable"      , tile.drawable);
-        app::JsonWrite(foo, "tile_index"    , tile.tile_index);
-        app::JsonWrite(foo, "value"         , tile.value);
-        app::JsonWrite(foo, "index"         , tile.palette_index);
+        app::JsonWrite(foo, "palette_index" , tile.palette_index);
+        app::JsonWrite(foo, "data_value"    , tile.data_value);
         app::JsonWrite(foo, "apply_material", tile.apply_material);
         app::JsonWrite(foo, "apply_value"   , tile.apply_value);
         tiles.push_back(foo);
@@ -3228,10 +3462,15 @@ void TilemapWidget::ToolIntoJson(const Tool& tool, QJsonObject& json)
 // static
 bool TilemapWidget::ToolFromJson(Tool& tool, const QJsonObject& json)
 {
+    unsigned tool_version = 0;
+    if (!app::JsonReadSafe(json, "version", &tool_version))
+        return false;
+
     app::JsonReadSafe(json, "tool",           &tool.tool);
     app::JsonReadSafe(json, "shape",          &tool.shape);
     app::JsonReadSafe(json, "id",             &tool.id);
     app::JsonReadSafe(json, "name",           &tool.name);
+    app::JsonReadSafe(json, "layer",          &tool.layer);
     app::JsonReadSafe(json, "width",          &tool.width);
     app::JsonReadSafe(json, "height",         &tool.height);
 
@@ -3240,39 +3479,16 @@ bool TilemapWidget::ToolFromJson(Tool& tool, const QJsonObject& json)
         const auto& tiles = json["tiles"].toArray();
         if (tiles.size() != tool.width * tool.height)
             return false;
+
         for (const auto& item : tiles)
         {
             TileTool::Tile tile;
-            const auto& json = item.toObject();
-            app::JsonReadSafe(json, "material",       &tile.material);
-            app::JsonReadSafe(json, "drawable",       &tile.drawable);
-            app::JsonReadSafe(json, "tile_index",     &tile.tile_index);
-            app::JsonReadSafe(json, "value",          &tile.value);
-            app::JsonReadSafe(json, "index",          &tile.palette_index);
-            app::JsonReadSafe(json, "apply_material", &tile.apply_material);
-            app::JsonReadSafe(json, "apply_value",    &tile.apply_value);
+            const auto& tool_json = item.toObject();
+            app::JsonReadSafe(tool_json, "palette_index",  &tile.palette_index);
+            app::JsonReadSafe(tool_json, "data_value",     &tile.data_value);
+            app::JsonReadSafe(tool_json, "apply_material", &tile.apply_material);
+            app::JsonReadSafe(tool_json, "apply_value",    &tile.apply_value);
             tool.tiles.push_back(std::move(tile));
-        }
-    }
-    else
-    {
-        TileTool::Tile tile;
-        app::JsonReadSafe(json, "material",       &tile.material);
-        app::JsonReadSafe(json, "drawable",       &tile.drawable);
-        app::JsonReadSafe(json, "value",          &tile.value);
-        app::JsonReadSafe(json, "index",          &tile.palette_index);
-        app::JsonReadSafe(json, "apply_material", &tile.apply_material);
-        app::JsonReadSafe(json, "apply_value",    &tile.apply_value);
-        for (size_t i=0; i<tool.width*tool.height; ++i)
-        {
-            TileTool::Tile copy;
-            copy.material = tile.material;
-            copy.drawable = tile.drawable;
-            copy.tile_index = tile.tile_index;
-            copy.palette_index = tile.palette_index;
-            copy.apply_material = tile.apply_material;
-            copy.apply_value = tile.apply_value;
-            tool.tiles.push_back(std::move(copy));
         }
     }
     return true;
@@ -3284,16 +3500,14 @@ void TilemapWidget::ReplaceDeletedResources()
     {
         for (auto& tile : tool->tiles)
         {
-            if (!mState.workspace->IsValidMaterial(tile.material))
-            {
-                tile.material = "_checkerboard";
-                WARN("Tilemap brush tool material was reset to checkerboard. [tool='%1']", tool->name);
-            }
-            if (!mState.workspace->IsValidDrawable(tile.drawable))
-            {
-                tile.drawable = "";
-                WARN("Tilemap brush tool drawable was reset to nothing. [tool='%1']", tool->name);
-            }
+            if (!tile.material_instance)
+                continue;
+
+            const auto& materialId = tile.material_instance->GetClassId();
+            if (mState.workspace->IsValidMaterial(materialId))
+                continue;
+
+            tile.material_instance.reset();
         }
     }
     for (unsigned i=0; i<mState.klass->GetNumLayers(); ++i)
@@ -3301,6 +3515,17 @@ void TilemapWidget::ReplaceDeletedResources()
         auto& layer = mState.klass->GetLayer(i);
         if (!layer.HasRenderComponent())
             continue;
+
+        const auto& tilemap_material_id = layer.GetTilemapMaterialId();
+        if (!tilemap_material_id.empty())
+        {
+            if (!mState.workspace->IsValidMaterial(tilemap_material_id))
+            {
+                layer.SetTilemapMaterialId("");
+                WARN("Tilemap layer tilemap material was reset to nothing. [layer='%1']",
+                    layer.GetName());
+            }
+        }
 
         for (unsigned i=0; i<layer.GetMaxPaletteIndex(); ++i)
         {
@@ -3312,8 +3537,8 @@ void TilemapWidget::ReplaceDeletedResources()
                 if (!mState.workspace->IsValidMaterial(material))
                 {
                     layer.SetPaletteMaterialId("_checkerboard", i);
-                    WARN("Tilemap layer palette material was reset to checkerboard. [layer='%1', index='%2']",
-                         layer.GetName(), i);
+                    WARN("Tilemap layer palette material was reset to checkerboard. [layer='%1']",
+                         layer.GetName());
                 }
             }
 
@@ -3322,49 +3547,11 @@ void TilemapWidget::ReplaceDeletedResources()
                 if (!mState.workspace->IsValidDrawable(drawable))
                 {
                     layer.SetPaletteDrawableId("", i);
-                    WARN("Tilemap layer palette drawable was reset to nothing. [layer='%1', index=%2]",
-                        layer.GetName(), i);
+                    WARN("Tilemap layer palette drawable was reset to nothing. [layer='%1']",
+                        layer.GetName());
                 }
             }
         }
-    }
-}
-
-void TilemapWidget::ClearUnusedPaletteEntries()
-{
-    auto* klass = GetCurrentLayer();
-    auto* layer = GetCurrentLayerInstance();
-    if (!layer || !klass || !klass->HasRenderComponent())
-        return;
-
-    static constexpr auto PaletteEntryUsed = 1;
-    static constexpr auto PaletteEntryUnused = 0;
-
-    // record every palette index currently used by going over the tiles.
-    std::vector<int> palette;
-    palette.resize(layer->GetMaxPaletteIndex());
-
-    for (unsigned row=0; row<layer->GetHeight(); ++row)
-    {
-        for (unsigned col=0; col<layer->GetWidth(); ++col)
-        {
-            uint8_t palette_index = 0;
-            ASSERT(layer->GetTilePaletteIndex(&palette_index, row, col));
-            if (palette_index == layer->GetMaxPaletteIndex())
-                continue;
-            ASSERT(palette_index < palette.size());
-            palette[palette_index] = PaletteEntryUsed;
-        }
-    }
-
-    for (uint8_t palette_index=0; palette_index<layer->GetMaxPaletteIndex(); ++palette_index)
-    {
-        ASSERT(palette_index < palette.size());
-        if (palette[palette_index] == PaletteEntryUsed)
-            continue;
-
-        if (klass->DeletePaletteIndex(palette_index))
-            DEBUG("Deleting unused tilemap palette index. [index=%1]", palette_index);
     }
 }
 
@@ -3409,4 +3596,139 @@ std::optional<TilemapWidget::Tile> TilemapWidget::FindTileUnderMouse() const
     return TilemapWidget::Tile { ret.col, ret.row };
 }
 
+void TilemapWidget::UpdateMaterialLists()
+{
+    const auto& materials = mState.workspace->ListAllMaterials();
+    std::vector<app::ResourceListItem> generic;
+    std::vector<app::ResourceListItem> tilemaps;
+    for (const auto& item : materials)
+    {
+        const gfx::MaterialClass* material_class = nullptr;
+        item.resource->GetContent(&material_class);
+        const auto type = material_class->GetType();
+
+        if (type == gfx::MaterialClass::Type::Tilemap)
+            tilemaps.push_back(item);
+        else if (type == gfx::MaterialClass::Type::Color ||
+            type == gfx::MaterialClass::Type::Gradient ||
+            type == gfx::MaterialClass::Type::Sprite ||
+            type == gfx::MaterialClass::Type::Texture ||
+            type == gfx::MaterialClass::Type::Custom)
+            generic.push_back(item);
+    }
+    for (auto* widget : mPaletteMaterialWidgets)
+    {
+        widget->UpdateMaterialList(generic);
+    }
+    SetList(mUI.cmbTilemap, tilemaps);
+}
+
+void TilemapWidget::RefreshPreviews(bool force)
+{
+    // regenerate the palette thumbnails on timer since otherwise
+    // getting this correct is a real pita.
+    auto ClearPreviews = [this]() {
+        for (auto* widget : mPaletteMaterialWidgets)
+        {
+            widget->ClearPreview();
+        }
+    };
+
+    if (const auto* layer = GetCurrentLayer())
+    {
+        const auto palette = layer->GetPaletteType();
+        if (palette == game::TilemapPaletteType::Tilemap)
+        {
+            const std::string tilemap_id = layer->GetTilemapMaterialId();
+            const auto tilemap_material = mState.workspace->FindMaterialClassById(tilemap_id);
+            if (tilemap_material)
+            {
+                // hack
+                auto* material_class = const_cast<gfx::MaterialClass*>(tilemap_material.get());
+                const gfx::TilemapMaterialClass tilemap(*material_class);
+
+                for (auto* widget : mPaletteMaterialWidgets)
+                {
+                    if (widget->GetPreviewId() == tilemap_id && !force)
+                        continue;
+
+                    widget->SetPreview(tilemap.ExtractTile(widget->GetTileIndex()), tilemap_id);
+                }
+            }
+            else
+            {
+                ClearPreviews();
+            }
+        }
+        else if (palette == game::TilemapPaletteType::MultiMaterial)
+        {
+            for  (auto* widget : mPaletteMaterialWidgets)
+            {
+                const std::string material_id = widget->GetMaterialId();
+                const std::string preview_id  = widget->GetPreviewId();
+                if (material_id == preview_id && !force)
+                    continue;
+
+                if (material_id.empty())
+                {
+                    widget->ClearPreview();
+                    continue;
+                }
+
+                if (const auto material = mState.workspace->FindMaterialClassById(material_id))
+                {
+                    // hack
+                    auto* material_class = const_cast<gfx::MaterialClass*>(material.get());
+                    const auto type = material->GetType();
+                    if (type == gfx::MaterialClass::Type::Sprite)
+                    {
+                        const gfx::SpriteMaterialClass sprite(*material_class);
+                        widget->SetPreview(sprite.ExtractPreview(), material_id);
+                    }
+                    else if (type == gfx::MaterialClass::Type::Texture)
+                    {
+                        const gfx::TextureMaterialClass texture(*material_class);
+                        widget->SetPreview(texture.ExtractPreview(), material_id);
+                    }
+                    else
+                    {
+                        widget->ClearPreview();
+                    }
+                }
+                else
+                {
+                    widget->ClearPreview();
+                }
+            }
+        }
+    }
+    else
+    {
+        ClearPreviews();
+    }
+}
+
+void TilemapWidget::InitializePaletteEntry(game::TilemapLayerClass& klass, size_t palette_index) const
+{
+    // If the palette index doesn't yet exist then we must create it.
+    if (klass.HasPaletteIndex(palette_index))
+        return;
+
+    const auto type = klass.GetPaletteType();
+
+    ASSERT(palette_index < mPaletteMaterialWidgets.size());
+    auto* palette_widget = mPaletteMaterialWidgets[palette_index];
+    if (type == game::TilemapLayerClass::PaletteType::Tilemap)
+    {
+        klass.SetPaletteOcclusion(palette_widget->GetOcclusion(), palette_index);
+        klass.SetPaletteDrawableId(palette_widget->GetDrawableId(), palette_index);
+        klass.SetPaletteMaterialTileIndex(palette_widget->GetTileIndex(), palette_index);
+    }
+    else if (type == game::TilemapLayerClass::PaletteType::MultiMaterial)
+    {
+        klass.SetPaletteOcclusion(palette_widget->GetOcclusion(), palette_index);
+        klass.SetPaletteDrawableId(palette_widget->GetDrawableId(), palette_index);
+        klass.SetPaletteMaterialId(palette_widget->GetMaterialId(), palette_index);
+    }
+}
 } // namespace

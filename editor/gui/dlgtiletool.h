@@ -30,6 +30,7 @@
 #include <functional>
 
 #include "graphics/material.h"
+#include "editor/app/types.h"
 #include "editor/app/workspace.h"
 
 namespace gui
@@ -46,29 +47,23 @@ namespace gui
     struct TileTool {
         TileToolFunction tool = TileToolFunction::TileBrush;
         TileToolShape shape   = TileToolShape::Rectangle;
-        QString id;
-        QString name;
+        std::string id;
+        std::string name;
+        std::string layer;
 
         struct Tile {
-            std::string material;
-            std::string drawable;
-            // tile index in the material (when material is tilemap)
-            unsigned tile_index = 0;
-            std::int32_t value  = 0;
-            int palette_index   = -1;
+            unsigned palette_index = 0;
+            std::int32_t data_value   = 0;
             bool apply_material = true;
             bool apply_value    = false;
 
             // filled at runtime when the tool is used.
             mutable std::unique_ptr<gfx::Material> material_instance;
-            mutable std::int32_t material_palette_index = 0;
-            mutable std::int32_t data_value = 0;
         };
         std::vector<Tile> tiles;
         unsigned width  = 0;
         unsigned height = 0;
     };
-
 
     class DlgTileTool : public QDialog
     {
@@ -76,14 +71,10 @@ namespace gui
 
     public:
         using ToolBox = std::vector<std::shared_ptr<TileTool>>;
-        using ToolBoxUpdate = std::function<void()>;
 
-        ToolBoxUpdate NotifyToolBoxUpdate;
-
-        DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolBox* tools);
-
-        inline void SetClass(std::shared_ptr<game::TilemapClass> klass) noexcept
-        { mClass = std::move(klass); }
+        DlgTileTool(const app::Workspace* workspace,
+            const game::TilemapClass* klass, const game::TilemapLayerClass* layer,
+            QWidget* parent, ToolBox* tools);
 
         void SaveState(Settings& settings) const;
         void LoadState(const Settings& settings);
@@ -97,25 +88,19 @@ namespace gui
         void on_toolName_editingFinished();
         void on_btnAddTool_clicked();
         void on_btnDelTool_clicked();
-        void on_btnSelectToolMaterial_clicked();
-        void on_btnSetToolMaterialParams_clicked();
-        void on_btnEditToolMaterial_clicked();
-        void on_btnEditToolShape_clicked();
-        void on_btnResetPaletteIndex_clicked();
+        void on_btnAccept_clicked();
+        void on_btnCancel_clicked();
+        void on_paletteIndex_valueChanged(int);
+        void on_dataValue_valueChanged(int);
         void on_cmbToolFunction_currentIndexChanged(int index);
         void on_cmbToolShape_currentIndexChanged(int index);
         void on_toolWidth_valueChanged(int);
         void on_toolHeight_valueChanged(int);
-        void on_cmbToolMaterial_currentIndexChanged(int);
-        void on_cmbToolDrawable_currentIndexChanged(int);
-        void on_toolPaletteIndex_valueChanged(int);
-        void on_toolValue_valueChanged(int);
         void on_material_toggled();
         void on_data_toggled();
         void on_widgetColor_colorChanged(QColor color);
         void on_tileCol_valueChanged(int);
         void on_tileRow_valueChanged(int);
-        void on_tileIndex_valueChanged(int);
 
     private:
         void PaintScene(gfx::Painter& painter, double);
@@ -127,16 +112,18 @@ namespace gui
         TileTool* GetCurrentTool();
         TileTool::Tile* GetCurrentTile();
         TileTool::Tile* GetTileUnderMouse(unsigned* col, unsigned* row);
-        void SetCurrentTool(const QString& id);
+        void SetCurrentTool(const app::AnyString& id);
         void ModifyCurrentTool();
         void ModifyCurrentTile();
         void UpdateToolCombo();
+
     private:
         Ui::DlgTileTool mUI;
     private:
         const app::Workspace* mWorkspace = nullptr;
+        const game::TilemapClass* mClass = nullptr;
+        const game::TilemapLayerClass* mLayer = nullptr;
         ToolBox* mTools = nullptr;
-        std::shared_ptr<game::TilemapClass> mClass;
         QTimer mTimer;
 
         struct State {

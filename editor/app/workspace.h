@@ -191,6 +191,8 @@ namespace app
         // a tilemap..
         ResourceList ListTileShapes() const;
 
+        ResourceList ListTilemapMaterials() const;
+
         ResourceList ListUserDefinedUIs() const;
         // Get a list of user defined tile map resources.
         ResourceList ListUserDefinedMaps() const;

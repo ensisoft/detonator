@@ -376,6 +376,14 @@ namespace engine
         std::mutex mRendererLock;
         std::unordered_map<std::string, PaintNode> mPaintNodes;
         std::unordered_map<std::string, LightNode> mLightNodes;
+
+        // tilemap material instances that are shared between all
+        // tilemap layers that have Tilemap palette mode.
+        std::unordered_map<std::string,
+            std::shared_ptr<gfx::Material>> mTilemapMaterials;
+
+        // Per tilemap layer material palette with material instances
+        // per each palette entry.
         std::vector<TilemapLayerPalette> mTilemapPalette;
 
 #if !defined(DETONATOR_ENGINE_BUILD)

@@ -316,6 +316,7 @@ add_library(GfxLib
     graphics/loader.cpp
     graphics/material.cpp
     graphics/material_class.cpp
+    graphics/material_class_api.cpp
     graphics/material_instance.cpp
     graphics/painter.cpp
     graphics/paint_context.cpp

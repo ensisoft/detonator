@@ -29,6 +29,19 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>#1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="preview">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -60,50 +73,7 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>#1</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="cmbDrawable">
-       <property name="toolTip">
-        <string>Drawable shape that is set on the tile</string>
-       </property>
-       <property name="placeholderText">
-        <string>Nothing</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="3">
-      <widget class="QToolButton" name="btnSelectMaterial">
-       <property name="toolTip">
-        <string>Select material at palette index</string>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resource/resource.qrc">
-         <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
-       </property>
-       <property name="arrowType">
-        <enum>Qt::NoArrow</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="cmbOcclusion"/>
-     </item>
-     <item row="0" column="4">
       <widget class="QToolButton" name="btnSetMaterialParams">
        <property name="enabled">
         <bool>false</bool>
@@ -120,36 +90,20 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="cmbMaterial">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="cmbOcclusion"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="cmbDrawable">
        <property name="toolTip">
-        <string>Material that is set on the tile</string>
+        <string>Drawable shape that is set on the tile</string>
        </property>
        <property name="placeholderText">
-        <string>Nothing</string>
+        <string>Builtin Tile Shape</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QSpinBox" name="tileIndex">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>Tilemap material tile index</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
+     <item row="0" column="4">
       <widget class="QToolButton" name="btnResetMaterial">
        <property name="toolTip">
         <string>Reset material to nothing at palette index</string>
@@ -169,7 +123,40 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="5">
+     <item row="0" column="1">
+      <widget class="QComboBox" name="cmbMaterial">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Material that is set on the tile</string>
+       </property>
+       <property name="placeholderText">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QToolButton" name="btnSelectMaterial">
+       <property name="toolTip">
+        <string>Select material at palette index</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resource/resource.qrc">
+         <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+       </property>
+       <property name="arrowType">
+        <enum>Qt::NoArrow</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
       <widget class="QToolButton" name="btnResetDrawable">
        <property name="toolTip">
         <string>Reset material to nothing at palette index</string>
@@ -195,7 +182,6 @@
  </widget>
  <tabstops>
   <tabstop>cmbMaterial</tabstop>
-  <tabstop>tileIndex</tabstop>
   <tabstop>btnSelectMaterial</tabstop>
   <tabstop>btnSetMaterialParams</tabstop>
   <tabstop>btnResetMaterial</tabstop>

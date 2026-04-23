@@ -16,6 +16,7 @@
 
 #define LOGTAG "gui"
 
+#include "game/enum.h"
 #include "graphics/simple_shape.h"
 #include "graphics/tilebatch.h"
 #include "graphics/guidegrid.h"
@@ -47,9 +48,13 @@ namespace {
 namespace gui
 {
 
-DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolBox* tools)
+DlgTileTool::DlgTileTool(const app::Workspace* workspace,
+                         const game::TilemapClass* klass, const game::TilemapLayerClass* layer,
+                         QWidget* parent, ToolBox* tools)
   : QDialog(parent)
   , mWorkspace(workspace)
+  , mClass(klass)
+  , mLayer(layer)
   , mTools(tools)
 {
     mUI.setupUi(this);
@@ -57,11 +62,7 @@ DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolB
     PopulateFromEnum<TileToolFunction>(mUI.cmbToolFunction);
     PopulateFromEnum<TileToolShape>(mUI.cmbToolShape);
 
-    const auto& materials = mWorkspace->ListAllMaterials();
-    const auto& shapes    = mWorkspace->ListTileShapes();
-    SetList(mUI.cmbToolMaterial, materials);
-    SetList(mUI.cmbToolDrawable, shapes);
-    SetRange(mUI.toolValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
+    SetRange(mUI.dataValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
 
     connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::TriggerPaint);
     connect(this, &QDialog::finished, mUI.widget, &GfxWidget::Dispose);
@@ -127,16 +128,17 @@ void DlgTileTool::on_toolName_editingFinished()
 void DlgTileTool::on_btnAddTool_clicked()
 {
     auto tool = std::make_shared<TileTool>();
+    tool->layer         = mLayer->GetId();
     tool->name          = "My Brush";
-    tool->id            = app::RandomString();
+    tool->id            = base::RandomString(10);
     tool->tool          = TileToolFunction::TileBrush;
     tool->shape         = TileToolShape::Rectangle;
     tool->width         = 1;
     tool->height        = 1;
 
     TileTool::Tile tile;
-    tile.material      = "_checkerboard";
-    tile.palette_index = PaletteIndexAutomatic;
+    tile.palette_index = 0;
+    tile.data_value    = 0;
     tool->tiles.push_back(std::move(tile));
     mTools->push_back(tool);
 
@@ -150,7 +152,7 @@ void DlgTileTool::on_btnDelTool_clicked()
 {
     if (auto* tool = GetCurrentTool())
     {
-        QString other;
+        std::string other;
         for (auto it = mTools->begin(); it != mTools->end(); ++it)
         {
             if ((*it)->id == tool->id)
@@ -169,48 +171,22 @@ void DlgTileTool::on_btnDelTool_clicked()
     SetEnabled(mUI.btnDelTool, !mTools->empty());
 }
 
-void DlgTileTool::on_btnSelectToolMaterial_clicked()
+void DlgTileTool::on_btnAccept_clicked()
 {
-    if (auto* tile = GetCurrentTile())
-    {
-        DlgMaterial dlg(this, mWorkspace, false);
-        dlg.SetSelectedMaterialId(tile->material);
-        dlg.SetTileIndex(tile->tile_index);
-        dlg.SetPreviewScale(GetMaterialPreviewScale(*mClass));
-        if (dlg.exec() == QDialog::Rejected)
-            return;
-
-        tile->material = dlg.GetSelectedMaterialId();
-        tile->tile_index = dlg.GetTileIndex();
-        tile->apply_material = true;
-
-        ShowCurrentTool();
-        ShowCurrentTile();
-    }
+    accept();
+}
+void DlgTileTool::on_btnCancel_clicked()
+{
+    reject();
 }
 
-void DlgTileTool::on_btnSetToolMaterialParams_clicked()
+void DlgTileTool::on_paletteIndex_valueChanged(int)
 {
-    // todo:
+    ModifyCurrentTile();
 }
 
-void DlgTileTool::on_btnEditToolMaterial_clicked()
+void DlgTileTool::on_dataValue_valueChanged(int)
 {
-    ActionEvent::OpenResource open;
-    open.id = GetItemId(mUI.cmbToolMaterial);
-    ActionEvent::Post(open);
-}
-
-void DlgTileTool::on_btnEditToolShape_clicked()
-{
-    ActionEvent::OpenResource open;
-    open.id =GetItemId(mUI.cmbToolDrawable);
-    ActionEvent::Post(open);
-}
-
-void DlgTileTool::on_btnResetPaletteIndex_clicked()
-{
-    SetValue(mUI.toolPaletteIndex, -1);
     ModifyCurrentTile();
 }
 
@@ -223,6 +199,7 @@ void DlgTileTool::on_cmbToolShape_currentIndexChanged(int)
 {
     ModifyCurrentTool();
 }
+
 void DlgTileTool::on_toolWidth_valueChanged(int)
 {
     ModifyCurrentTool();
@@ -230,25 +207,6 @@ void DlgTileTool::on_toolWidth_valueChanged(int)
 void DlgTileTool::on_toolHeight_valueChanged(int)
 {
     ModifyCurrentTool();
-}
-
-void DlgTileTool::on_cmbToolMaterial_currentIndexChanged(int)
-{
-    ModifyCurrentTile();
-}
-
-void DlgTileTool::on_cmbToolDrawable_currentIndexChanged(int)
-{
-    ModifyCurrentTile();
-}
-
-void DlgTileTool::on_toolPaletteIndex_valueChanged(int)
-{
-    ModifyCurrentTile();
-}
-void DlgTileTool::on_toolValue_valueChanged(int)
-{
-    ModifyCurrentTile();
 }
 
 void DlgTileTool::on_material_toggled()
@@ -288,79 +246,43 @@ void DlgTileTool::on_tileRow_valueChanged(int)
     }
 }
 
-void DlgTileTool::on_tileIndex_valueChanged(int)
-{
-    ModifyCurrentTile();
-}
-
 void DlgTileTool::ResourceAdded(const app::Resource* resource)
 {
-    if (resource->IsMaterial())
-    {
-        const auto& materials = mWorkspace->ListAllMaterials();
-        SetList(mUI.cmbToolMaterial, materials);
-    }
-    else if (resource->IsCustomShape())
-    {
-        const auto& shapes = mWorkspace->ListTileShapes();
-        SetList(mUI.cmbToolDrawable, shapes);
-    }
+
 }
 void DlgTileTool::ResourceRemoved(const app::Resource* resource)
 {
-    if (resource->IsMaterial())
-    {
-        const auto& materials = mWorkspace->ListAllMaterials();
-        SetList(mUI.cmbToolMaterial, materials);
+    if (!resource->IsMaterial())
+        return;
 
-        if (auto* tool = GetCurrentTool())
-        {
-            for (auto& tile : tool->tiles)
-            {
-                if (tile.material == resource->GetId())
-                    tile.material = "_checkerboard";
-            }
-        }
-        ShowCurrentTile();
-    }
-    else if (resource->IsCustomShape())
+    if (auto* tool = GetCurrentTool())
     {
-        const auto& shapes = mWorkspace->ListTileShapes();
-        SetList(mUI.cmbToolDrawable, shapes);
-
-        if (auto* tool = GetCurrentTool())
+        for (auto& tile : tool->tiles)
         {
-            for (auto& tile : tool->tiles)
-            {
-                if (tile.drawable == resource->GetId())
-                    tile.drawable.clear();
-            }
+            if (!tile.material_instance)
+                continue;
+
+            if (tile.material_instance->GetClassId() == resource->GetId())
+                tile.material_instance.reset();
         }
-        ShowCurrentTile();
     }
 }
+
 void DlgTileTool::ResourceUpdated(const app::Resource* resource)
 {
-    if (resource->IsMaterial())
-    {
-        const auto& materials = mWorkspace->ListAllMaterials();
-        SetList(mUI.cmbToolMaterial, materials);
+    if (!resource->IsMaterial())
+        return;
 
-        if (auto* tool = GetCurrentTool())
+    if (auto* tool = GetCurrentTool())
+    {
+        for (auto& tile : tool->tiles)
         {
-            for (auto& tile : tool->tiles)
-            {
-                if (tile.material == resource->GetId())
-                    tile.material_instance.reset();
-            }
-        }
+            if (!tile.material_instance)
+                continue;
 
-        ShowCurrentTile();
-    }
-    else if (resource->IsCustomShape())
-    {
-        const auto& shapes = mWorkspace->ListTileShapes();
-        SetList(mUI.cmbToolDrawable, shapes);
+            if (tile.material_instance->GetClassId() == resource->GetId())
+                tile.material_instance.reset();
+        }
     }
 }
 
@@ -413,6 +335,8 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
                                                            {tile_width_units, tile_height_units},
                                                            perspective);
 
+    const auto max_index = mLayer->GetMaxPaletteIndex();
+
     for (unsigned row=0; row<tool->height; ++row)
     {
         for (unsigned col=0; col<tool->width; ++col)
@@ -420,12 +344,17 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
             const auto& tile_data = tool->tiles[row * tool->width + col];
             if (!tile_data.apply_material)
                 continue;
+            if (tile_data.palette_index == max_index)
+                continue;
+
+            const auto materialId = mLayer->GetEffectiveMaterialId(tile_data.palette_index);
+            const auto tile_index = mLayer->GetPaletteMaterialTileIndex(tile_data.palette_index);
 
             gfx::TileBatch::Tile tile;
             tile.pos.x = col - (tool->width / 2.0f);
             tile.pos.y = row - (tool->height / 2.0f);
             tile.pos.z = 0;
-            tile.data.x = tile_data.tile_index;
+            tile.data.x = tile_index;
 
             gfx::TileBatch batch;
             batch.AddTile(tile);
@@ -443,9 +372,15 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
 
             // re-create the material if the tool's material setting has changed.
             if (!tile_data.material_instance ||
-                 tile_data.material_instance->GetClassId() != tile_data.material)
+                 tile_data.material_instance->GetClassId() != materialId)
             {
-                auto klass = mWorkspace->GetMaterialClassById(tile_data.material);
+                std::shared_ptr<const gfx::MaterialClass> klass;
+                if (materialId.empty())
+                    klass = mWorkspace->GetMaterialClassById("_checkerboard");
+                else if (!mWorkspace->IsValidMaterial(materialId))
+                    klass = mWorkspace->GetMaterialClassById("_checkerboard");
+                else klass = mWorkspace->GetMaterialClassById(materialId);
+
                 tile_data.material_instance = gfx::CreateMaterialInstance(klass);
             }
 
@@ -518,15 +453,10 @@ bool DlgTileTool::KeyPress(QKeyEvent* event)
     {
         close();
     }
-    else if (key == Qt::Key_Space)
-    {
-        on_btnSelectToolMaterial_clicked();
-    }
     else if (key == Qt::Key_Delete || key == Qt::Key_Backspace)
     {
         if (auto* tile = GetCurrentTile())
         {
-            tile->material = "_checkerboard";
             tile->apply_material = false;
             ShowCurrentTile();
         }
@@ -570,10 +500,8 @@ void DlgTileTool::MouseDoubleClick(QMouseEvent* mickey)
     {
         SetValue(mUI.tileCol, tile_col);
         SetValue(mUI.tileRow, tile_row);
-        on_btnSelectToolMaterial_clicked();
     }
 }
-
 
 void DlgTileTool::ShowCurrentTool()
 {
@@ -585,11 +513,6 @@ void DlgTileTool::ShowCurrentTool()
         SetEnabled(mUI.cmbToolShape,             true);
         SetEnabled(mUI.toolWidth,                true);
         SetEnabled(mUI.toolHeight,               true);
-        SetEnabled(mUI.cmbToolMaterial,          true);
-        SetEnabled(mUI.cmbToolDrawable,          true);
-        SetEnabled(mUI.btnSelectToolMaterial,    true);
-        SetEnabled(mUI.btnSetToolMaterialParams, false);
-        SetEnabled(mUI.btnEditToolMaterial,      true);
         SetEnabled(mUI.material,                 true);
         SetEnabled(mUI.data,                     true);
 
@@ -608,12 +531,6 @@ void DlgTileTool::ShowCurrentTool()
         SetEnabled(mUI.cmbToolShape,             false);
         SetEnabled(mUI.toolWidth,                false);
         SetEnabled(mUI.toolHeight,               false);
-        SetEnabled(mUI.cmbToolMaterial,          false);
-        SetEnabled(mUI.cmbToolDrawable,          false);
-        SetEnabled(mUI.btnSelectToolMaterial,    false);
-        SetEnabled(mUI.btnSetToolMaterialParams, false);
-        SetEnabled(mUI.btnEditToolMaterial,      false);
-        SetEnabled(mUI.toolValue,                false);
         SetEnabled(mUI.material,                 false);
         SetEnabled(mUI.data,                     false);
 
@@ -622,9 +539,6 @@ void DlgTileTool::ShowCurrentTool()
         SetValue(mUI.cmbToolShape,    -1);
         SetValue(mUI.toolWidth,        0);
         SetValue(mUI.toolHeight,       0);
-        SetValue(mUI.cmbToolMaterial, -1);
-        SetValue(mUI.cmbToolDrawable, -1);
-        SetValue(mUI.toolValue,        0);
     }
 }
 
@@ -632,27 +546,18 @@ void DlgTileTool::ShowCurrentTile()
 {
     if (const auto* tile = GetCurrentTile())
     {
-        SetValue(mUI.cmbToolMaterial,  ListItemId(tile->material));
-        SetValue(mUI.cmbToolDrawable,  ListItemId(tile->drawable));
-        SetValue(mUI.toolPaletteIndex, tile->palette_index);
-        SetValue(mUI.toolValue,        tile->value);
-        SetValue(mUI.material,         tile->apply_material);
-        SetValue(mUI.data,             tile->apply_value);
-        SetValue(mUI.tileIndex,        tile->tile_index);
+        SetValue(mUI.paletteIndex, tile->palette_index);
+        SetValue(mUI.dataValue, tile->data_value);
+        SetValue(mUI.material, tile->apply_material);
+        SetValue(mUI.data, tile->apply_value);
         SetEnabled(mUI.currentTile, true);
-
-        if (mWorkspace->IsUserDefinedResource(tile->material))
-            SetEnabled(mUI.btnEditToolMaterial, true);
-        else SetEnabled(mUI.btnEditToolMaterial, false);
     }
     else
     {
-        SetValue(mUI.cmbToolMaterial, -1);
-        SetValue(mUI.cmbToolDrawable, -1);
-        SetValue(mUI.toolPaletteIndex, 0);
-        SetValue(mUI.toolValue,        0);
-        SetValue(mUI.material,         false);
-        SetValue(mUI.data,             false);
+        SetValue(mUI.paletteIndex, 0);
+        SetValue(mUI.dataValue, 0);
+        SetValue(mUI.material, false);
+        SetValue(mUI.data,  false);
         SetEnabled(mUI.currentTile, false);
     }
 }
@@ -664,7 +569,7 @@ TileTool* DlgTileTool::GetCurrentTool()
 
     for (size_t index=0; index<mTools->size(); ++index)
     {
-        if ((*mTools)[index]->id == GetItemId(mUI.cmbTool))
+        if ((*mTools)[index]->id == (std::string)GetItemId(mUI.cmbTool))
             return (*mTools)[index].get();
     }
     BUG("No such tool was found.");
@@ -729,7 +634,7 @@ TileTool::Tile* DlgTileTool::GetTileUnderMouse(unsigned* col, unsigned* row)
     return &tool->tiles[tile_row * tool->width + tile_col];
 }
 
-void DlgTileTool::SetCurrentTool(const QString& id)
+void DlgTileTool::SetCurrentTool(const app::AnyString& id)
 {
     SetValue(mUI.cmbTool, ListItemId(id));
 }
@@ -741,7 +646,7 @@ void DlgTileTool::ModifyCurrentTool()
         const auto previous_width = tool->width;
         const auto previous_height = tool->height;
 
-        tool->name   = (const QString&)GetValue(mUI.toolName);
+        tool->name   = GetValue(mUI.toolName);
         tool->tool   = GetValue(mUI.cmbToolFunction);
         tool->width  = GetValue(mUI.toolWidth);
         tool->height = GetValue(mUI.toolHeight);
@@ -764,8 +669,8 @@ void DlgTileTool::ModifyCurrentTool()
                 else
                 {
                     TileTool::Tile tile;
-                    tile.material       = "_checkerboard";
-                    tile.palette_index  = PaletteIndexAutomatic;
+                    tile.palette_index = 0;
+                    tile.data_value    = 0;
                     tile.apply_material = false;
                     tile.apply_value    = false;
                     tool->tiles.push_back(std::move(tile));
@@ -785,21 +690,10 @@ void DlgTileTool::ModifyCurrentTile()
 {
     if (auto* tile = GetCurrentTile())
     {
-        tile->material       = GetItemId(mUI.cmbToolMaterial);
-        tile->drawable       = GetItemId(mUI.cmbToolDrawable);
-        tile->palette_index  = GetValue(mUI.toolPaletteIndex);
-        tile->value          = GetValue(mUI.toolValue);
+        tile->palette_index = GetValue(mUI.paletteIndex);
+        tile->data_value    = GetValue(mUI.dataValue);
         tile->apply_material = GetValue(mUI.material);
         tile->apply_value    = GetValue(mUI.data);
-        tile->tile_index     = GetValue(mUI.tileIndex);
-
-        if (tile->apply_material)
-        {
-            if (!mWorkspace->IsValidMaterial(tile->material))
-                tile->material = "_checkerboard";
-            if (!mWorkspace->IsValidDrawable(tile->drawable))
-                tile->drawable.clear();
-        }
     }
 }
 
@@ -814,11 +708,6 @@ void DlgTileTool::UpdateToolCombo()
         items.push_back(std::move(item));
     }
     SetList(mUI.cmbTool, items);
-
-    if (NotifyToolBoxUpdate)
-        NotifyToolBoxUpdate();
 }
-
-
 
 } // namespace

@@ -52,7 +52,7 @@ namespace gui
         }
         void SetPaletteIndex(std::size_t index)
         {
-            mIndex = index;
+            mPaletteIndex = index;
         }
         void ResetMaterial();
         void SetMaterial(const app::AnyString& id);
@@ -69,6 +69,16 @@ namespace gui
             SetValue(mUI.cmbOcclusion, sort);
         }
 
+        app::AnyString GetPreviewId() const
+        {
+            return mPreviewMaterialId;
+        }
+
+        app::AnyString GetTilemapMaterialId() const
+        {
+            return mTilemapMaterialId;
+        }
+
         app::AnyString GetMaterialId() const
         {
             return GetItemId(mUI.cmbMaterial);
@@ -80,7 +90,7 @@ namespace gui
 
         std::size_t GetPaletteIndex() const
         {
-            return mIndex;
+            return mPaletteIndex;
         }
         game::TileOcclusion GetOcclusion() const
         {
@@ -89,14 +99,20 @@ namespace gui
 
         unsigned GetTileIndex() const
         {
-            return GetValue(mUI.tileIndex);
+            return mTileIndex;
         }
-        void UpdateMaterialPreview(const app::AnyString& id);
+
+        void SetPreview(const std::shared_ptr<const gfx::IBitmap>& bitmap, const app::AnyString& id);
+        void ClearPreview();
 
         void UpdateMaterialList(const ResourceList& list);
         void UpdateDrawableList(const ResourceList& list);
-    private:
-        void UpdatePreview(const app::AnyString& id);
+
+        void SetPaletteType(game::TilemapPaletteType palette);
+        void SetTilemapMaterialId(app::AnyString id)
+        {
+            mTilemapMaterialId = std::move(id);
+        }
 
     signals:
         void ValueChanged(const PaletteMaterial* material);
@@ -108,15 +124,19 @@ namespace gui
         void on_btnResetDrawable_clicked();
         void on_cmbMaterial_currentIndexChanged(int);
         void on_cmbDrawable_currentIndexChanged(int);
-        void on_tileIndex_valueChanged(int);
         void on_cmbOcclusion_currentIndexChanged(int);
     private:
         Ui::PaletteMaterial mUI;
     private:
         const app::Workspace* mWorkspace = nullptr;
+        app::AnyString mTilemapMaterialId;
+        app::AnyString mPreviewMaterialId;
         QWidget* mParent = nullptr;
-        std::size_t mIndex = 0;
+        std::size_t mPaletteIndex = 0;
+        std::uint8_t mTileIndex = 0;
         Size2Df mPreviewScale = {1.0f, 1.0f};
+        game::TilemapPaletteType mPaletteType =
+            game::TilemapPaletteType::MultiMaterial;
     private:
 
     };

@@ -42,6 +42,7 @@
 #include "graphics/text_material.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
+#include "graphics/paint_log.h"
 #include "engine/classlib.h"
 #include "game/entity.h"
 #include "game/entity_class.h"
@@ -770,6 +771,7 @@ void Renderer::ClearPaintState()
     mPaintNodes.clear();
     mLightNodes.clear();
     mTilemapPalette.clear();
+    mTilemapMaterials.clear();
 }
 
 #endif // DETONATOR_ENGINE_BUILD
@@ -2142,6 +2144,34 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
 
 std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilemap& map, std::uint16_t layer_index, std::uint16_t material_index)
 {
+    // find the material ID for this index from the layer.
+    const auto& layer = map.GetLayer(layer_index);
+    const auto layer_palette_type = layer.GetPaletteType();
+    if (layer_palette_type == game::TilemapLayer::PaletteType::Tilemap)
+    {
+        const auto tilemap_material_id = layer.GetTilemapMaterialId();
+        if (tilemap_material_id.empty())
+        {
+            GFX_PAINT_WARN("Tilemap layer has no tilemap material ID set. [layer='%1'", layer.GetClassName());
+            return nullptr;
+        }
+        if (const auto* ptr = base::SafeFind(mTilemapMaterials, tilemap_material_id))
+            return *ptr;
+
+        auto klass = mClassLib->FindMaterialClassById(tilemap_material_id);
+        if (!klass)
+        {
+            WARN("No such tilemap layer tilemap material found. [layer='%1', material='%2']",
+                layer.GetClassName(), tilemap_material_id);
+            return nullptr;
+        }
+        std::shared_ptr<gfx::Material> material = gfx::CreateMaterialInstance(klass);
+        mTilemapMaterials[tilemap_material_id] = material;
+        return material;
+    }
+
+    ASSERT(layer_palette_type == game::TilemapLayer::PaletteType::MultiMaterial);
+
     // create new layer palette for the material instances if needed.
     if (layer_index >= mTilemapPalette.size())
         mTilemapPalette.resize(layer_index+1);
@@ -2154,8 +2184,6 @@ std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilem
 
     auto& layer_material_node = layer_palette[material_index];
 
-    // find the material ID for this index from the layer.
-    const auto& layer = map.GetLayer(layer_index);
     const auto& material = layer.GetPaletteMaterialId(material_index);
 
     // create the material instances if the material Id has changed.
@@ -2165,7 +2193,7 @@ std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilem
         layer_material_node.material.reset();
         if (layer_material_node.material_id.empty())
         {
-            WARN("Tilemap layer has no material ID set for material palette index. [layer='%1', index=%2]", layer.GetClassName(), material_index);
+            GFX_PAINT_WARN("Tilemap layer has no material ID set for material palette index. [layer='%1', index=%2]", layer.GetClassName(), material_index);
             return nullptr;
         }
         auto klass = mClassLib->FindMaterialClassById(material);

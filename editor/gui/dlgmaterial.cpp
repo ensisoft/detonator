@@ -91,6 +91,13 @@ void DlgMaterial::SetSelectedTextureMapId(const app::AnyString& id)
     mSelectedTextureMapId = id;
 }
 
+ void DlgMaterial::SetFilterSet(std::unordered_set<std::string> set)
+{
+    mFilterSet = std::move(set);
+    mUseFilterSet = true;
+    ListMaterials("");
+}
+
 unsigned DlgMaterial::GetTileIndex() const
 {
     return GetValue(mUI.tileIndex);
@@ -99,6 +106,11 @@ unsigned DlgMaterial::GetTileIndex() const
 void DlgMaterial::SetTileIndex(unsigned index)
 {
     SetValue(mUI.tileIndex, index);
+}
+
+void DlgMaterial::ShowTileIndex(bool show)
+{
+    SetVisible(mUI.tileIndex, show);
 }
 
 void DlgMaterial::on_btnAccept_clicked()
@@ -399,6 +411,12 @@ void DlgMaterial::ListMaterials(const QString &filter_string)
 
     for (const auto& resource : resource_list)
     {
+        if (mUseFilterSet)
+        {
+            if (!base::Contains(mFilterSet, resource.id))
+                continue;;
+        }
+
         if (!filter_string.isEmpty())
         {
             if (!resource.name.contains(filter_string, Qt::CaseInsensitive))

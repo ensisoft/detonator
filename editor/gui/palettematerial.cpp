@@ -16,12 +16,7 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-  #include <QPixmap>
-#include "warnpop.h"
-
 #include "game/enum.h"
-#include "graphics/material_class.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/palettematerial.h"
 #include "editor/gui/dlgmaterial.h"
@@ -39,7 +34,9 @@ PaletteMaterial::PaletteMaterial(const app::Workspace* workspace, QWidget* paren
     PopulateFromEnum<game::TileOcclusion>(mUI.cmbOcclusion);
 
     SetEnabled(mUI.btnSetMaterialParams, false);
+    SetVisible(mUI.btnSetMaterialParams, false);
     SetEnabled(mUI.btnResetMaterial, false);
+    SetPaletteType(game::TilemapPaletteType::MultiMaterial);
 }
 
  void PaletteMaterial::ResetMaterial()
@@ -47,11 +44,13 @@ PaletteMaterial::PaletteMaterial(const app::Workspace* workspace, QWidget* paren
      SetValue(mUI.cmbMaterial, -1);
      SetValue(mUI.cmbOcclusion, game::TileOcclusion::None);
      SetEnabled(mUI.btnResetMaterial, false);
-     SetImage(mUI.preview, QPixmap());
  }
 
 void PaletteMaterial::SetMaterial(const app::AnyString& id)
 {
+    if (mPaletteType != game::TilemapPaletteType::MultiMaterial)
+        return;
+
     const QString& current = GetItemId(mUI.cmbMaterial);
     if (current == id)
         return;
@@ -59,23 +58,16 @@ void PaletteMaterial::SetMaterial(const app::AnyString& id)
     if (SetValue(mUI.cmbMaterial, ListItemId(id)))
     {
         SetEnabled(mUI.btnResetMaterial, true);
-        UpdatePreview(id);
     }
     else
     {
         SetEnabled(mUI.btnResetMaterial, false);
-        SetImage(mUI.preview, QPixmap());
     }
+
 }
 void PaletteMaterial::SetTileIndex(unsigned tile_index)
 {
-    const  unsigned current = GetValue(mUI.tileIndex);
-    if (current == tile_index)
-        return;
-
-    SetValue(mUI.tileIndex, tile_index);
-
-    // todo: preview update
+    mTileIndex = tile_index;
 }
 
 void PaletteMaterial::ResetDrawable()
@@ -120,7 +112,6 @@ bool PaletteMaterial::HasSelectedDrawable() const
 void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
 {
     SetList(mUI.cmbMaterial, list);
-    UpdatePreview(GetItemId(mUI.cmbMaterial));
 }
 
 void PaletteMaterial::UpdateDrawableList(const ResourceList& list)
@@ -128,50 +119,39 @@ void PaletteMaterial::UpdateDrawableList(const ResourceList& list)
     SetList(mUI.cmbDrawable, list);
 }
 
-void PaletteMaterial::UpdateMaterialPreview(const app::AnyString& id)
+void PaletteMaterial::SetPreview(const std::shared_ptr<const gfx::IBitmap>& bitmap, const app::AnyString& id)
 {
-    const QString& current = GetItemId(mUI.cmbMaterial);
-    if (current == id)
-    {
-        UpdatePreview(id);
-    }
+    if (bitmap)
+        SetImage(mUI.preview, *bitmap);
+    else
+        SetImage(mUI.preview, QPixmap());
+
+    mPreviewMaterialId = id;
 }
 
-void PaletteMaterial::UpdatePreview(const app::AnyString& id)
+void PaletteMaterial::ClearPreview()
 {
     SetImage(mUI.preview, QPixmap());
+    mPreviewMaterialId.Clear();
+}
 
-    const auto& klass = mWorkspace->FindMaterialClassById(id);
-    if (!klass)
-        return;
-
-    const auto map_count = klass->GetNumTextureMaps();
-    if (map_count == 0)
-        return;
-
-    const auto* texture = klass->GetTextureMap(0);
-    if (!texture->GetNumTextures())
-        return;
-
-    // todo: tilemap tile computation inside texture rect
-
-    const auto* texture_source = texture->GetTextureSource(0);
-    const auto& texture_source_rect = texture->GetTextureRect(0);
-    const auto& texture_source_data = texture_source->GetData();
-    if (!texture_source_data)
-        return;
-
-    const auto texture_rect = base::MapToGlobalExpand(texture_source_data->GetRect(),
-                                              texture_source_rect);
-    if (texture_rect == texture_source_data->GetRect())
+void PaletteMaterial::SetPaletteType(game::TilemapPaletteType palette)
+{
+    if (palette ==game::TilemapPaletteType::Tilemap)
     {
-        SetImage(mUI.preview, *texture_source_data);
+        SetVisible(mUI.cmbDrawable, true);
+        SetVisible(mUI.cmbMaterial, false);
+        SetVisible(mUI.btnSelectMaterial, false);
+        SetVisible(mUI.btnResetMaterial, false);
     }
-    else
+    else if (palette == game::TilemapPaletteType::MultiMaterial)
     {
-        const auto& texture_data = texture_source_data->CopyRect(texture_rect);
-        SetImage(mUI.preview, *texture_data);
+        SetVisible(mUI.cmbDrawable, true);
+        SetVisible(mUI.cmbMaterial, true);
+        SetVisible(mUI.btnResetMaterial, true);
+        SetVisible(mUI.btnSelectMaterial, true);
     }
+    mPaletteType = palette;
 }
 
 void PaletteMaterial::on_btnSelectMaterial_clicked()
@@ -184,17 +164,17 @@ void PaletteMaterial::on_btnSelectMaterial_clicked()
 
     dlg.SetPreviewScale(mPreviewScale);
     dlg.SetSelectedMaterialId(GetItemId(mUI.cmbMaterial));
-    dlg.SetTileIndex(GetValue(mUI.tileIndex));
+    dlg.ShowTileIndex(false);
 
     if (dlg.exec() == QDialog::Rejected)
         return;
+
     SetValue(mUI.cmbMaterial, ListItemId(dlg.GetSelectedMaterialId()));
-    SetValue(mUI.tileIndex, dlg.GetTileIndex());
     SetEnabled(mUI.btnResetMaterial, true);
-    UpdatePreview(dlg.GetSelectedMaterialId());
 
     emit ValueChanged(this);
 }
+
 void PaletteMaterial::on_btnSetMaterialParams_clicked()
 {
 
@@ -202,7 +182,6 @@ void PaletteMaterial::on_btnSetMaterialParams_clicked()
 void PaletteMaterial::on_btnResetMaterial_clicked()
 {
     SetValue(mUI.cmbMaterial, -1);
-    SetValue(mUI.tileIndex, 0);
     SetValue(mUI.cmbOcclusion, game::TileOcclusion::None);
     SetEnabled(mUI.btnResetMaterial, false);
     SetImage(mUI.preview, QPixmap());
@@ -219,8 +198,6 @@ void PaletteMaterial::on_btnResetDrawable_clicked()
 void PaletteMaterial::on_cmbMaterial_currentIndexChanged(int)
 {
     SetEnabled(mUI.btnResetMaterial, true);
-    UpdatePreview(GetItemId(mUI.cmbMaterial));
-
     emit ValueChanged(this);
 }
 
@@ -228,11 +205,6 @@ void PaletteMaterial::on_cmbDrawable_currentIndexChanged(int)
 {
     SetEnabled(mUI.btnResetDrawable, true);
 
-    emit ValueChanged(this);
-}
-
-void PaletteMaterial::on_tileIndex_valueChanged(int)
-{
     emit ValueChanged(this);
 }
 

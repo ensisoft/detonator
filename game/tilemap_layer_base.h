@@ -75,6 +75,11 @@ namespace game
             { return mClass->GetId(); }
             std::string GetClassName() const override
             { return mClass->GetName(); }
+            std::string GetTilemapMaterialId() const override
+            { return mClass->GetTilemapMaterialId(); }
+
+            PaletteType GetPaletteType() const override
+            { return mClass->GetPaletteType(); }
 
             std::string GetPaletteMaterialId(size_t palette_index) const override
             { return mClass->GetPaletteMaterialId(palette_index); }

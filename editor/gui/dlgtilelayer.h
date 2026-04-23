@@ -28,6 +28,7 @@
 #include "base/assert.h"
 #include "game/tilemap.h"
 #include "game/tilemap_types.h"
+#include "game/tilemap_layer_class.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgmaterial.h"
@@ -37,6 +38,17 @@ namespace app {
 } //
 
 namespace game {
+    inline std::string TranslateEnum(game::TilemapLayerClass::PaletteType palette)
+    {
+        using P = game::TilemapLayerClass::PaletteType;
+        if (palette == P::Tilemap)
+            return "Single Tilemap Material";
+        else if (palette == P::MultiMaterial)
+            return "Multiple Materials";
+        else BUG("Missing translation");
+        return "???";
+    }
+
     inline std::string TranslateEnum(game::TilemapLayerClass::Storage storage)
     {
         using S = game::TilemapLayerClass::Storage;
@@ -99,19 +111,19 @@ namespace game {
         {
             using T = TilemapLayerType;
             if (type == T::Render)
-                return "256 Color Render Layer";
+                return "256 Material Render Layer";
             else if (type == T::Render_DataSInt4)
-                return "16 Color Render Layer with 4bit Signed Integer Data";
+                return "16 Material Render Layer with 4bit Signed Integer Data";
             else if (type == T::Render_DataUInt4)
-                return "16 Color Render Layer with 4bit Signed Integer Data";
+                return "16 Material Render Layer with 4bit Signed Integer Data";
             else if (type == T::Render_DataSInt8)
-                return "256 Color Render Layer with 8bit Signed Integer Data";
+                return "256 Material Render Layer with 8bit Signed Integer Data";
             else if (type == T::Render_DataUInt8)
-                return "256 Color Render Layer with 8bit Unsigned Integer Data";
+                return "256 Material Render Layer with 8bit Unsigned Integer Data";
             else if (type == T::Render_DataSInt24)
-                return "256 Color Render Layer with 24bit Signed Integer Data";
+                return "256 Material Render Layer with 24bit Signed Integer Data";
             else if (type == T::Render_DataUInt24)
-                return "256 Color Render Layer with 24bit Unsigned Integer Data";
+                return "256 Material Render Layer with 24bit Unsigned Integer Data";
             else if (type == T::DataSInt8)
                 return "8bit Signed Integer Data Layer";
             else if (type == T::DataUInt8)
@@ -145,6 +157,7 @@ namespace gui
             PopulateFromEnum<game::TilemapLayerClass::Storage>(mUI.cmbLayerStorage);
             PopulateFromEnum<game::TilemapLayerClass::Cache>(mUI.cmbLayerCache);
             PopulateFromEnum<game::TilemapLayerClass::Resolution>(mUI.cmbLayerResolution);
+            PopulateFromEnum<game::TilemapLayerClass::PaletteType>(mUI.cmbPaletteType);
             SetValue(mUI.cmbLayerStorage,    game::TilemapLayerClass::Storage::Dense);
             SetValue(mUI.cmbLayerCache,      game::TilemapLayerClass::Cache::Automatic);
             SetValue(mUI.cmbLayerResolution, game::TilemapLayerClass::Resolution::Original);
@@ -162,6 +175,8 @@ namespace gui
         { return GetValue(mUI.cmbLayerCache); }
         game::TilemapLayerClass::Resolution GetLayerResolution() const
         { return GetValue(mUI.cmbLayerResolution); }
+        game::TilemapLayerClass::PaletteType GetPaletteType() const
+        { return GetValue(mUI.cmbPaletteType); }
         std::int32_t GetTileDataValue() const
         { return GetValue(mUI.tileDataValue); }
         std::int32_t GetTilePaletteIndex() const
