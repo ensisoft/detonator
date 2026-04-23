@@ -368,6 +368,8 @@ namespace gfx
         {
             if (sizeof(Pixel) == 1)
             {
+                if (mPixels.empty())
+                    return;
                 std::memset(&mPixels[0], value.r, mPixels.size());
             }
             else
