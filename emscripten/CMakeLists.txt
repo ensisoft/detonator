@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 
 project(Detonator-Shitscripten)
 message(STATUS "
@@ -6,7 +6,7 @@ message(STATUS "
 
     \\\\o Brought to you by Ensisoft o//
         http://www.ensisoft.com
-    Copyright (c) 2020-2024 Sami Väisänen
+    Copyright (c) 2020-2026 Sami Väisänen
                 Ensisoft
 
     https://github.com/ensisoft/detonator
@@ -17,7 +17,7 @@ message(STATUS "
 include(FetchContent)
 FetchContent_Declare(cmake_git_version_tracking
         GIT_REPOSITORY https://github.com/ensisoft/cmake-git-version-tracking.git
-        GIT_TAG 7b0d0fcb7e6f5fcadd238dd1292350e9e1363d36
+        GIT_TAG d7b1e24eadcb60937c1a3615e31f599b2c57b48f
         )
 FetchContent_MakeAvailable(cmake_git_version_tracking)
 
