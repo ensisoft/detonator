@@ -3,7 +3,7 @@
 # supplied with the third party code such as the libsndfile which has
 # a ton of ***** in it...
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 
 project(third_party)
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 
 # some cmake yak yak about msvc CRT libs
 cmake_policy(SET CMP0091 NEW)
@@ -30,7 +30,7 @@ message(STATUS "
 
     \\\\o Brought to you by Ensisoft o//
         http://www.ensisoft.com
-    Copyright (c) 2019-2025 Sami Väisänen
+    Copyright (c) 2019-2026 Sami Väisänen
                 Ensisoft
 
     https://github.com/ensisoft/detonator
@@ -86,7 +86,7 @@ set(ENGINE_LINK_OPTIONS)
 include(FetchContent)
 FetchContent_Declare(cmake_git_version_tracking
   GIT_REPOSITORY https://github.com/ensisoft/cmake-git-version-tracking.git
-  GIT_TAG aa600bb67ac18c13ed721af30e4084d64af5c92d
+  GIT_TAG d7b1e24eadcb60937c1a3615e31f599b2c57b48f
 )
 FetchContent_MakeAvailable(cmake_git_version_tracking)
 
