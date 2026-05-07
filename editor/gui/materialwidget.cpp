@@ -707,9 +707,14 @@ void MaterialWidget::on_actionDelMap_triggered()
 {
     if (const auto* map = GetSelectedTextureMap())
     {
-        const auto index = mMaterial->FindTextureMapIndexById(map->GetId());
+        const auto id = map->GetId();
+        const auto index = mMaterial->FindTextureMapIndexById(id);
         if (index < mMaterial->GetNumTextureMaps())
+        {
             mMaterial->DeleteTextureMap(index);
+            if (mMaterial->GetActiveTextureMap() == id)
+                mMaterial->SetActiveTextureMap("");
+        }
 
         mUI.textureMapWidget->ClearSelection();
 
@@ -1240,12 +1245,17 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
     gfx::MaterialClass other(type, mMaterial->GetId());
     other.SetName(mMaterial->GetName());
 
-    if (type == gfx::MaterialClass::Type::Gradient)
+    if (type == gfx::MaterialClass::Type::Color)
+    {
+        other.SetActiveTextureMap("");
+    }
+    else if (type == gfx::MaterialClass::Type::Gradient)
     {
         other.SetUniform<gfx::kGradientColor0>(gfx::Color::DarkRed);
         other.SetUniform<gfx::kGradientColor1>(gfx::Color::DarkGreen);
         other.SetUniform<gfx::kGradientColor2>(gfx::Color::DarkBlue);
         other.SetUniform<gfx::kGradientColor3>(gfx::Color::DarkYellow);
+        other.SetActiveTextureMap("");
         mUI.gradientMap->Collapse(false);
     }
     else if (type == gfx::MaterialClass::Type::Texture)
@@ -3113,24 +3123,51 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     // basic light material has optional texture maps.
     if (type != gfx::MaterialClass::Type::BasicLight)
     {
+        gfx::FPoint point(10.0f, 10.0f);
+
+        bool missing_texture_error = false;
+        if (type == gfx::MaterialClass::Type::Texture ||
+            type == gfx::MaterialClass::Type::Sprite ||
+            type == gfx::MaterialClass::Type::Particle2D ||
+            type == gfx::MaterialClass::Type::Tilemap)
+        {
+            if (mMaterial->GetNumTextureMaps() == 0)
+            {
+                ShowError(base::FormatString("Missing texture map"), point, painter);
+                missing_texture_error = true;
+                point.Translate(0.0f, 20.0f);
+            }
+            const auto active_map_id = mMaterial->GetActiveTextureMap();
+            if (!mMaterial->FindTextureMapById(active_map_id))
+            {
+                ShowError(base::FormatString("Invalid active texture map '%1'", active_map_id), point, painter);
+                missing_texture_error = true;
+                point.Translate(0.0f, 20.0f);
+            }
+        }
         for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
         {
             const auto& map = mMaterial->GetTextureMap(i);
             if (map->GetNumTextures() == 0)
             {
-                ShowMessage(base::FormatString("Missing texture map '%1' texture", map->GetName()), painter);
-                mUI.sprite->EnablePaint(false);
-                if (mDefaultsPossible)
-                {
-                    ShowInstruction(
-                        "The material needs some textures in order to render.\n"
-                        "Click here to add some default textures\n"
-                        "or press 'Esc' to dismiss this message",
-                        gfx::FRect(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
-                        painter, 29);
-                }
-                return;
+                ShowError(base::FormatString("Missing texture map '%1' texture", map->GetName()), point, painter);
+                missing_texture_error = true;
+                point.Translate(0.0f, 20.0f);
             }
+        }
+        if (missing_texture_error)
+        {
+            mUI.sprite->EnablePaint(false);
+            if (mDefaultsPossible)
+            {
+                ShowInstruction(
+                    "The material needs some textures in order to render.\n"
+                    "Click here to add some default textures\n"
+                    "or press 'Esc' to dismiss this message",
+                    gfx::FRect(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
+                    painter, 29);
+            }
+            return;
         }
     }
 
@@ -3140,7 +3177,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         const auto& uri = mMaterial->GetShaderUri();
         if (uri.empty())
         {
-            ShowMessage("No shader has been selected.", painter);
+            ShowError("No shader has been selected.", gfx::FPoint(10.0f, 10.0f), painter);
             mUI.sprite->EnablePaint(false);
             if (mDefaultsPossible)
             {
@@ -3477,11 +3514,12 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
             if (mMaterial->GetNumTextureMaps() != 1)
                 mMaterial->SetNumTextureMaps(1);
 
-            auto* map = mMaterial->GetTextureMap(0);
+            auto map = std::make_unique<gfx::TextureMap>();
             map->SetType(gfx::TextureMap::Type::Sprite);
             map->SetSpriteLooping(true);
             map->SetName("Flying");
             map->SetNumTextures(8);
+            map->SetSpriteFrameRate(10.0f);
             map->SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/materials/sprite/frame-1.png"));
             map->SetTextureSource(1, gfx::LoadTextureFromFile("app://textures/materials/sprite/frame-2.png"));
             map->SetTextureSource(2, gfx::LoadTextureFromFile("app://textures/materials/sprite/frame-3.png"));
@@ -3490,45 +3528,46 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
             map->SetTextureSource(5, gfx::LoadTextureFromFile("app://textures/materials/sprite/frame-6.png"));
             map->SetTextureSource(6, gfx::LoadTextureFromFile("app://textures/materials/sprite/frame-7.png"));
             map->SetTextureSource(7, gfx::LoadTextureFromFile("app://textures/materials/sprite/frame-8.png"));
+            mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
 
             mMaterial->SetBlendFrames(false);
             mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
             mMaterial->SetUniform<gfx::kAlphaCutoff>(0.4f);
             mMaterial->SetUniform<gfx::kBaseColor>(gfx::Color::White);
             mMaterial->SetActiveTextureMap(map->GetId());
-
-            mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
+            mMaterial->SetTextureMap(0, std::move(map));
         }
         else if (type == gfx::MaterialClass::Type::Texture)
         {
             if (mMaterial->GetNumTextureMaps() != 1)
                 mMaterial->SetNumTextureMaps(1);
 
-            auto* map = mMaterial->GetTextureMap(0);
+            auto map = std::make_unique<gfx::TextureMap>();
             map->SetSpriteLooping(false);
             map->SetName("Texture");
             map->SetType(gfx::TextureMap::Type::Texture2D);
             map->SetNumTextures(1);
             map->SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/materials/texture/background.png"));
+            mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
 
             mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
             mMaterial->SetActiveTextureMap(map->GetId());
             mMaterial->SetUniform<gfx::kBaseColor>(gfx::Color::White);
-
-            mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
+            mMaterial->SetTextureMap(0, std::move(map));
         }
         else if (type == gfx::MaterialClass::Type::Tilemap)
         {
             if (mMaterial->GetNumTextureMaps() != 1)
                 mMaterial->SetNumTextureMaps(1);
 
-            auto* map = mMaterial->GetTextureMap(0);
+            auto map = std::make_unique<gfx::TextureMap>();
             map->SetSpriteLooping(false);
             map->SetNumTextures(8);
             map->SetName("Tilemap");
             map->SetType(gfx::TextureMap::Type::Texture2D);
             map->SetNumTextures(1);
             map->SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/materials/tilesheet/forest/tiles_2048_256x256.png"));
+            mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
 
             const gfx::TilemapMaterialClass tilemap(*mMaterial);
             tilemap.SetTileSize(glm::vec2 { 256.0f, 256.0f });
@@ -3536,10 +3575,12 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
             tilemap.SetTileOffset(glm::vec2 { 0.0f, 0.0f });
             tilemap.SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
             tilemap.SetBaseColor(gfx::Color::White);
-            tilemap.SetActiveTextureMap(map->GetId());
+
+            mMaterial->SetActiveTextureMap(map->GetId());
+            mMaterial->SetTextureMap(0, std::move(map));
 
             SetValue(mUI.kTileIndex, 0);
-            mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
+
         }
         else if (type == gfx::MaterialClass::Type::BasicLight)
         {
@@ -3578,18 +3619,20 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
             if (mMaterial->GetNumTextureMaps() != 1)
                 mMaterial->SetNumTextureMaps(1);
 
-            auto* map = mMaterial->GetTextureMap(0);
+            auto map = std::make_unique<gfx::TextureMap>();
             map->SetType(gfx::TextureMap::Type::Texture2D);
             map->SetName("Particle Alpha Mask");
             map->SetSamplerName("kMask");
             map->SetNumTextures(1);
             map->SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/particles/symbol_02.png"));
+            mUI.textureMapWidget->SetSelectedTextureMapId(map->GetId());
 
-            mMaterial->SetActiveTextureMap(map->GetId());
             mMaterial->SetUniform<gfx::kParticleStartColor>(gfx::Color::Red);
             mMaterial->SetUniform<gfx::kParticleMidColor>(gfx::Color::Green);
             mMaterial->SetUniform<gfx::kParticleEndColor>(gfx::Color::Blue);
             mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
+            mMaterial->SetActiveTextureMap(map->GetId());
+            mMaterial->SetTextureMap(0, std::move(map));
         }
         else if (type == gfx::MaterialClass::Type::Custom)
         {
