@@ -878,14 +878,17 @@ void DrawViewport(gfx::Painter& painter,
 
     const gfx::FRect rect(game_viewport_x_in_window, game_viewport_y_in_window,
                           game_viewport_width_in_window, game_viewport_height_in_window);
-    gfx::DrawRectOutline(painter, rect, gfx::Color::HotPink, 2.0f);
+
+    const auto palette = QApplication::palette();
+    const auto color = ToGfx(palette.color(QPalette::Text));
+
+    gfx::DrawRectOutline(painter, rect, color, 1.2f);
 
     const gfx::FRect text(game_viewport_x_in_window +  0.0f,
                           game_viewport_y_in_window + game_viewport_height_in_window + 10.0f,
                           200.0f, 20.0f);
     gfx::DrawTextRect(painter, base::FormatString("%1 x %2", (int)game_viewport_width, (int)game_viewport_height),
-                      "app://fonts/orbitron-medium.otf", 14, text,
-                      gfx::Color::HotPink,
+                      "app://fonts/OpenSans-Regular.ttf", 14, text, color,
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 
