@@ -34,6 +34,9 @@
 #include "graphics/material_instance.h"
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
+#include "graphics/material_class_api.h"
+#include "graphics/material_uniform.h"
+#include "graphics/tilebatch.h"
 #include "editor/app/format.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
@@ -50,7 +53,6 @@
 #include "editor/gui/dlgtiletool.h"
 #include "editor/gui/palettematerial.h"
 #include "editor/gui/translation.h"
-#include "graphics/material_class_api.h"
 
 namespace{
 
@@ -362,7 +364,7 @@ public:
             else klass = mState.workspace->GetMaterialClassById(materialId);
 
             mTiles[i].material = gfx::CreateMaterialInstance(klass);
-            mTiles[i].material->SetUniform("kBaseColor", gfx::Color::HotPink);
+            mTiles[i].material->SetUniform<gfx::kBaseColor>(gfx::Color::HotPink);
             mTiles[i].tile_index    = mLayer->GetPaletteMaterialTileIndex(palette_index);
             mTiles[i].palette_index = palette_index;
         }
@@ -875,6 +877,8 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     mButtonBar->addAction(mBrushMenu->menuAction());
     mUI.toolbarLayout->addWidget(mButtonBar);
 
+    const auto& tile_shapes = mState.workspace->ListTileShapes();
+
     // generate a list of widgets for the layer color palette.
     // we have a maximum of 254 palette entries for our use since
     // the highest palette entry index is used to indicate "no value set".
@@ -888,6 +892,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
         widget->SetLabel(QString("#%1").arg(i));
         widget->SetMaterialPreviewScale(Size2Df(1.0f, 1.0f));
         widget->setObjectName(QString::number(i));
+        widget->UpdateDrawableList(tile_shapes);
         mUI.layout->addWidget(widget);
         mPaletteMaterialWidgets.push_back(widget);
         connect(widget, &PaletteMaterial::ValueChanged, this, &TilemapWidget::PaletteMaterialChanged);
@@ -2617,7 +2622,11 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         for (size_t i=0; i<mState.klass->GetNumLayers(); ++i)
         {
             const auto& layer = mState.klass->GetLayer(i);
+            if (!layer.HasRenderComponent())
+                continue;
+
             const auto palette_type = layer.GetPaletteType();
+
             if (palette_type == game::TilemapPaletteType::Tilemap)
             {
                 const auto materialId = layer.GetTilemapMaterialId();
@@ -2883,13 +2892,11 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                         // for posterity however.
                         if (int(tile.pos.z) == mLayer->GetDepth())
                         {
-                            if (packet.map_layer == layer_index)
-                                material->SetUniform("kBaseColor", gfx::Color::HotPink);
-                            else material->SetUniform("kBaseColor", gfx::Color::HotPink);
+                            material->SetUniform<gfx::kBaseColor>(gfx::Color::HotPink);
                         }
                         else
                         {
-                            material->SetUniform("kBaseColor", gfx::Color::LightGray);
+                            material->SetUniform<gfx::kBaseColor>(gfx::Color::LightGray);
                         }
 
                         packet.material = std::move(material);
