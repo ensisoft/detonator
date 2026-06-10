@@ -202,11 +202,13 @@ namespace gui
             if (game::TilemapLayerClass::HasRenderComponent(type))
             {
                 SetEnabled(mUI.tilePaletteIndex, true);
+                SetEnabled(mUI.cmbPaletteType, true);
             }
             else
             {
                 SetValue(mUI.tilePaletteIndex, -1);
                 SetEnabled(mUI.tilePaletteIndex, false);
+                SetEnabled(mUI.cmbPaletteType, false);
             }
 
             if ( game::TilemapLayerClass::HasDataComponent(type))
