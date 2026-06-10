@@ -455,9 +455,9 @@ namespace engine
             if (GetRawValue(color))
                 return true;
             // maybe the color is encoded as a string color name.
-            gfx::Color name = gfx::Color::Black;
-            if (GetValueInternal(&name)) {
-                *color = gfx::Color4f(name);
+            gfx::Color color_name = gfx::Color::Black;
+            if (GetValueInternal(&color_name)) {
+                *color = gfx::Color4f(color_name);
                 return true;
             }
             return false;
