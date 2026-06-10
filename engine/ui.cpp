@@ -115,17 +115,22 @@ bool ParseProperties(const nlohmann::json& json, std::vector<PropertyPair>& prop
         }
         if (base::Contains(prop.key, "color"))
         {
-            // uh, oh we already had issues with the variant order. now the issue is
-            // that a color property that is encoded as a hex string will also parse
-            // as a string!.
-            base::Color4f color;
-            if (!base::JsonReadSafe(json, "value", &color))
+            // try to avoid accidentally changing the underlying type of the property.
+            // color enum names are stored as string and on property load we should
+            // also keep them as strings.
+            gfx::Color color_name;
+            gfx::Color4f color;
+
+            if (base::JsonReadSafeEnum(json, "value", &color_name))
+                prop.value = std::string(magic_enum::enum_name(color_name));
+            else if (base::JsonReadSafe(json, "value", &color))
+                prop.value = color;
+            else
             {
                 success = false;
-                WARN("Ignoring unexpected UI style property. [key='%1']", prop.key);
+                WARN("Unsupported UI style color property value. [key='%1']", prop.key);
                 continue;
             }
-            prop.value = color;
         }
         else if (!base::JsonReadSafe(json, "value", &prop.value))
         {

@@ -108,7 +108,9 @@ void unit_test_style()
         style.SetProperty("string", std::string("foobar"));
         style.SetProperty("const char", "bollocks");
         style.SetProperty("shape", engine::UIStyle::WidgetShape::Circle);
-        style.SetProperty("color", gfx::Color::Silver);
+        style.SetProperty("color-name", gfx::Color::Silver);
+        style.SetProperty("color-value", gfx::Color4f(0.1f, 0.2f, 0.3f, 1.0f));
+        style.SetProperty("color-hex", "#ff0000ff");
 
         TEST_REQUIRE(style.HasProperty("int"));
         TEST_REQUIRE(style.HasProperty("keke") == false);
@@ -134,11 +136,20 @@ void unit_test_style()
         TEST_REQUIRE(prop.HasValue());
         TEST_REQUIRE(prop.GetValue<engine::UIStyle::WidgetShape>() == engine::UIStyle::WidgetShape::Circle);
 
-        prop = style.GetProperty("color");
+        prop = style.GetProperty("color-name");
         TEST_REQUIRE(prop.HasValue());
         TEST_REQUIRE(prop.GetValue<gfx::Color4f>() == gfx::Color::Silver);
         TEST_REQUIRE(prop.GetValue<gfx::Color>() == gfx::Color::Silver);
         TEST_REQUIRE(prop.GetValue<std::string>() == "Silver");
+
+        prop = style.GetProperty("color-value");
+        TEST_REQUIRE(prop.HasValue());
+        TEST_REQUIRE(prop.GetValue<gfx::Color4f>() == gfx::Color4f(0.1f, 0.2f, 0.3f, 1.0f));
+
+        prop = style.GetProperty("color-hex");
+        TEST_REQUIRE(prop.HasValue());
+        // currently not convertible to color4f, only on load
+        //TEST_REQUIRE(prop.GetValue<gfx::Color4f>() == gfx::Color4f(1.0f, 0.0f, 0.0f, 1.0f));
 
         style.SaveStyle(json);
     }
@@ -168,15 +179,21 @@ void unit_test_style()
         TEST_REQUIRE(prop.HasValue());
         TEST_REQUIRE(prop.GetValue<engine::UIStyle::WidgetShape>() == engine::UIStyle::WidgetShape::Circle);
 
-        prop = style.GetProperty("color");
+        prop = style.GetProperty("color-name");
         TEST_REQUIRE(prop.HasValue());
         TEST_REQUIRE(prop.GetValue<gfx::Color4f>() == gfx::Color::Silver);
         TEST_REQUIRE(prop.GetValue<gfx::Color>() == gfx::Color::Silver);
         TEST_REQUIRE(prop.GetValue<std::string>() == "Silver");
+
+        prop = style.GetProperty("color-value");
+        TEST_REQUIRE(prop.HasValue());
+        TEST_REQUIRE(prop.GetValue<gfx::Color4f>() == gfx::Color4f(0.1f, 0.2f, 0.3f, 1.0f));
+
+        prop = style.GetProperty("color-hex");
+        TEST_REQUIRE(prop.HasValue());
+        TEST_REQUIRE(prop.GetValue<gfx::Color4f>() == gfx::Color4f(1.0f, 0.0f, 0.0f, 1.0f));
     }
-
 }
-
 
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
