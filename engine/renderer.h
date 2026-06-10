@@ -238,25 +238,6 @@ namespace engine
         void ClearPaintState();
 #endif
     private:
-        struct TileBatch {
-            enum class Type {
-                Render, Data
-            };
-            Type type = Type::Render;
-            std::vector<gfx::TileBatch::Tile> tiles;
-            std::shared_ptr<const gfx::Material> material;
-            // the index of the layer in the map
-            std::uint8_t padding_;
-            std::uint8_t occlusion_sort_key = 0;
-            std::uint16_t layer_index = 0;
-            std::int16_t render_layer = 0;
-            std::int16_t depth  = 0;
-            std::uint32_t row   = 0;
-            std::uint32_t col   = 0;
-            glm::vec3 tile_size = {0.0f, 0.0f, 0.0f};
-            glm::vec2 render_size = {0.0f, 0.0f};
-        };
-
         template<typename EntityType, typename NodeType>
         void CreatePaintNodes(const EntityType& entity, gfx::Transform& transform, std::string prefix = "");
 
@@ -307,32 +288,29 @@ namespace engine
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets, std::vector<Light>& lights) const;
 
-        void GenerateMapDrawPackets(const game::Tilemap& map,
-                                    const FrameSettings& settings,
-                                    const std::vector<TileBatch>& batches,
-                                    std::vector<DrawPacket>& packets) const;
-
-        void PrepareMapTileBatches(const game::Tilemap& map,
+        void PrepareMapDrawPackets(const game::Tilemap& map,
                                    const FrameSettings& settings,
-                                   std::vector<TileBatch>& batches,
+                                   std::vector<DrawPacket>& packets,
                                    bool draw_render_layer,
                                    bool draw_data_layer,
                                    bool obey_klass_flags,
                                    bool use_batching);
         template<typename LayerType>
-        void PrepareDataLayerTileBatches(const game::Tilemap& map,
-                                         const game::TilemapLayer& layer,
-                                         const game::URect& visible_region,
-                                         std::vector<TileBatch>& batches,
-                                         std::uint16_t layer_index,
-                                         bool use_batching);
+        void PrepareMapDataLayerDrawPackets(const game::Tilemap& map,
+                                            const game::TilemapLayer& layer,
+                                            const game::URect& visible_region,
+                                            const  FrameSettings& settings,
+                                            std::vector<DrawPacket>& packets,
+                                            std::uint16_t layer_index,
+                                            bool use_batching);
         template<typename LayerType>
-        void PrepareRenderLayerTileBatches(const game::Tilemap& map,
-                                           const game::TilemapLayer& layer,
-                                           const game::URect& visible_region,
-                                           std::vector<TileBatch>& batches,
-                                           std::uint16_t layer_index,
-                                           bool use_batching);
+        void PrepareMapRenderLayerDrawPackets(const game::Tilemap& map,
+                                              const game::TilemapLayer& layer,
+                                              const game::URect& visible_region,
+                                              const FrameSettings& settings,
+                                              std::vector<DrawPacket>& packets,
+                                              std::uint16_t layer_index,
+                                              bool use_batching);
 
         void SortTilePackets(std::vector<DrawPacket>& packets) const;
 
