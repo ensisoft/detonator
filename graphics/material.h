@@ -121,7 +121,7 @@ namespace gfx
         virtual std::unique_ptr<Material> Clone() const { return nullptr; };
 
         template<typename T>
-        inline bool GetValue(const std::string& key, T* out) const noexcept
+        bool GetValue(const std::string& key, T* out) const noexcept
         {
             RuntimeValue value;
             if (GetValue(key, &value))
@@ -132,6 +132,13 @@ namespace gfx
             }
             return false;
         }
+
+        template<typename kUniform>
+        void SetUniform(const typename kUniform::T& value) noexcept
+        {
+            SetUniform(kUniform::uniform_name, value);
+        }
+
     private:
     };
 
