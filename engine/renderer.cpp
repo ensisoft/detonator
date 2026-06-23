@@ -1892,6 +1892,10 @@ void Renderer::PrepareMapRenderLayerDrawPackets(const game::Tilemap& map,
     {
         for (unsigned col=tile_col; col<max_col; ++col)
         {
+            const auto tile_xpos = static_cast<float>(col);
+            const auto tile_ypos = static_cast<float>(row);
+            const auto tile_zpos = static_cast<float>(klass.GetDepth());
+
             // the tiles index value is an index into the tile map
             // sprite palette.
             const auto palette_index = ptr->GetTile(row, col).index;
@@ -1902,34 +1906,70 @@ void Renderer::PrepareMapRenderLayerDrawPackets(const game::Tilemap& map,
             if (palette_index == LayerTraits::MaxPaletteIndex)
                 continue;
 
-            gfx::TileBatch::Tile tile;
-            tile.pos.x  = static_cast<float>(col);
-            tile.pos.y  = static_cast<float>(row);
-            tile.pos.z  = static_cast<float>(klass.GetDepth());
-            tile.data.x = static_cast<float>(klass.GetPaletteMaterialTileIndex(palette_index));
-
-            auto tiles = std::make_unique<gfx::TileBatch>();
-            tiles->SetTileWorldSize(layer_tile_size);
-            tiles->SetTileRenderWidth(tile_width_render_units);
-            tiles->SetTileRenderHeight(tile_height_render_units);
-            tiles->SetTileShape(gfx::TileBatch::TileShape::Automatic);
-            tiles->SetProjection(tile_batch_projection);
-            tiles->AddTile(tile);
-
             DrawPacket packet;
             packet.source       = DrawPacket::Source::Map;
             packet.domain       = DrawPacket::Domain::Scene;
             packet.projection   = DrawPacket::Projection::Orthographic;
             packet.pass         = DrawPacket::RenderPass::DrawColor;
-            packet.drawable     = std::move(tiles);
             packet.material     = GetTileMaterial(map, layer_index, palette_index);
             packet.transform    = from_map_to_scene;
             packet.map_row      = row;
             packet.map_col      = col;
+            packet.map_depth    = klass.GetDepth();
             packet.map_layer    = klass.GetLayer();
             packet.render_layer = map.GetRenderLayer();
             packet.packet_index = 0;
             packet.map_occlusion_sort_key = static_cast<uint8_t>(klass.GetPaletteOcclusion(palette_index));
+
+            if (auto tile_shape = GetTileDrawable(map, layer_index, palette_index))
+            {
+                gfx::Transform transform;
+                if (IsAxonometricProjection(map_view))
+                {
+                    transform.Push(CreateModelMatrix(GameView::AxisAligned));
+                    transform.Push(CreateModelMatrix(map_view));
+                }
+                transform.Push();
+                   transform.Resize(map_tile_width_units, map_tile_height_units, map_tile_depth_units);
+                   transform.MoveTo(layer_tile_size * glm::vec3(tile_xpos, tile_ypos, tile_zpos));
+
+                gfx::PolygonMeshInstance::Perceptual3DGeometry perceptual_geometry;
+                perceptual_geometry.axonometric_model_view = transform;
+                perceptual_geometry.enable_perceptual_3D_override = true;
+
+                packet.draw_call = tile_shape->CreatePerceptualDraw(perceptual_geometry);
+                packet.drawable =  tile_shape; //std::make_unique<gfx::Cube>();
+                packet.transform = transform;
+
+                packet.material = gfx::CreateMaterialFromColor(gfx::Color::DarkBlue).Clone();
+
+                //gfx::PolygonMeshInstance::Perceptual3DGeometry perceptual_geometry;
+                //perceptual_geometry.enable_perceptual_3D_override = false;
+                //perceptual_geometry.axonometric_model_view = transform;
+
+                // todo: tilemap material index
+                // todo: depth (z value)
+
+                //packet.draw_call = tile_shape->CreatePerceptualDraw(perceptual_geometry);
+                //packet.drawable = std::move(tile_shape);
+            }
+            else
+            {
+                gfx::TileBatch::Tile tile;
+                tile.pos.x  = tile_xpos;
+                tile.pos.y  = tile_ypos;
+                tile.pos.z  = tile_ypos;
+                tile.data.x = static_cast<float>(klass.GetPaletteMaterialTileIndex(palette_index));
+
+                auto tile_batch = std::make_unique<gfx::TileBatch>();
+                tile_batch->SetTileWorldSize(layer_tile_size);
+                tile_batch->SetTileRenderWidth(tile_width_render_units);
+                tile_batch->SetTileRenderHeight(tile_height_render_units);
+                tile_batch->SetTileShape(gfx::TileBatch::TileShape::Automatic);
+                tile_batch->SetProjection(tile_batch_projection);
+                tile_batch->AddTile(tile);
+                packet.drawable = std::move(tile_batch);
+            }
             packets.push_back(std::move(packet));
         }
     }
@@ -2084,7 +2124,7 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
 }
 
 
-std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilemap& map, std::uint16_t layer_index, std::uint16_t material_index)
+std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilemap& map, std::uint16_t layer_index, std::uint16_t palette_index)
 {
     // find the material ID for this index from the layer.
     const auto& layer = map.GetLayer(layer_index);
@@ -2121,12 +2161,12 @@ std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilem
     auto& layer_palette = mTilemapPalette[layer_index];
 
     // allocate new tile map material node.
-    if (material_index >= layer_palette.size())
-        layer_palette.resize(material_index + 1);
+    if (palette_index >= layer_palette.size())
+        layer_palette.resize(palette_index + 1);
 
-    auto& layer_material_node = layer_palette[material_index];
+    auto& layer_material_node = layer_palette[palette_index];
 
-    const auto& material = layer.GetPaletteMaterialId(material_index);
+    const auto& material = layer.GetPaletteMaterialId(palette_index);
 
     // create the material instances if the material Id has changed.
     if (layer_material_node.material_id != material)
@@ -2135,7 +2175,7 @@ std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilem
         layer_material_node.material.reset();
         if (layer_material_node.material_id.empty())
         {
-            GFX_PAINT_WARN("Tilemap layer has no material ID set for material palette index. [layer='%1', index=%2]", layer.GetClassName(), material_index);
+            GFX_PAINT_WARN("Tilemap layer has no material ID set for material palette index. [layer='%1', index=%2]", layer.GetClassName(), palette_index);
             return nullptr;
         }
         auto klass = mClassLib->FindMaterialClassById(material);
@@ -2147,6 +2187,56 @@ std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilem
         layer_material_node.material = gfx::CreateMaterialInstance(klass);
     }
     return layer_material_node.material;
+}
+
+std::shared_ptr<const gfx::PolygonMeshInstance> Renderer::GetTileDrawable(const game::Tilemap& map, std::uint16_t layer_index, std::uint16_t palette_index)
+{
+    const auto& layer = map.GetLayer(layer_index);
+    const auto& drawable = layer->GetPaletteDrawableId(palette_index);
+    if (drawable.empty())
+        return nullptr;
+
+    // create new layer palette for the material instances if needed.
+    if (layer_index >= mTilemapPalette.size())
+        mTilemapPalette.resize(layer_index+1);
+
+    auto& layer_palette = mTilemapPalette[layer_index];
+
+    // allocate new tile map material node.
+    if (palette_index >= layer_palette.size())
+        layer_palette.resize(palette_index + 1);
+
+    auto& layer_material_node = layer_palette[palette_index];
+
+    if (layer_material_node.drawable_id != drawable)
+    {
+        layer_material_node.drawable_id = drawable;
+        layer_material_node.drawable.reset();
+        if (layer_material_node.drawable_id.empty())
+            return nullptr;
+
+        auto klass = mClassLib->FindDrawableClassById(drawable);
+        if (!klass)
+        {
+            WARN("No such tilemap layer drawable class found. [layer='%1', drawable='%2']", layer.GetClassName(), drawable);
+            return nullptr;
+        }
+
+        if (klass->GetType() != gfx::Drawable::Type::Polygon)
+        {
+            WARN("Tilemap drawable is not an isometric polygon shape. [layer='%1', drawable='%2']", layer.GetClassName(), drawable);
+            return nullptr;
+        }
+
+        if (!klass->IsPerceptual3D())
+        {
+            WARN("Tilemap drawable is not a perceptual 3D axonometric shape. [layer='%1', drawable='%2']", layer.GetClassName(), drawable);
+            return nullptr;
+        }
+        layer_material_node.drawable = std::make_unique<gfx::PolygonMeshInstance>(
+            std::static_pointer_cast<const gfx::PolygonMeshClass>(klass));
+    }
+    return layer_material_node.drawable;
 }
 
 } // namespace

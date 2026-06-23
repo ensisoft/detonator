@@ -31,6 +31,7 @@
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "graphics/particle_engine.h"
+#include "graphics/tilebatch.h"
 #include "graphics/texture_bitmap_buffer_source.h"
 #include "game/entity.h"
 #include "game/entity_class.h"

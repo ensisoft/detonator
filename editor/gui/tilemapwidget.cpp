@@ -2796,8 +2796,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                 if (!mState.selection.HasSelection() || !mLayer)
                     return;
 
-                const auto* batch = dynamic_cast<const gfx::TileBatch*>(packet.drawable.get());
-
                 const auto layer_index = mState.map->FindLayerIndex(mLayer);
                 if (packet.map_layer != layer_index)
                     return;
@@ -2813,24 +2811,20 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                 const auto layer_tile_height = tile_height * tile_scaler;
                 const auto layer_tile_depth  = tile_depth * tile_scaler;
 
-                for (size_t i=0; i<batch->GetNumTiles(); ++i)
+                if (selection.IsSelected(packet.map_col, packet.map_row))
                 {
-                    const auto& tile = batch->GetTile(i);
-
-                    if (!selection.IsSelected(tile.pos.x, tile.pos.y))
-                        continue;
-
                     // indicates data layer packet
                     if (packet.domain == engine::DrawPacket::Domain::Editor)
                     {
                         gfx::Transform model;
                         model.Scale(layer_tile_width, layer_tile_height);
-                        model.MoveTo(layer_tile_width * tile.pos.x, layer_tile_height * tile.pos.y);
+                        model.MoveTo(layer_tile_width * packet.map_col, layer_tile_height * packet.map_row);
                         painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
                                      gfx::CreateMaterialFromColor(gfx::Color::HotPink), 2.0f);
                     }
                     else if (packet.domain == engine::DrawPacket::Domain::Scene)
                     {
+                        /*
                         gfx::TileBatch tiles;
                         tiles.AddTile(tile);
                         tiles.SetTileWorldSize(batch->GetTileWorldSize());
@@ -2843,6 +2837,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                         else if (perspective == game::Tilemap::Perspective::Isometric)
                             tiles.SetProjection(gfx::TileBatch::Projection::Isometric);
                         else BUG("unknown projection");
+                        */
 
                         //DrawEdges(painter, mWindowPainter, tiles, *packet.material, packet.transform, mState.klass->GetId());
                     }
@@ -2859,12 +2854,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                 if (packet_layer->GetResolution() != selection.GetResolution())
                     return true;
 
-                const auto* tile_batch = dynamic_cast<const gfx::TileBatch*>(packet.drawable.get());
-                const auto layer_index = mState.map->FindLayerIndex(mLayer);
-
-
                 TileSelection temp;
-
                 if (const auto* select_tool = dynamic_cast<const TileSelectTool*>(mCurrentTool))
                 {
                     temp = select_tool->GetSelection();
@@ -2872,15 +2862,15 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                     ASSERT(temp.GetResolution() == packet_layer->GetResolution());
                 }
 
-                for (size_t i=0; i<tile_batch->GetNumTiles(); ++i)
+                // batching should be disabled in the editor, if we have a tile batch
+                // and a selection where only a few tiles in the batch were selected
+                // trying to highlight the selected tiles in the bach by changing the
+                // material properties would change the appearance of all tiles in the
+                // batch!
+
+                if (const auto selected_tile= selection.IsSelected(packet.map_col, packet.map_row) ||
+                                              temp.IsSelected(packet.map_col, packet.map_row))
                 {
-                    const auto& tile = tile_batch->GetTile(i);
-
-                    const auto selected_tile= selection.IsSelected(tile.pos.x, tile.pos.y) ||
-                                             temp.IsSelected(tile.pos.x, tile.pos.y);
-                    if (!selected_tile)
-                        continue;
-
                     if (packet.domain == engine::DrawPacket::Domain::Scene)
                     {
                         auto material = packet.material->Clone();
@@ -2890,7 +2880,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                         // we could use different colors here but visually using a single
                         // color seems more appealing. Going to leave that layer check here
                         // for posterity however.
-                        if (int(tile.pos.z) == mLayer->GetDepth())
+                        if (packet.map_depth == mLayer->GetDepth())
                         {
                             material->SetUniform<gfx::kBaseColor>(gfx::Color::HotPink);
                         }
@@ -2902,7 +2892,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                         packet.material = std::move(material);
                     }
                 }
-
                 return true;
             }
         private:

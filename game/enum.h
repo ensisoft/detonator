@@ -161,6 +161,13 @@ namespace game {
         return false;
     }
 
+    inline bool IsAxonometricProjection(RenderView view) noexcept
+    {
+        if (view == RenderView::Dimetric || view == RenderView::Isometric)
+            return true;
+        return false;
+    }
+
     enum class CoordinateSpace {
         // The entity exists in scene space, meaning it is positioned and transformed
         // relative to the game world. It moves as the camera moves.

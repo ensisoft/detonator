@@ -29,6 +29,7 @@
 #include "base/bitflag.h"
 #include "graphics/types.h"
 #include "graphics/painter.h"
+#include "graphics/drawcall.h"
 #include "graphics/fwd.h"
 #include "engine/camera.h"
 #include "engine/types.h"
@@ -77,6 +78,8 @@ namespace engine
         std::shared_ptr<const gfx::Material> material;
         // shortcut to the node's drawable.
         std::shared_ptr<const gfx::Drawable> drawable;
+
+        gfx::DrawCall draw_call;
         // model to world transform for transforming the drawable.
         glm::mat4 transform;
         // the sort point (in model space) for mapping a point from the
@@ -106,6 +109,8 @@ namespace engine
         std::uint32_t map_col = 0;
         // map layer.
         std::uint16_t map_layer = 0;
+
+        std::int16_t map_depth = 0;
 
         // the occlusion sort key to help render objects that
         // occlude other objects in the right order. The data is provided

@@ -286,6 +286,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
         gfx::Painter::DrawItem draw;
         draw.user                 = (void*)&packet;
         draw.model                = &packet.transform;
+        draw.draw_call            = packet.draw_call;
         draw.drawable             = packet.drawable.get();
         draw.material             = packet.material.get();
         draw.culling              = packet.culling;

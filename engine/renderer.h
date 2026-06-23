@@ -32,7 +32,6 @@
 #include "base/bitflag.h"
 #include "graphics/fwd.h"
 #include "graphics/drawable.h"
-#include "graphics/tilebatch.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
 #include "game/enum.h"
@@ -320,7 +319,11 @@ namespace engine
 
         std::shared_ptr<const gfx::Material> GetTileMaterial(const game::Tilemap& map,
                                                              std::uint16_t layer_index,
-                                                             std::uint16_t material_index);
+                                                             std::uint16_t palette_index);
+        std::shared_ptr<const gfx::PolygonMeshInstance> GetTileDrawable(const game::Tilemap& map,
+                                                             std::uint16_t layer_index,
+                                                             std::uint16_t palette_index);
+
     private:
         const ClassLibrary* mClassLib = nullptr;
         std::string mRendererName;
@@ -348,6 +351,8 @@ namespace engine
         struct TilemapLayerPaletteEntry {
             std::string material_id;
             std::shared_ptr<gfx::Material> material;
+            std::string drawable_id;
+            std::shared_ptr<gfx::PolygonMeshInstance> drawable;
         };
         using TilemapLayerPalette = std::vector<TilemapLayerPaletteEntry>;
 

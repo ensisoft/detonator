@@ -38,6 +38,7 @@ namespace gfx
     class Resource;
     class Framebuffer;
     class PolygonMeshClass;
+    class PolygonMeshInstance;
     class VertexStream;
     class VertexBuffer;
     class IndexStream;
