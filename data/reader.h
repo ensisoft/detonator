@@ -110,6 +110,47 @@ namespace data
             std::string name;
         };
 
+        template<typename Enum>
+        bool ReadEnum(const char* name, Enum* out) const
+        {
+            static_assert(std::is_enum_v<Enum>, "ReadEnum type must be an enum");
+
+            std::string str;
+            if (!Read(name, &str))
+                return false;
+
+            const auto& enum_val = magic_enum::enum_cast<Enum>(str);
+            if (!enum_val.has_value())
+                return false;
+            *out = enum_val.value();
+            return true;
+        }
+
+        template<typename Enum>
+        bool ReadEnum(const char* name, Enum* out,
+            const std::vector<EnumAlias<Enum>>& enum_aliases = {}) const
+        {
+            static_assert(std::is_enum_v<Enum>, "ReadEnum type must be an enum");
+
+            std::string str;
+            if (!Read(name, &str))
+                return false;
+
+            for (const auto& alias : enum_aliases)
+            {
+                if (alias.name == str)
+                {
+                    *out = alias.value;
+                    return true;
+                }
+            }
+            const auto& enum_val = magic_enum::enum_cast<Enum>(str);
+            if (!enum_val.has_value())
+                return false;
+            *out = enum_val.value();
+            return true;
+        }
+
         template<typename Enum, typename Bits>
         bool Read(const char* name, base::bitflag<Enum, Bits>* bitflag,
                   const std::vector<EnumAlias<Enum>>& enum_aliases = {}) const
