@@ -182,7 +182,9 @@ bool SplineMoverClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= mSpline.FromJson(data);
-    ok &= data.Read("path-coordinate-space", &mPathCoordinateSpace);
+    ok &= data.ReadEnum("path-coordinate-space", &mPathCoordinateSpace,
+        { { PathCoordinateSpace::Parent, "Absolute" },
+          { PathCoordinateSpace::Local,  "Relative" }});
     ok &= data.Read("path-curve-type"      , &mPathCurveType);
     ok &= data.Read("rotation-mode"        , &mRotationMode);
     ok &= data.Read("iteration-mode"       , &mIterationMode);
@@ -195,9 +197,9 @@ bool SplineMoverClass::FromJson(const data::Reader& data)
 bool SplineMoverClass::InitClassRuntime() const
 {
     bool ok = true;
-    if (mRotationMode == RotationMode::ApplySplineRotation && mPathCoordinateSpace == PathCoordinateSpace::Relative)
+    if (mRotationMode == RotationMode::ApplySplineRotation && mPathCoordinateSpace == PathCoordinateSpace::Local)
     {
-        WARN("Spline rotator set to apply object rotation from spline while using relative coordinates.");
+        WARN("Spline rotator set to apply object rotation from spline while using local coordinates.");
         WARN("Applying the rotation from spline will rotate the direction of the spline itself.");
         ok = false;
     }
@@ -273,7 +275,7 @@ SplineMover::SplineMover(std::shared_ptr<const SplineMoverClass> klass)
         if (!mCatmullRom)
             return;
 
-        if (mClass->GetPathCoordinateSpace() == PathCoordinateSpace::Relative)
+        if (mClass->GetPathCoordinateSpace() == PathCoordinateSpace::Local)
             mStartPos = mCatmullRom->evaluate(0.0f).GetPosition();
 
         mPathLength = (float)mClass->GetPathLength();
@@ -283,7 +285,7 @@ SplineMover::SplineMover(std::shared_ptr<const SplineMoverClass> klass)
         mPolyLine = mClass->GetPolyLine();
         mPathLength = mPolyLine->GetLineLength();
 
-        if (mClass->GetPathCoordinateSpace() == PathCoordinateSpace::Relative)
+        if (mClass->GetPathCoordinateSpace() == PathCoordinateSpace::Local)
             mStartPos = mPolyLine->GetPoint(0).GetPosition();
     }
 }

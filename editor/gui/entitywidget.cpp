@@ -728,9 +728,9 @@ public:
             const auto& mode = mSpline->GetPathCoordinateSpace();
 
             const game::EntityNodeClass* coordinate_reference_node = nullptr;
-            if (mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+            if (mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
                 coordinate_reference_node = parent;
-            else if (mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+            else if (mode == game::SplineMoverClass::PathCoordinateSpace::Local)
                 coordinate_reference_node = mNode;
             else BUG("Bug on spline path mode.");
 
@@ -744,13 +744,13 @@ public:
     {
         const auto parent_node = mState.entity->FindNodeParent(mNode);
         const auto spline_path_mode = mSpline->GetPathCoordinateSpace();
-        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative && mIndex == 0)
+        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Local && mIndex == 0)
             return;
 
         const game::EntityNodeClass* coordinate_reference_node = nullptr;
-        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
             coordinate_reference_node = parent_node;
-        else if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+        else if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
             coordinate_reference_node = mNode;
         else BUG("Bug on spline path mode.");
 
@@ -758,7 +758,7 @@ public:
         mMousePosLocal = mState.entity->MapCoordsToNode(mouse_pos_world, coordinate_reference_node).ToVec2();
         glm::vec2 offset = {0.0f, 0.0f};
 
-        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
         {
             offset = mSpline->GetPoint(0).GetPosition().ToVec2();
         }
@@ -766,7 +766,7 @@ public:
         if (mickey.TestModKey(Qt::KeyboardModifier::ShiftModifier))
         {
             const auto last_index = mSpline->GetPointCount() - 1;
-            if ((mIndex == 0 && spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Absolute) ||
+            if ((mIndex == 0 && spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent) ||
                     (mIndex == last_index))
                 mPlacePoint = true;
         }
@@ -790,14 +790,14 @@ public:
             const auto last_index = mSpline->GetPointCount() - 1;
 
             const game::EntityNodeClass* coordinate_reference_node = nullptr;
-            if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+            if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
                 coordinate_reference_node = parent_node;
-            else if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+            else if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
                 coordinate_reference_node = mNode;
             else BUG("Bug on spline path mode.");
 
             glm::vec2 offset;
-            if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+            if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
             {
                 offset = mSpline->GetPoint(0).GetPosition().ToVec2();
             }
@@ -4553,7 +4553,7 @@ void EntityWidget::ToggleSplineMover(bool on)
         if (on && !node->HasSplineMover())
         {
             game::SplineMoverClass mover;
-            mover.SetPathCoordinateSpace(game::SplineMoverClass::PathCoordinateSpace::Absolute);
+            mover.SetPathCoordinateSpace(game::SplineMoverClass::PathCoordinateSpace::Parent);
             mover.SetSpeed(100.0f);
 
             glm::vec2 point = {-200.0f, 0.0f};
@@ -5146,9 +5146,9 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             const auto& mode = spline->GetPathCoordinateSpace();
 
             const game::EntityNodeClass* coordinate_reference_node = nullptr;
-            if (mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+            if (mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
                 coordinate_reference_node = parent;
-            else if (mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+            else if (mode == game::SplineMoverClass::PathCoordinateSpace::Local)
                 coordinate_reference_node = node;
             else BUG("Bug on spline path mode.");
 
@@ -5319,9 +5319,9 @@ void EntityWidget::MousePress(QMouseEvent* event)
                 const auto spline_path_mode = spline->GetPathCoordinateSpace();
                 const game::EntityNodeClass* coordinate_reference_node = nullptr;
 
-                if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+                if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
                     coordinate_reference_node = parent_node;
-                else if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+                else if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
                     coordinate_reference_node = current;
                 else BUG("Bug on spline path mode.");
 
@@ -5782,7 +5782,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.mnVCenter, 1.0f);
     SetValue(mUI.nodeMapLayer, 0);
     SetValue(mUI.nodeTileOcclusion, game::TileOcclusion::None);
-    SetValue(mUI.splineCoordSpace, game::SplineMoverClass::PathCoordinateSpace::Absolute);
+    SetValue(mUI.splineCoordSpace, game::SplineMoverClass::PathCoordinateSpace::Parent);
     SetValue(mUI.splineCurveType, game::SplineMoverClass::PathCurveType::CatmullRom);
     SetValue(mUI.splineRotation, game::SplineMoverClass::RotationMode::ApplySplineRotation);
     SetValue(mUI.splineLooping, game::SplineMoverClass::IterationMode::Once);

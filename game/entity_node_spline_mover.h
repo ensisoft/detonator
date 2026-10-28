@@ -40,8 +40,14 @@ namespace game
     {
     public:
         enum class PathCoordinateSpace {
-            Absolute,  // positions are absolute in spline's local space
-            Relative   // positions are deltas; integrate over time
+            // Spline positions are absolute node positions relative to the parent.
+            // In other words when the spine is traversed the node's position is set directly
+            // from the spline. This is the position relative to the node parent.
+            Parent,
+            // Spline positions are relative to the first point and applied as offsets from the node's
+            // start position. In other words when the spline is traversed the positions are
+            // integrated (summed) over time.
+            Local
         };
         enum class PathCurveType {
             Linear, CatmullRom
@@ -104,7 +110,7 @@ namespace game
 
         auto GetPathRelativePoint(size_t index) const noexcept
         {
-            if (mPathCoordinateSpace == PathCoordinateSpace::Absolute)
+            if (mPathCoordinateSpace == PathCoordinateSpace::Parent)
                 return GetPoint(index);
 
             const auto& offset = GetPoint(0).GetPosition().ToVec2();
@@ -181,7 +187,7 @@ namespace game
         SplinePoint Evaluate(const CatmullRomFunction& catmull_rom, float t) const
         {
             auto sample = Spline::Evaluate(catmull_rom, t);
-            if (mPathCoordinateSpace == PathCoordinateSpace::Absolute)
+            if (mPathCoordinateSpace == PathCoordinateSpace::Parent)
                 return sample;
 
             const auto& offset = GetPoint(0).GetPosition().ToVec2();
@@ -193,7 +199,7 @@ namespace game
         SplinePoint Evaluate(const PolyLineFunction& polyline, float t) const
         {
             auto sample = Spline::Evaluate(polyline, t);
-            if (mPathCoordinateSpace == PathCoordinateSpace::Absolute)
+            if (mPathCoordinateSpace == PathCoordinateSpace::Parent)
                 return sample;
 
             const auto& offset = GetPoint(0).GetPosition().ToVec2();
@@ -209,7 +215,7 @@ namespace game
     private:
         bool InitCatmullRomCache() const;
     private:
-        PathCoordinateSpace mPathCoordinateSpace = PathCoordinateSpace::Absolute;
+        PathCoordinateSpace mPathCoordinateSpace = PathCoordinateSpace::Parent;
         PathCurveType mPathCurveType = PathCurveType::CatmullRom;
         RotationMode mRotationMode = RotationMode::ApplySplineRotation;
         IterationMode mIterationMode = IterationMode::Once;
@@ -295,11 +301,11 @@ namespace game
                     tangent  = mPolyLine->FindTangent(mDisplacement).GetPosition();
             }
 
-            if (coordinate_space == PathCoordinateSpace::Absolute)
+            if (coordinate_space == PathCoordinateSpace::Parent)
             {
                 object.SetTranslation(position);
             }
-            else if (coordinate_space == PathCoordinateSpace::Relative)
+            else if (coordinate_space == PathCoordinateSpace::Local)
             {
                 // cumulative error can happen here..
                 const auto delta = position.ToVec2() - mStartPos.ToVec2();
