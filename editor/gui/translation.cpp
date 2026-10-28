@@ -378,10 +378,10 @@ std::string TranslateEnum(TileOcclusion occlusion)
 std::string TranslateEnum(SplineMoverClass::PathCoordinateSpace mode)
 {
     using P = SplineMoverClass::PathCoordinateSpace;
-    if (mode == P::Absolute)
-        return "Absolute Path Coordinates";
-    else if (mode == P::Relative)
-        return "Relative Path Coordinates";
+    if (mode == P::Parent)
+        return "Relative to Parent";
+    else if (mode == P::Local)
+        return "Relative to Self";
     else BUG("Missing translation");
     return "???";
 }
