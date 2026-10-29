@@ -21,6 +21,8 @@
 #include "base/hash.h"
 #include "base/logging.h"
 #include "graphics/drawable.h"
+
+#include "curve.h"
 #include "graphics/shader_code.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
@@ -41,6 +43,7 @@ DrawCategory DrawableClass::MapDrawableCategory(Type type) noexcept
              type == Type::LineBatch3D ||
              type == Type::LineBatch2D ||
              type == Type::GuideGrid ||
+             type == Type::Curve ||
              type == Type::Other)
         return DrawCategory::Basic;
     BUG("Bug on draw category mapping based on drawable type.");
@@ -132,6 +135,8 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
         return std::make_unique<ParticleEngineInstance>(std::static_pointer_cast<const ParticleEngineClass>(klass));
     else if (type == DrawableClass::Type::Polygon)
         return std::make_unique<PolygonMeshInstance>(std::static_pointer_cast<const PolygonMeshClass>(klass));
+    else if (type == DrawableClass::Type::Curve)
+        return std::make_unique<CurveInstance>(std::static_pointer_cast<const CurveClass>(klass));
     else BUG("Unhandled drawable class type");
     return nullptr;
 }
