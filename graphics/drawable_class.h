@@ -71,6 +71,7 @@ namespace gfx
             GuideGrid,
             DebugDrawable,
             EffectsDrawable,
+            Curve,
             Other
         };
 
