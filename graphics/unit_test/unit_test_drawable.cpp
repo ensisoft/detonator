@@ -28,6 +28,8 @@
 #include "graphics/linebatch.h"
 #include "graphics/guidegrid.h"
 #include "graphics/polygon_mesh.h"
+#include "graphics/curve.h"
+#include "graphics/triangle_iterator.h"
 #include "graphics/particle_engine.h"
 #include "graphics/simple_shape.h"
 #include "graphics/tool/polygon.h"
@@ -1164,6 +1166,638 @@ void unit_test_polygon_data()
     }
 }
 
+void unit_test_curve_data()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::CurveClass klass;
+    klass.SetName("foo");
+    klass.SetContentHash(0xffaabbee001177ff);
+    klass.SetStatic(false);
+    klass.SetCurveType(gfx::CurveClass::CurveType::PolylineSpline);
+    klass.SetJointStyle(gfx::CurveClass::JointStyle::Round);
+    klass.SetEndCapStyle(gfx::CurveClass::EndCapStyle::Butt);
+    klass.AddPoint(gfx::CurvePoint({ 1.0f,  2.0f}, { 0.5f,  0.5f}, 0.25f));
+    klass.AddPoint(gfx::CurvePoint({-1.0f, -2.0f}, { 1.0f,  1.0f}, 0.5f));
+    klass.AddPoint(gfx::CurvePoint({ 0.0f,  0.0f}, {-0.5f, -0.5f}, 1.0f));
+
+    // to/from json
+    {
+        data::JsonObject json;
+        klass.IntoJson(json);
+
+        gfx::CurveClass ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetName() == klass.GetName());
+        TEST_REQUIRE(ret.GetId() == klass.GetId());
+        TEST_REQUIRE(ret.GetContentHash() == klass.GetContentHash());
+        TEST_REQUIRE(ret.IsStatic() == klass.IsStatic());
+        TEST_REQUIRE(ret.GetCurveType() == gfx::CurveClass::CurveType::PolylineSpline);
+        TEST_REQUIRE(ret.GetJointStyle() == gfx::CurveClass::JointStyle::Round);
+        TEST_REQUIRE(ret.GetEndCapStyle() == gfx::CurveClass::EndCapStyle::Butt);
+        TEST_REQUIRE(ret.GetHash() == klass.GetHash());
+
+        TEST_REQUIRE(ret.GetPointCount() == 3);
+        for (size_t i=0; i<ret.GetPointCount(); ++i)
+        {
+            const auto& expected = klass.GetPoint(i);
+            const auto& actual = ret.GetPoint(i);
+            TEST_REQUIRE(real::float32(actual.GetPosition().x) == real::float32(expected.GetPosition().x));
+            TEST_REQUIRE(real::float32(actual.GetPosition().y) == real::float32(expected.GetPosition().y));
+            TEST_REQUIRE(real::float32(actual.GetData().x) == real::float32(expected.GetData().x));
+            TEST_REQUIRE(real::float32(actual.GetData().y) == real::float32(expected.GetData().y));
+            TEST_REQUIRE(real::float32(actual.GetWidth()) == real::float32(expected.GetWidth()));
+        }
+    }
+
+    // test copy ctor/assignment
+    {
+        gfx::CurveClass copy(klass);
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetPointCount() == 3);
+
+        copy = klass;
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetPointCount() == 3);
+    }
+
+    // test virtual copy/clone
+    {
+        auto copy = klass.Copy();
+        TEST_REQUIRE(copy->GetId() == klass.GetId());
+        TEST_REQUIRE(copy->GetHash() == klass.GetHash());
+
+        auto clone = klass.Clone();
+        TEST_REQUIRE(clone->GetId() != klass.GetId());
+        TEST_REQUIRE(clone->GetHash() != klass.GetHash());
+    }
+}
+
+void unit_test_curve_catmull_rom_tessellation()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // straight line along the x axis with constant width.
+    gfx::CurveClass klass;
+    klass.SetCurveType(gfx::CurveClass::CurveType::CatmullRomSpline);
+    klass.AddPoint(gfx::CurvePoint({0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+    klass.AddPoint(gfx::CurvePoint({1.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+    klass.AddPoint(gfx::CurvePoint({2.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+    klass.AddPoint(gfx::CurvePoint({3.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+
+    // butt end caps
+    {
+        klass.SetEndCapStyle(gfx::CurveClass::EndCapStyle::Butt);
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(klass.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::TriangleStrip);
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexDataPtr(),
+                                       buffer.GetVertexBytes());
+        TEST_REQUIRE(stream.GetCount() == (3 * 16 + 1) * 2);
+
+        // the strip should be two parallel lines at +- half width
+        for (size_t i=0; i<stream.GetCount(); ++i)
+        {
+            const auto* vertex = stream.GetVertex<gfx::Vertex2D>(i);
+            TEST_REQUIRE(real::float32(std::abs(vertex->aPosition.y)) == real::float32(0.1f));
+        }
+
+        const auto* first = stream.GetVertex<gfx::Vertex2D>(0);
+        const auto* last = stream.GetVertex<gfx::Vertex2D>(stream.GetCount() - 1);
+        TEST_REQUIRE(real::float32(first->aPosition.x) == real::float32(0.0f));
+        TEST_REQUIRE(real::float32(last->aPosition.x) == real::float32(3.0f));
+        TEST_REQUIRE(real::float32(first->aTexCoord.x) == real::float32(0.0f));
+        TEST_REQUIRE(real::float32(last->aTexCoord.x) == real::float32(1.0f));
+    }
+
+    // square end caps extend the curve ends by half width
+    {
+        klass.SetEndCapStyle(gfx::CurveClass::EndCapStyle::Square);
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(klass.Construct(&buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexDataPtr(),
+                                       buffer.GetVertexBytes());
+        const auto* first = stream.GetVertex<gfx::Vertex2D>(0);
+        const auto* last = stream.GetVertex<gfx::Vertex2D>(stream.GetCount() - 1);
+        TEST_REQUIRE(real::float32(first->aPosition.x) == real::float32(-0.1f));
+        TEST_REQUIRE(real::float32(last->aPosition.x) == real::float32(3.1f));
+    }
+
+    // round end caps are half circles around the curve end points
+    {
+        klass.SetEndCapStyle(gfx::CurveClass::EndCapStyle::Round);
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(klass.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::TriangleStrip);
+
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexDataPtr(),
+                                       buffer.GetVertexBytes());
+        // curve vertices + tip and 7 vertex pairs per cap
+        TEST_REQUIRE(stream.GetCount() == (3 * 16 + 1) * 2 + 2 * (1 + 7 * 2));
+
+        // the strip starts and ends with the cap tips
+        const auto* first = stream.GetVertex<gfx::Vertex2D>(0);
+        const auto* last = stream.GetVertex<gfx::Vertex2D>(stream.GetCount() - 1);
+        TEST_REQUIRE(real::float32(first->aPosition.x) == real::float32(-0.1f));
+        TEST_REQUIRE(real::float32(first->aPosition.y) == real::float32(0.0f));
+        TEST_REQUIRE(real::float32(last->aPosition.x) == real::float32(3.1f));
+        TEST_REQUIRE(real::float32(last->aPosition.y) == real::float32(0.0f));
+        TEST_REQUIRE(real::float32(first->aTexCoord.y) == real::float32(0.5f));
+        TEST_REQUIRE(real::float32(last->aTexCoord.y) == real::float32(0.5f));
+
+        // the cap vertices are on a half circle with the radius of half
+        // the curve width around the curve end points and behind/ahead
+        // of the curve end points.
+        for (size_t i=0; i<1 + 7 * 2; ++i)
+        {
+            const auto& start = stream.GetVertex<gfx::Vertex2D>(i)->aPosition;
+            const auto& end = stream.GetVertex<gfx::Vertex2D>(stream.GetCount() - 1 - i)->aPosition;
+            TEST_REQUIRE(std::abs(glm::length(glm::vec2(start.x, start.y)) - 0.1f) < 0.0001f);
+            TEST_REQUIRE(std::abs(glm::length(glm::vec2(end.x - 3.0f, end.y)) - 0.1f) < 0.0001f);
+            TEST_REQUIRE(start.x < 0.0f);
+            TEST_REQUIRE(end.x > 3.0f);
+        }
+    }
+
+    // too few points produces no geometry
+    {
+        gfx::CurveClass klass;
+        klass.AddPoint(gfx::CurvePoint({0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+        klass.AddPoint(gfx::CurvePoint({1.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(!klass.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetVertexBytes() == 0);
+    }
+
+    // all triangles in the strip must have counter-clockwise winding
+    // regardless of which way the curve bends.
+    for (auto cap : {gfx::CurveClass::EndCapStyle::Butt,
+                     gfx::CurveClass::EndCapStyle::Square,
+                     gfx::CurveClass::EndCapStyle::Round})
+    {
+        gfx::CurveClass klass;
+        klass.SetEndCapStyle(cap);
+        klass.AddPoint(gfx::CurvePoint({0.0f, 0.0f}, {0.0f, 0.0f}, 0.1f));
+        klass.AddPoint(gfx::CurvePoint({1.0f, 1.0f}, {0.0f, 0.0f}, 0.1f));
+        klass.AddPoint(gfx::CurvePoint({2.0f, 0.0f}, {0.0f, 0.0f}, 0.1f));
+        klass.AddPoint(gfx::CurvePoint({3.0f, -1.0f}, {0.0f, 0.0f}, 0.1f));
+        klass.AddPoint(gfx::CurvePoint({4.0f, 0.0f}, {0.0f, 0.0f}, 0.1f));
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(klass.Construct(&buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexDataPtr(),
+                                       buffer.GetVertexBytes());
+        const gfx::TriangleIterator triangles(buffer.GetDrawCommands(), stream);
+        TEST_REQUIRE(triangles.GetCount() == stream.GetCount() - 2);
+
+        for (size_t i=0; i<triangles.GetCount(); ++i)
+        {
+            const auto& triangle = triangles.GetTriangle(i);
+            const auto& v0 = stream.GetVertex<gfx::Vertex2D>(triangle.i0)->aPosition;
+            const auto& v1 = stream.GetVertex<gfx::Vertex2D>(triangle.i1)->aPosition;
+            const auto& v2 = stream.GetVertex<gfx::Vertex2D>(triangle.i2)->aPosition;
+            const auto signed_area = (v1.x - v0.x) * (v2.y - v0.y) -
+                                     (v2.x - v0.x) * (v1.y - v0.y);
+            TEST_REQUIRE(signed_area > 0.0f);
+        }
+    }
+
+    // coincident control points fail
+    {
+        gfx::CurveClass klass;
+        klass.AddPoint(gfx::CurvePoint({0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+        klass.AddPoint(gfx::CurvePoint({1.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+        klass.AddPoint(gfx::CurvePoint({1.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+        klass.AddPoint(gfx::CurvePoint({3.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(!klass.Construct(&buffer));
+    }
+}
+
+namespace {
+struct PolylineResult {
+    std::vector<glm::vec2> positions;
+    std::vector<glm::vec2> texcoords;
+    // sum of the (absolute) triangle areas
+    float area = 0.0f;
+    // true if all triangles are counter-clockwise
+    bool all_ccw = true;
+    size_t triangle_count = 0;
+};
+
+bool TessellatePolyline(const std::vector<gfx::CurvePoint>& points,
+                        gfx::CurveClass::JointStyle joint,
+                        gfx::CurveClass::EndCapStyle cap,
+                        PolylineResult* result)
+{
+    gfx::CurveClass klass;
+    klass.SetCurveType(gfx::CurveClass::CurveType::PolylineSpline);
+    klass.SetJointStyle(joint);
+    klass.SetEndCapStyle(cap);
+    for (const auto& point : points)
+        klass.AddPoint(point);
+
+    gfx::GeometryBuffer buffer;
+    if (!klass.Construct(&buffer))
+        return false;
+
+    TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+    TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Triangles);
+    TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+
+    const gfx::VertexStream stream(buffer.GetLayout(),
+                                   buffer.GetVertexDataPtr(),
+                                   buffer.GetVertexBytes());
+    TEST_REQUIRE(stream.GetCount() % 3 == 0);
+
+    for (size_t i=0; i<stream.GetCount(); ++i)
+    {
+        const auto* vertex = stream.GetVertex<gfx::Vertex2D>(i);
+        result->positions.push_back({vertex->aPosition.x, vertex->aPosition.y});
+        result->texcoords.push_back({vertex->aTexCoord.x, vertex->aTexCoord.y});
+    }
+    result->triangle_count = stream.GetCount() / 3;
+    for (size_t i=0; i<stream.GetCount(); i+=3)
+    {
+        const auto& v0 = result->positions[i+0];
+        const auto& v1 = result->positions[i+1];
+        const auto& v2 = result->positions[i+2];
+        const auto signed_area = 0.5f * ((v1.x - v0.x) * (v2.y - v0.y) -
+                                         (v2.x - v0.x) * (v1.y - v0.y));
+        if (signed_area <= 0.0f)
+            result->all_ccw = false;
+        result->area += std::abs(signed_area);
+    }
+    return true;
+}
+
+bool Near(float a, float b, float eps = 0.0001f)
+{
+    return std::abs(a - b) < eps;
+}
+} // namespace
+
+void unit_test_curve_polyline_tessellation()
+{
+    TEST_CASE(test::Type::Feature)
+
+    using Joint = gfx::CurveClass::JointStyle;
+    using Cap = gfx::CurveClass::EndCapStyle;
+    using Point = gfx::CurvePoint;
+
+    const auto P = [](float x, float y, float width) {
+        return Point({x, y}, {0.0f, 0.0f}, width);
+    };
+
+    // a straight line with butt caps is a single quad
+    {
+        PolylineResult r;
+        TEST_REQUIRE(TessellatePolyline({P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f)}, Joint::Miter, Cap::Butt, &r));
+        TEST_REQUIRE(r.triangle_count == 2);
+        TEST_REQUIRE(r.all_ccw);
+        TEST_REQUIRE(Near(r.area, 0.2f));
+        for (size_t i=0; i<r.positions.size(); ++i)
+        {
+            TEST_REQUIRE(Near(std::abs(r.positions[i].y), 0.1f));
+            TEST_REQUIRE(r.positions[i].x >= 0.0f && r.positions[i].x <= 1.0f);
+            // u goes from 0 to 1 along the line, v is 0 on the left and 1 on the right.
+            TEST_REQUIRE(Near(r.texcoords[i].x, r.positions[i].x));
+            TEST_REQUIRE(Near(r.texcoords[i].y, r.positions[i].y > 0.0f ? 0.0f : 1.0f));
+        }
+    }
+
+    // square caps extend the line by half the width at both ends.
+    {
+        PolylineResult r;
+        TEST_REQUIRE(TessellatePolyline({P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f)}, Joint::Miter, Cap::Square, &r));
+        TEST_REQUIRE(r.all_ccw);
+        TEST_REQUIRE(Near(r.area, 1.2f * 0.2f));
+        float min_x = 100.0f, max_x = -100.0f;
+        for (const auto& p : r.positions)
+        {
+            min_x = std::min(min_x, p.x);
+            max_x = std::max(max_x, p.x);
+        }
+        TEST_REQUIRE(Near(min_x, -0.1f));
+        TEST_REQUIRE(Near(max_x, 1.1f));
+    }
+
+    // round caps are half circles around the line ends.
+    {
+        PolylineResult r;
+        TEST_REQUIRE(TessellatePolyline({P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f)}, Joint::Miter, Cap::Round, &r));
+        TEST_REQUIRE(r.all_ccw);
+        // 16 segments in a half circle at both ends
+        TEST_REQUIRE(r.triangle_count == 2 + 2 * 16);
+        // area of a regular polygon with 32 sides and radius of 0.1 is the area of two caps.
+        const float circle = 0.5f * 0.1f * 0.1f * 32.0f * std::sin(2.0f * float(math::Pi) / 32.0f);
+        TEST_REQUIRE(Near(r.area, 0.2f + circle));
+        for (const auto& p : r.positions)
+        {
+            TEST_REQUIRE(p.x >= -0.1f - 0.0001f && p.x <= 1.1f + 0.0001f);
+            if (p.x < 0.0f)
+                TEST_REQUIRE(Near(glm::length(p), 0.1f));
+            if (p.x > 1.0f)
+                TEST_REQUIRE(Near(glm::length(p - glm::vec2(1.0f, 0.0f)), 0.1f));
+        }
+    }
+
+    // the line direction and the draw order of the points does not matter
+    // for the winding or area.
+    {
+        PolylineResult r;
+        TEST_REQUIRE(TessellatePolyline({P(1.0f, 1.0f, 0.2f), P(0.0f, 0.0f, 0.2f)}, Joint::Miter, Cap::Butt, &r));
+        TEST_REQUIRE(r.all_ccw);
+        TEST_REQUIRE(Near(r.area, std::sqrt(2.0f) * 0.2f));
+    }
+
+    // a 90 degree left turn. the inner side of the turn is trimmed so the
+    // segments don't overlap and the total area is the exact area of the
+    // shape. (the horizontal bar (0 -> 1.1, 0.2 high) and the vertical bar (0.2 wide, 0.9 high))
+    const std::vector<Point> left_turn = {P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f), P(1.0f, 1.0f, 0.2f)};
+    // and the same turn in the other direction.
+    const std::vector<Point> right_turn = {P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f), P(1.0f, -1.0f, 0.2f)};
+
+    for (const auto& points : {left_turn, right_turn})
+    {
+        // bevel: the outer corner is cut off. (a triangle of 0.1 x 0.1)
+        {
+            PolylineResult r;
+            TEST_REQUIRE(TessellatePolyline(points, Joint::Bevel, Cap::Butt, &r));
+            TEST_REQUIRE(r.all_ccw);
+            TEST_REQUIRE(Near(r.area, 0.4f - 0.005f));
+        }
+        // miter: the outer corner is a sharp corner.
+        {
+            PolylineResult r;
+            TEST_REQUIRE(TessellatePolyline(points, Joint::Miter, Cap::Butt, &r));
+            TEST_REQUIRE(r.all_ccw);
+            TEST_REQUIRE(Near(r.area, 0.4f));
+        }
+        // round: the outer corner is a quarter circle around the corner point.
+        {
+            PolylineResult r;
+            TEST_REQUIRE(TessellatePolyline(points, Joint::Round, Cap::Butt, &r));
+            TEST_REQUIRE(r.all_ccw);
+            const float sector = 0.5f * 0.1f * 0.1f * 8.0f * std::sin(float(math::Pi) * 0.5f / 8.0f);
+            TEST_REQUIRE(Near(r.area, 0.4f - 0.01f + sector));
+            // all the vertices around the corner are within the half width of the corner
+            // or in the bar areas.
+            for (const auto& p : r.positions)
+            {
+                const bool in_horizontal = p.x >= -0.0001f && p.x <= 1.1001f && std::abs(p.y) <= 0.1001f;
+                const bool in_vertical = std::abs(p.x - 1.0f) <= 0.1001f && std::abs(p.y) <= 1.0001f;
+                TEST_REQUIRE(in_horizontal || in_vertical);
+            }
+        }
+    }
+
+    // the miter joint is replaced with a bevel when the turn is so sharp
+    // that the miter would extend too far.
+    {
+        PolylineResult miter, bevel;
+        const std::vector<Point> sharp = {P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f), P(0.0f, 0.05f, 0.2f)};
+        TEST_REQUIRE(TessellatePolyline(sharp, Joint::Miter, Cap::Butt, &miter));
+        TEST_REQUIRE(TessellatePolyline(sharp, Joint::Bevel, Cap::Butt, &bevel));
+        TEST_REQUIRE(miter.all_ccw);
+        TEST_REQUIRE(Near(miter.area, bevel.area));
+        // and none of the vertices are far from the joint
+        for (const auto& p : miter.positions)
+            TEST_REQUIRE(p.x <= 1.0f + 0.1001f);
+    }
+
+    // a gentle turn uses a proper miter.
+    {
+        PolylineResult miter, bevel;
+        const std::vector<Point> gentle = {P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f), P(2.0f, 0.5f, 0.2f)};
+        TEST_REQUIRE(TessellatePolyline(gentle, Joint::Miter, Cap::Butt, &miter));
+        TEST_REQUIRE(TessellatePolyline(gentle, Joint::Bevel, Cap::Butt, &bevel));
+        TEST_REQUIRE(miter.all_ccw);
+        TEST_REQUIRE(miter.area > bevel.area);
+    }
+
+    // the line turns back on itself.
+    {
+        const std::vector<Point> reversal = {P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f), P(0.0f, 0.0f, 0.2f)};
+        PolylineResult bevel, round;
+        TEST_REQUIRE(TessellatePolyline(reversal, Joint::Bevel, Cap::Butt, &bevel));
+        TEST_REQUIRE(TessellatePolyline(reversal, Joint::Round, Cap::Butt, &round));
+        TEST_REQUIRE(bevel.all_ccw);
+        TEST_REQUIRE(round.all_ccw);
+        // a round joint makes a half circle around the tip.
+        TEST_REQUIRE(round.triangle_count == bevel.triangle_count + 16);
+        float max_x = -100.0f;
+        for (const auto& p : round.positions)
+            max_x = std::max(max_x, p.x);
+        TEST_REQUIRE(Near(max_x, 1.1f));
+    }
+
+    // collinear points don't make a joint
+    {
+        PolylineResult line, split;
+        TEST_REQUIRE(TessellatePolyline({P(0.0f, 0.0f, 0.2f), P(2.0f, 0.0f, 0.2f)}, Joint::Round, Cap::Butt, &line));
+        TEST_REQUIRE(TessellatePolyline({P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f), P(2.0f, 0.0f, 0.2f)}, Joint::Round, Cap::Butt, &split));
+        TEST_REQUIRE(split.all_ccw);
+        TEST_REQUIRE(Near(line.area, split.area));
+        TEST_REQUIRE(split.triangle_count == 4);
+    }
+
+    // coincident points are ignored.
+    {
+        PolylineResult r;
+        TEST_REQUIRE(TessellatePolyline({P(0.0f, 0.0f, 0.2f), P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f)},
+                                        Joint::Miter, Cap::Butt, &r));
+        TEST_REQUIRE(r.triangle_count == 2);
+        TEST_REQUIRE(Near(r.area, 0.2f));
+    }
+
+    // the line width is interpolated between the points
+    {
+        PolylineResult r;
+        TEST_REQUIRE(TessellatePolyline({P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.6f)}, Joint::Miter, Cap::Butt, &r));
+        TEST_REQUIRE(r.all_ccw);
+        TEST_REQUIRE(Near(r.area, 0.4f));
+        for (size_t i=0; i<r.positions.size(); ++i)
+        {
+            const auto expected = r.positions[i].x < 0.5f ? 0.1f : 0.3f;
+            TEST_REQUIRE(Near(std::abs(r.positions[i].y), expected));
+        }
+    }
+
+    // the texture u coordinate follows the distance along the line
+    {
+        PolylineResult r;
+        TEST_REQUIRE(TessellatePolyline({P(0.0f, 0.0f, 0.2f), P(1.0f, 0.0f, 0.2f), P(1.0f, 3.0f, 0.2f)},
+                                        Joint::Bevel, Cap::Butt, &r));
+        for (size_t i=0; i<r.positions.size(); ++i)
+        {
+            const auto& p = r.positions[i];
+            const auto u = r.texcoords[i].x;
+            TEST_REQUIRE(u >= -0.0001f && u <= 1.0001f);
+            if (p.y < -0.0999f && p.x < 0.9f)
+                TEST_REQUIRE(Near(u, p.x / 4.0f));
+            if (p.y > 2.9999f)
+                TEST_REQUIRE(Near(u, 1.0f));
+        }
+    }
+
+    // all the triangles are counter-clockwise for all the combinations
+    // of joints and caps and for all kinds of turns.
+    for (auto joint : {Joint::Miter, Joint::Bevel, Joint::Round})
+    {
+        for (auto cap : {Cap::Butt, Cap::Square, Cap::Round})
+        {
+            const std::vector<Point> zigzag = {
+                P(0.0f, 0.0f, 0.1f), P(1.0f, 1.0f, 0.2f), P(2.0f, 0.0f, 0.1f),
+                P(3.0f, -1.0f, 0.3f), P(4.0f, 0.0f, 0.1f), P(4.0f, 2.0f, 0.1f),
+                P(1.0f, 2.0f, 0.1f), P(1.0f, 2.1f, 0.1f), P(0.5f, 3.0f, 0.1f)
+            };
+            PolylineResult r;
+            TEST_REQUIRE(TessellatePolyline(zigzag, joint, cap, &r));
+            TEST_REQUIRE(r.all_ccw);
+            TEST_REQUIRE(r.triangle_count > 0);
+        }
+    }
+
+    // short segments that can't be trimmed (the width is large compared
+    // to the segment length) still work.
+    for (auto joint : {Joint::Miter, Joint::Bevel, Joint::Round})
+    {
+        const std::vector<Point> tight = {P(0.0f, 0.0f, 1.0f), P(0.1f, 0.0f, 1.0f), P(0.1f, 0.1f, 1.0f), P(0.2f, 0.1f, 1.0f)};
+        PolylineResult r;
+        TEST_REQUIRE(TessellatePolyline(tight, joint, Cap::Round, &r));
+        TEST_REQUIRE(r.all_ccw);
+    }
+
+    // too few (distinct) points or zero width produces no geometry
+    {
+        PolylineResult r;
+        TEST_REQUIRE(!TessellatePolyline({}, Joint::Miter, Cap::Butt, &r));
+        TEST_REQUIRE(!TessellatePolyline({P(0.0f, 0.0f, 0.2f)}, Joint::Miter, Cap::Butt, &r));
+        TEST_REQUIRE(!TessellatePolyline({P(1.0f, 1.0f, 0.2f), P(1.0f, 1.0f, 0.2f)}, Joint::Miter, Cap::Butt, &r));
+        TEST_REQUIRE(!TessellatePolyline({P(0.0f, 0.0f, 0.0f), P(1.0f, 0.0f, 0.0f)}, Joint::Miter, Cap::Butt, &r));
+    }
+
+    // NormalizeCurve flips y and normalizes the curve points into the unit box.
+    {
+        gfx::CurveArgs args;
+        args.curve_type = gfx::CurveType::PolylineSpline;
+        args.joint_style = gfx::CurveJointStyle::Miter;
+        args.end_cap_style = gfx::CurveEndCapStyle::Butt;
+
+        auto Tessellate = [&args](const std::vector<Point>& points, std::vector<glm::vec2>* positions) {
+            auto curve_args = args;
+            curve_args.points = points;
+            gfx::Curve curve(std::move(curve_args));
+            gfx::Drawable::Environment env;
+            env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
+            auto geometry = curve.Construct(env);
+            TEST_REQUIRE(!geometry.IsNull());
+            const auto& buffer = geometry.GetGeometryBuffer();
+            TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+            TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::Triangles);
+            const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+            float area = 0.0f;
+            for (size_t i=0; i<stream.GetCount(); ++i)
+            {
+                const auto& pos = stream.GetVertex<gfx::Vertex2D>(i)->aPosition;
+                positions->push_back({pos.x, pos.y});
+            }
+            for (size_t i=0; i<positions->size(); i+=3)
+            {
+                const auto& v0 = (*positions)[i+0];
+                const auto& v1 = (*positions)[i+1];
+                const auto& v2 = (*positions)[i+2];
+                area += 0.5f * ((v1.x - v0.x) * (v2.y - v0.y) - (v2.x - v0.x) * (v1.y - v0.y));
+            }
+            return area;
+        };
+        const auto Bounds = [](const std::vector<glm::vec2>& positions) {
+            glm::vec2 min = {100.0f, 100.0f};
+            glm::vec2 max = {-100.0f, -100.0f};
+            for (const auto& p : positions)
+            {
+                min = glm::min(min, p);
+                max = glm::max(max, p);
+            }
+            return std::make_pair(min, max);
+        };
+
+        const std::vector<Point> points = {P(0.0f, 0.0f, 0.2f), P(100.0f, 0.0f, 0.2f), P(100.0f, 50.0f, 0.2f)};
+
+        std::vector<glm::vec2> plain;
+        const auto plain_area = Tessellate(points, &plain);
+        TEST_REQUIRE(plain_area > 0.0f);
+
+        // the tessellation is CCW also for curve points that have been flipped on y.
+        {
+            auto flipped_points = points;
+            for (auto& p : flipped_points)
+                p.SetPosition({p.GetPosition().x, -p.GetPosition().y});
+            std::vector<glm::vec2> flipped;
+            const auto flipped_area = Tessellate(flipped_points, &flipped);
+            TEST_REQUIRE(Near(flipped_area, plain_area, 0.001f));
+        }
+
+        // normalization fits the (longer side of the) curve bounds into the unit
+        // box [0, 1] x [-1, 0] and centers the shorter side. the bounds are computed
+        // from the point positions and the point widths are left unchanged.
+        for (bool flip : {false, true})
+        {
+            auto normalized_points = points;
+            gfx::NormalizeCurve(normalized_points, flip);
+            // the horizontal extent is 100 and the vertical extent is 50
+            const auto scale = 100.0f;
+            TEST_REQUIRE(Near(normalized_points[0].GetPosition().x, 0.0f));
+            TEST_REQUIRE(Near(normalized_points[1].GetPosition().x, 1.0f));
+            TEST_REQUIRE(Near(normalized_points[0].GetWidth(), 0.2f));
+            // the orientation is preserved, y grows up unless flipped.
+            const auto dy = normalized_points[2].GetPosition().y - normalized_points[0].GetPosition().y;
+            TEST_REQUIRE(Near(dy, (flip ? -50.0f : 50.0f) / scale, 0.00001f));
+
+            // the widths are not scaled so the line thickness (0.2) extends half of
+            // the width outside the unit box at the outer side of the miter joint.
+            // the curve is centered vertically, 0.5 high, between y = -0.75 and y = -0.25.
+            std::vector<glm::vec2> normalized;
+            const auto normalized_area = Tessellate(normalized_points, &normalized);
+            TEST_REQUIRE(normalized_area > 0.0f);
+            const auto [min, max] = Bounds(normalized);
+            TEST_REQUIRE(Near(min.x, 0.0f) && Near(max.x, 1.1f));
+            TEST_REQUIRE(Near(min.y, flip ? -0.75f : -0.85f));
+            TEST_REQUIRE(Near(max.y, flip ? -0.15f : -0.25f));
+        }
+
+        // degenerate curves. no points does nothing and a zero size curve collapses to the center.
+        {
+            std::vector<Point> none;
+            gfx::NormalizeCurve(none, true);
+            TEST_REQUIRE(none.empty());
+
+            std::vector<Point> single = {P(5.0f, 7.0f, 0.0f)};
+            gfx::NormalizeCurve(single, false);
+            TEST_REQUIRE(Near(single[0].GetPosition().x, 0.5f));
+            TEST_REQUIRE(Near(single[0].GetPosition().y, -0.5f));
+        }
+    }
+}
+
 void unit_test_simple_shape_mesh()
 {
     TEST_CASE(test::Type::Feature)
@@ -1937,6 +2571,168 @@ void unit_test_shader_id()
     }
 }
 
+void unit_test_curve_aspect_ratio()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // the curve is tessellated for the aspect ratio of the model matrix and the inverse of
+    // the aspect ratio is baked into the model matrix that goes to the vertex shader. The
+    // line thickness should then be the same in all directions (a fraction of the
+    // longer side of the node) and the curve points should still map to the node box.
+
+    using Point = gfx::CurvePoint;
+
+    // the same rules apply to a curve that has its own control points (gfx::Curve)
+    // and to a curve that gets its control points from a curve class.
+    for (const bool use_class : {false, true})
+    {
+
+    // tessellate the curve with the given model matrix and return the world space
+    // bounds of the vertices when transformed with the model matrix given to the shader.
+    const auto Render = [use_class](const std::vector<Point>& points, const glm::mat4& model_matrix) {
+        std::unique_ptr<gfx::Drawable> curve;
+        if (use_class)
+        {
+            gfx::CurveClass klass;
+            klass.SetCurveType(gfx::CurveType::PolylineSpline);
+            klass.SetJointStyle(gfx::CurveJointStyle::Miter);
+            klass.SetEndCapStyle(gfx::CurveEndCapStyle::Butt);
+            for (const auto& point : points)
+                klass.AddPoint(point);
+            curve = std::make_unique<gfx::CurveInstance>(klass);
+        }
+        else
+        {
+            gfx::CurveArgs args;
+            args.curve_type = gfx::CurveType::PolylineSpline;
+            args.joint_style = gfx::CurveJointStyle::Miter;
+            args.end_cap_style = gfx::CurveEndCapStyle::Butt;
+            args.points = points;
+            curve = std::make_unique<gfx::Curve>(std::move(args));
+        }
+
+        const glm::mat4 view_matrix(1.0f);
+        const glm::mat4 proj_matrix(1.0f);
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
+        env.model_matrix = &model_matrix;
+        env.view_matrix = &view_matrix;
+        env.proj_matrix = &proj_matrix;
+
+        auto geometry = curve->Construct(env);
+        TEST_REQUIRE(!geometry.IsNull());
+
+        TestDevice device;
+        gfx::ProgramState program;
+        gfx::Drawable::RasterState raster;
+        gfx::DrawCall draw;
+        TEST_REQUIRE(curve->ApplyDynamicState(env, draw, gfx::DrawGeometryHandle::Null, device, program, raster));
+        glm::mat4 shader_matrix;
+        TEST_REQUIRE(program.GetUniform("kModelViewMatrix", &shader_matrix));
+
+        const auto& buffer = geometry.GetGeometryBuffer();
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        glm::vec2 min = { 1.0e6f,  1.0e6f};
+        glm::vec2 max = {-1.0e6f, -1.0e6f};
+        for (size_t i=0; i<stream.GetCount(); ++i)
+        {
+            const auto& pos = stream.GetVertex<gfx::Vertex2D>(i)->aPosition;
+            const auto world = shader_matrix * glm::vec4(pos.x, pos.y, 0.0f, 1.0f);
+            TEST_REQUIRE(std::isfinite(world.x) && std::isfinite(world.y));
+            min = glm::min(min, glm::vec2(world.x, world.y));
+            max = glm::max(max, glm::vec2(world.x, world.y));
+        }
+        return std::make_pair(min, max);
+    };
+
+    const auto Near = [](float a, float b, float tolerance) {
+        return std::abs(a - b) <= tolerance;
+    };
+
+    const std::vector<Point> horizontal = {Point(0.0f, -0.5f, 0.1f), Point(1.0f, -0.5f, 0.1f)};
+    const std::vector<Point> vertical   = {Point(0.5f,  0.0f, 0.1f), Point(0.5f, -1.0f, 0.1f)};
+
+    // these aspect ratios (4:1, 1:4, 1:1) are exactly on the bucket grid.
+    // the thickness is 0.1 * max(width, height) in every direction.
+    {
+        const auto model = glm::scale(glm::mat4(1.0f), glm::vec3(400.0f, 100.0f, 1.0f));
+
+        const auto [hmin, hmax] = Render(horizontal, model);
+        TEST_REQUIRE(Near(hmin.x,   0.0f, 0.01f));
+        TEST_REQUIRE(Near(hmax.x, 400.0f, 0.01f));
+        TEST_REQUIRE(Near(hmin.y, -70.0f, 0.01f)); // center line at -50, thickness 40
+        TEST_REQUIRE(Near(hmax.y, -30.0f, 0.01f));
+
+        const auto [vmin, vmax] = Render(vertical, model);
+        TEST_REQUIRE(Near(vmin.x, 180.0f, 0.01f)); // center line at 200, thickness 40
+        TEST_REQUIRE(Near(vmax.x, 220.0f, 0.01f));
+        TEST_REQUIRE(Near(vmin.y, -100.0f, 0.01f));
+        TEST_REQUIRE(Near(vmax.y,    0.0f, 0.01f));
+    }
+    {
+        const auto model = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 400.0f, 1.0f));
+
+        const auto [hmin, hmax] = Render(horizontal, model);
+        TEST_REQUIRE(Near(hmin.x,    0.0f, 0.01f));
+        TEST_REQUIRE(Near(hmax.x,  100.0f, 0.01f));
+        TEST_REQUIRE(Near(hmin.y, -220.0f, 0.01f)); // center line at -200, thickness 40
+        TEST_REQUIRE(Near(hmax.y, -180.0f, 0.01f));
+
+        const auto [vmin, vmax] = Render(vertical, model);
+        TEST_REQUIRE(Near(vmin.x,  30.0f, 0.01f)); // center line at 50, thickness 40
+        TEST_REQUIRE(Near(vmax.x,  70.0f, 0.01f));
+        TEST_REQUIRE(Near(vmin.y, -400.0f, 0.01f));
+        TEST_REQUIRE(Near(vmax.y,    0.0f, 0.01f));
+    }
+    {
+        const auto model = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 1.0f));
+        const auto [hmin, hmax] = Render(horizontal, model);
+        TEST_REQUIRE(Near(hmin.y, -55.0f, 0.01f)); // thickness 10
+        TEST_REQUIRE(Near(hmax.y, -45.0f, 0.01f));
+        const auto [vmin, vmax] = Render(vertical, model);
+        TEST_REQUIRE(Near(vmin.x, 45.0f, 0.01f));
+        TEST_REQUIRE(Near(vmax.x, 55.0f, 0.01f));
+    }
+
+    // an aspect ratio that is not exactly on the bucket grid. The curve
+    // still maps to the node box exactly and the thickness is off by
+    // the quantization error (a few percent) at most.
+    {
+        const auto model = glm::scale(glm::mat4(1.0f), glm::vec3(300.0f, 100.0f, 1.0f));
+
+        const auto [hmin, hmax] = Render(horizontal, model);
+        TEST_REQUIRE(Near(hmin.x,   0.0f, 0.01f));
+        TEST_REQUIRE(Near(hmax.x, 300.0f, 0.01f));
+        TEST_REQUIRE(Near((hmin.y + hmax.y) * 0.5f, -50.0f, 0.01f));
+        TEST_REQUIRE(Near(hmax.y - hmin.y, 30.0f, 30.0f * 0.03f));
+
+        const auto [vmin, vmax] = Render(vertical, model);
+        TEST_REQUIRE(Near((vmin.x + vmax.x) * 0.5f, 150.0f, 0.01f));
+        TEST_REQUIRE(Near(vmax.x - vmin.x, 30.0f, 30.0f * 0.03f));
+        TEST_REQUIRE(Near(vmin.y, -100.0f, 0.01f));
+        TEST_REQUIRE(Near(vmax.y,    0.0f, 0.01f));
+    }
+
+    // the rotation doesn't change the aspect ratio of the model matrix
+    // (the lengths of the axis vectors) so the center of the line must
+    // still be on the rotated node box and the thickness should be isotropic.
+    {
+        const auto model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) *
+                           glm::scale(glm::mat4(1.0f), glm::vec3(400.0f, 100.0f, 1.0f));
+        const auto [hmin, hmax] = Render(horizontal, model);
+        // rotated 90 degrees: the line runs along y, thickness 40 along x.
+        TEST_REQUIRE(Near(hmax.x - hmin.x, 40.0f, 0.01f));
+        TEST_REQUIRE(Near(hmax.y - hmin.y, 400.0f, 0.01f));
+    }
+
+    // degenerate model matrices produce a valid (finite) geometry.
+    {
+        Render(horizontal, glm::scale(glm::mat4(1.0f), glm::vec3(0.0f, 100.0f, 1.0f)));
+        Render(horizontal, glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 0.0f, 1.0f)));
+    }
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -1949,6 +2745,10 @@ int test_main(int argc, char* argv[])
     unit_test_polygon_builder_build();
     unit_test_particle_engine_data();
     unit_test_polygon_data();
+    unit_test_curve_catmull_rom_tessellation();
+    unit_test_curve_polyline_tessellation();
+    unit_test_curve_aspect_ratio();
+    unit_test_curve_data();
     unit_test_simple_shape_mesh();
     unit_test_polygon_simple_render_mesh();
     unit_test_polygon_simple_shard_mesh();

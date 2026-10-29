@@ -53,6 +53,7 @@
 #include "graphics/shader_programs.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
+#include "graphics/curve.h"
 #include "graphics/wavefront_mesh.h"
 #include "graphics/particle_engine.h"
 #include "graphics/tilebatch.h"
@@ -1798,6 +1799,103 @@ public:
     { return mName; }
 private:
     const std::string mName;
+};
+
+class CurveTest : public GraphicsTest
+{
+public:
+    using CurveClass = gfx::CurveClass;
+    using CurvePoint = gfx::CurvePoint;
+    using CurveType = gfx::CurveClass::CurveType;
+
+    CurveTest(CurveType type)
+        : mCurveType(type)
+    {
+        // control points in normalized coordinates. x grows from 0.0f to 1.0f
+        // to the right and y grows from 0.0f to -1.0f downwards. the points are
+        // inset from the edges so that the end caps stay inside the unit box.
+        using ControlPoints = std::vector<base::Float2>;
+
+        const std::vector<ControlPoints> splines = {
+            // vertical line
+            { {0.5f, -0.1f}, {0.5f, -0.366f}, {0.5f, -0.633f}, {0.5f, -0.9f} },
+            // horizontal line
+            { {0.1f, -0.5f}, {0.366f, -0.5f}, {0.633f, -0.5f}, {0.9f, -0.5f} },
+            // diagonal line
+            { {0.1f, -0.1f}, {0.366f, -0.366f}, {0.633f, -0.633f}, {0.9f, -0.9f} },
+            // curvy line
+            { {0.1f, -0.5f}, {0.3f, -0.15f}, {0.5f, -0.5f}, {0.7f, -0.85f}, {0.9f, -0.5f} }
+        };
+        const CurveClass::EndCapStyle caps[] = {
+            CurveClass::EndCapStyle::Butt,
+            CurveClass::EndCapStyle::Square,
+            CurveClass::EndCapStyle::Round
+        };
+
+        for (const auto cap : caps)
+        {
+            for (const auto& spline : splines)
+            {
+                auto klass = std::make_shared<CurveClass>();
+                klass->SetCurveType(mCurveType);
+                klass->SetEndCapStyle(cap);
+                for (const auto& point : spline)
+                    klass->AddPoint(CurvePoint(point, 0.1f));
+                mCurves.push_back(std::move(klass));
+            }
+        }
+    }
+
+    void Render(gfx::Painter& painter) override
+    {
+        auto klass = gfx::CreateMaterialClassFromImage("textures/uv_test_512.png");
+        // in order to validate the texture coordinates let's set
+        // the filtering to nearest and clamp to edge on sampling
+        klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
+        klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
+        klass.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+        klass.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+        gfx::MaterialInstance material(klass);
+
+        const auto& outline = gfx::CreateMaterialFromColor(gfx::Color::DarkGray);
+
+        // columns from left to right are the different lines (vertical,
+        // horizontal, diagonal, curvy) and rows from top to bottom are the
+        // different end caps (butt, square, round)
+        constexpr auto Cols = 4u;
+        constexpr auto Rows = 3u;
+        for (unsigned row=0; row<Rows; ++row)
+        {
+            for (unsigned col=0; col<Cols; ++col)
+            {
+                gfx::Transform transform;
+                transform.Resize(200.0f, 200.0f);
+                transform.MoveTo(10.0f + col * 250.0f, 10.0f + row * 250.0f);
+
+                if (mShowOutlines)
+                    painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), transform, outline);
+                painter.Draw(gfx::CurveInstance(mCurves[row * Cols + col]), transform, material);
+            }
+        }
+    }
+    bool DoesUpdate() const override
+    { return false; }
+
+    std::string GetName() const override
+    { return base::FormatString("%1Test", mCurveType); }
+
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        // the unit box outlines are off by default in order to keep
+        // them out of the image based test result comparison.
+        if (key.symbol == wdk::Keysym::Space)
+            mShowOutlines = !mShowOutlines;
+    }
+
+private:
+    const CurveType mCurveType;
+    std::vector<std::shared_ptr<const gfx::CurveClass>> mCurves;
+    bool mShowOutlines = false;
 };
 
 class RenderParticleTest : public GraphicsTest
@@ -4643,6 +4741,8 @@ int main(int argc, char* argv[])
     tests.emplace_back(new ShapeTest<gfx::Trapezoid>("TrapezoidShapeTest"));
     tests.emplace_back(new ShapeTest<gfx::SemiCircle>("SemiCircleShapeTest"));
     tests.emplace_back(new ShapeTest<gfx::Sector>("SectorTest"));
+    tests.emplace_back(new CurveTest(CurveTest::CurveType::CatmullRomSpline));
+    tests.emplace_back(new CurveTest(CurveTest::CurveType::PolylineSpline));
     tests.emplace_back(new TextureTest);
     tests.emplace_back(new TextureBlurTest);
     tests.emplace_back(new TextureEdgeTest);
