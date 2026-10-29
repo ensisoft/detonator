@@ -618,55 +618,6 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     return ok;
 }
 
-    /*
-DrawGeometryBuffer PolygonMeshClass::Construct(const Environment& env, Device&) const
-{
-    if (env.mesh_type == DrawableClass::MeshType::ShardedEffectMesh)
-    {
-        if (mMeshType == MeshType::Simple2DRenderMesh)
-        {
-            Geometry::CreateArgs temp;
-            if (!ConstructInternal(temp))
-                return false;
-
-            const auto& args = std::get<ShardedEffectMeshArgs>(env.mesh_args);
-
-            // if the sub-division count is set to 0 we're going to keep each
-            // triangle that is in the original mesh.
-            const auto discard_skinny_slivers = args.mesh_subdivision_count != 0;
-
-            GeometryBuffer shard_geometry_buffer;
-            if (!CreateShardEffectMesh(temp.buffer, &shard_geometry_buffer,
-                                       args.mesh_subdivision_count, discard_skinny_slivers))
-                return false;
-
-            const auto vertex_count = shard_geometry_buffer.GetVertexCount();
-            const auto triangle_count = vertex_count / 3;
-
-            create.buffer = std::move(shard_geometry_buffer);
-            create.usage  = temp.usage;
-            create.content_hash = temp.content_hash;
-            create.content_name = temp.content_name;
-            DEBUG("Successfully constructed polygon mesh shard mesh. [shape='%1', triangles=%2]",
-                    mName, triangle_count);
-            return true;
-        }
-        if (mMeshType != MeshType::Simple2DShardEffectMesh)
-            return false;
-
-        return ConstructInternal(create);
-    }
-    else if (env.mesh_type == DrawableClass::MeshType::NormalRenderMesh)
-    {
-        if (mMeshType == MeshType::Simple2DShardEffectMesh)
-            return false;
-
-        return ConstructInternal(create);
-    }
-    BUG("Bug on mesh type.");
-}
-    */
-
 bool PolygonMeshClass::Construct(GeometryBuffer* buffer) const
 {
     if (mData.has_value())
