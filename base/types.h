@@ -1389,64 +1389,92 @@ namespace base
 
         Float2() = default;
 
-        inline Float2(float x, float y) noexcept
+        Float2(float x, float y) noexcept
           : x(x), y(y)
         {}
 
 #if defined(BASE_TYPES_SUPPORT_GLM)
-        inline Float2(const glm::vec2& vec) noexcept
+        Float2(const glm::vec2& vec) noexcept
           : x(vec.x), y(vec.y)
         {}
-        inline Float2(const glm::vec3& vec) noexcept
+        Float2(const glm::vec3& vec) noexcept
           : x(vec.x), y(vec.y)
         {}
-        inline Float2(const glm::vec4& vec) noexcept
+        Float2(const glm::vec4& vec) noexcept
           : x(vec.x), y(vec.y)
         {}
 #endif
-        inline Float2(const FPoint& point) noexcept
+        Float2(const FPoint& point) noexcept
           : x(point.GetX()), y(point.GetY())
         {}
-        inline Float2(const FVector2D& vector) noexcept
+        Float2(const FVector2D& vector) noexcept
           : x(vector.x), y(vector.y)
         {}
-        inline Float2(const FSize& size) noexcept
+        Float2(const FSize& size) noexcept
           : x(size.GetWidth()), y(size.GetHeight())
         {}
 
-        inline operator FPoint () const noexcept
+        operator FPoint () const noexcept
         {
             return {x, y};
         }
-        inline operator FVector2D () const noexcept
+        operator FVector2D () const noexcept
         {
             return {x, y};
         }
-        inline operator FSize () const noexcept
+        operator FSize () const noexcept
         {
             return {x, y};
         }
 
-        inline FSize ToSize() const noexcept
+        FSize ToSize() const noexcept
         {
             return {x, y};
         }
-        inline FPoint ToPoint() const noexcept
+        FPoint ToPoint() const noexcept
         {
             return {x, y};
         }
-        inline FVector2D ToVector2D() const noexcept
+        FVector2D ToVector2D() const noexcept
         {
             return {x, y};
         }
 #if defined(BASE_TYPES_SUPPORT_GLM)
-        inline operator glm::vec2 () const noexcept
+        operator glm::vec2 () const noexcept
         {
             return {x, y};
         }
         glm::vec2 ToVec2() const noexcept
         {
             return {x, y};
+        }
+#endif
+    };
+
+    class Float3
+    {
+    public:
+        float x = 0.0f;
+        float y = 0.0f;
+        float z = 0.0f;
+
+        Float3(float x, float y, float z) noexcept
+          : x(x), y(y), z(z)
+        {}
+
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        Float3(const glm::vec3& vec) noexcept
+          : x(vec.x), y(vec.y), z(vec.z)
+        {}
+
+        operator glm::vec3 () const noexcept
+        {
+            return {x, y, z };
+        }
+
+        glm::vec3 ToVec3() const noexcept
+        {
+            return { x, y, z };
         }
 #endif
     };
