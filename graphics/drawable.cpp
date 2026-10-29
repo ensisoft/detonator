@@ -41,6 +41,7 @@ DrawCategory DrawableClass::MapDrawableCategory(Type type) noexcept
              type == Type::LineBatch3D ||
              type == Type::LineBatch2D ||
              type == Type::GuideGrid ||
+             type == Type::Curve ||
              type == Type::Other)
         return DrawCategory::Basic;
     BUG("Bug on draw category mapping based on drawable type.");

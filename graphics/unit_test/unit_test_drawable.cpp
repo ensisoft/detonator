@@ -28,6 +28,8 @@
 #include "graphics/linebatch.h"
 #include "graphics/guidegrid.h"
 #include "graphics/polygon_mesh.h"
+#include "graphics/curve.h"
+#include "graphics/triangle_iterator.h"
 #include "graphics/particle_engine.h"
 #include "graphics/simple_shape.h"
 #include "graphics/tool/polygon.h"
@@ -1164,6 +1166,232 @@ void unit_test_polygon_data()
     }
 }
 
+void unit_test_curve_data()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::CurveClass klass;
+    klass.SetName("foo");
+    klass.SetContentHash(0xffaabbee001177ff);
+    klass.SetStatic(false);
+    klass.SetCurveType(gfx::CurveClass::CurveType::PolylineSpline);
+    klass.SetJointStyle(gfx::CurveClass::JointStyle::Round);
+    klass.SetEndCapStyle(gfx::CurveClass::EndCapStyle::Butt);
+    klass.AddPoint(gfx::CurvePoint({ 1.0f,  2.0f, 3.0f}, { 0.5f,  0.5f}, 0.25f));
+    klass.AddPoint(gfx::CurvePoint({-1.0f, -2.0f, 0.0f}, { 1.0f,  1.0f}, 0.5f));
+    klass.AddPoint(gfx::CurvePoint({ 0.0f,  0.0f, 0.0f}, {-0.5f, -0.5f}, 1.0f));
+
+    // to/from json
+    {
+        data::JsonObject json;
+        klass.IntoJson(json);
+
+        gfx::CurveClass ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.GetName() == klass.GetName());
+        TEST_REQUIRE(ret.GetId() == klass.GetId());
+        TEST_REQUIRE(ret.GetContentHash() == klass.GetContentHash());
+        TEST_REQUIRE(ret.IsStatic() == klass.IsStatic());
+        TEST_REQUIRE(ret.GetCurveType() == gfx::CurveClass::CurveType::PolylineSpline);
+        TEST_REQUIRE(ret.GetJointStyle() == gfx::CurveClass::JointStyle::Round);
+        TEST_REQUIRE(ret.GetEndCapStyle() == gfx::CurveClass::EndCapStyle::Butt);
+        TEST_REQUIRE(ret.GetHash() == klass.GetHash());
+
+        TEST_REQUIRE(ret.GetPointCount() == 3);
+        for (size_t i=0; i<ret.GetPointCount(); ++i)
+        {
+            const auto& expected = klass.GetPoint(i);
+            const auto& actual = ret.GetPoint(i);
+            TEST_REQUIRE(real::float32(actual.GetPosition().x) == real::float32(expected.GetPosition().x));
+            TEST_REQUIRE(real::float32(actual.GetPosition().y) == real::float32(expected.GetPosition().y));
+            TEST_REQUIRE(real::float32(actual.GetPosition().z) == real::float32(expected.GetPosition().z));
+            TEST_REQUIRE(real::float32(actual.GetData().x) == real::float32(expected.GetData().x));
+            TEST_REQUIRE(real::float32(actual.GetData().y) == real::float32(expected.GetData().y));
+            TEST_REQUIRE(real::float32(actual.GetWidth()) == real::float32(expected.GetWidth()));
+        }
+    }
+
+    // test copy ctor/assignment
+    {
+        gfx::CurveClass copy(klass);
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetPointCount() == 3);
+
+        copy = klass;
+        TEST_REQUIRE(copy.GetId() == klass.GetId());
+        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetPointCount() == 3);
+    }
+
+    // test virtual copy/clone
+    {
+        auto copy = klass.Copy();
+        TEST_REQUIRE(copy->GetId() == klass.GetId());
+        TEST_REQUIRE(copy->GetHash() == klass.GetHash());
+
+        auto clone = klass.Clone();
+        TEST_REQUIRE(clone->GetId() != klass.GetId());
+        TEST_REQUIRE(clone->GetHash() != klass.GetHash());
+    }
+}
+
+void unit_test_curve_catmull_rom_tessellation()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // straight line along the x axis with constant width.
+    gfx::CurveClass klass;
+    klass.SetCurveType(gfx::CurveClass::CurveType::CatmullRomSpline);
+    klass.AddPoint(gfx::CurvePoint({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+    klass.AddPoint(gfx::CurvePoint({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+    klass.AddPoint(gfx::CurvePoint({2.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+    klass.AddPoint(gfx::CurvePoint({3.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+
+    // butt end caps
+    {
+        klass.SetEndCapStyle(gfx::CurveClass::EndCapStyle::Butt);
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(klass.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::TriangleStrip);
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexDataPtr(),
+                                       buffer.GetVertexBytes());
+        TEST_REQUIRE(stream.GetCount() == (3 * 16 + 1) * 2);
+
+        // the strip should be two parallel lines at +- half width
+        for (size_t i=0; i<stream.GetCount(); ++i)
+        {
+            const auto* vertex = stream.GetVertex<gfx::Vertex2D>(i);
+            TEST_REQUIRE(real::float32(std::abs(vertex->aPosition.y)) == real::float32(0.1f));
+        }
+
+        const auto* first = stream.GetVertex<gfx::Vertex2D>(0);
+        const auto* last = stream.GetVertex<gfx::Vertex2D>(stream.GetCount() - 1);
+        TEST_REQUIRE(real::float32(first->aPosition.x) == real::float32(0.0f));
+        TEST_REQUIRE(real::float32(last->aPosition.x) == real::float32(3.0f));
+        TEST_REQUIRE(real::float32(first->aTexCoord.x) == real::float32(0.0f));
+        TEST_REQUIRE(real::float32(last->aTexCoord.x) == real::float32(1.0f));
+    }
+
+    // square end caps extend the curve ends by half width
+    {
+        klass.SetEndCapStyle(gfx::CurveClass::EndCapStyle::Square);
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(klass.Construct(&buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexDataPtr(),
+                                       buffer.GetVertexBytes());
+        const auto* first = stream.GetVertex<gfx::Vertex2D>(0);
+        const auto* last = stream.GetVertex<gfx::Vertex2D>(stream.GetCount() - 1);
+        TEST_REQUIRE(real::float32(first->aPosition.x) == real::float32(-0.1f));
+        TEST_REQUIRE(real::float32(last->aPosition.x) == real::float32(3.1f));
+    }
+
+    // round end caps are half circles around the curve end points
+    {
+        klass.SetEndCapStyle(gfx::CurveClass::EndCapStyle::Round);
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(klass.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(buffer.GetDrawCmd(0).type == gfx::DrawType::TriangleStrip);
+
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexDataPtr(),
+                                       buffer.GetVertexBytes());
+        // curve vertices + tip and 7 vertex pairs per cap
+        TEST_REQUIRE(stream.GetCount() == (3 * 16 + 1) * 2 + 2 * (1 + 7 * 2));
+
+        // the strip starts and ends with the cap tips
+        const auto* first = stream.GetVertex<gfx::Vertex2D>(0);
+        const auto* last = stream.GetVertex<gfx::Vertex2D>(stream.GetCount() - 1);
+        TEST_REQUIRE(real::float32(first->aPosition.x) == real::float32(-0.1f));
+        TEST_REQUIRE(real::float32(first->aPosition.y) == real::float32(0.0f));
+        TEST_REQUIRE(real::float32(last->aPosition.x) == real::float32(3.1f));
+        TEST_REQUIRE(real::float32(last->aPosition.y) == real::float32(0.0f));
+        TEST_REQUIRE(real::float32(first->aTexCoord.y) == real::float32(0.5f));
+        TEST_REQUIRE(real::float32(last->aTexCoord.y) == real::float32(0.5f));
+
+        // the cap vertices are on a half circle with the radius of half
+        // the curve width around the curve end points and behind/ahead
+        // of the curve end points.
+        for (size_t i=0; i<1 + 7 * 2; ++i)
+        {
+            const auto& start = stream.GetVertex<gfx::Vertex2D>(i)->aPosition;
+            const auto& end = stream.GetVertex<gfx::Vertex2D>(stream.GetCount() - 1 - i)->aPosition;
+            TEST_REQUIRE(std::abs(glm::length(glm::vec2(start.x, start.y)) - 0.1f) < 0.0001f);
+            TEST_REQUIRE(std::abs(glm::length(glm::vec2(end.x - 3.0f, end.y)) - 0.1f) < 0.0001f);
+            TEST_REQUIRE(start.x < 0.0f);
+            TEST_REQUIRE(end.x > 3.0f);
+        }
+    }
+
+    // too few points produces no geometry
+    {
+        gfx::CurveClass klass;
+        klass.AddPoint(gfx::CurvePoint({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+        klass.AddPoint(gfx::CurvePoint({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(!klass.Construct(&buffer));
+        TEST_REQUIRE(buffer.GetVertexBytes() == 0);
+    }
+
+    // all triangles in the strip must have counter-clockwise winding
+    // regardless of which way the curve bends.
+    for (auto cap : {gfx::CurveClass::EndCapStyle::Butt,
+                     gfx::CurveClass::EndCapStyle::Square,
+                     gfx::CurveClass::EndCapStyle::Round})
+    {
+        gfx::CurveClass klass;
+        klass.SetEndCapStyle(cap);
+        klass.AddPoint(gfx::CurvePoint({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.1f));
+        klass.AddPoint(gfx::CurvePoint({1.0f, 1.0f, 0.0f}, {0.0f, 0.0f}, 0.1f));
+        klass.AddPoint(gfx::CurvePoint({2.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.1f));
+        klass.AddPoint(gfx::CurvePoint({3.0f, -1.0f, 0.0f}, {0.0f, 0.0f}, 0.1f));
+        klass.AddPoint(gfx::CurvePoint({4.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.1f));
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(klass.Construct(&buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(),
+                                       buffer.GetVertexDataPtr(),
+                                       buffer.GetVertexBytes());
+        const gfx::TriangleIterator triangles(buffer.GetDrawCommands(), stream);
+        TEST_REQUIRE(triangles.GetCount() == stream.GetCount() - 2);
+
+        for (size_t i=0; i<triangles.GetCount(); ++i)
+        {
+            const auto& triangle = triangles.GetTriangle(i);
+            const auto& v0 = stream.GetVertex<gfx::Vertex2D>(triangle.i0)->aPosition;
+            const auto& v1 = stream.GetVertex<gfx::Vertex2D>(triangle.i1)->aPosition;
+            const auto& v2 = stream.GetVertex<gfx::Vertex2D>(triangle.i2)->aPosition;
+            const auto signed_area = (v1.x - v0.x) * (v2.y - v0.y) -
+                                     (v2.x - v0.x) * (v1.y - v0.y);
+            TEST_REQUIRE(signed_area > 0.0f);
+        }
+    }
+
+    // coincident control points fail
+    {
+        gfx::CurveClass klass;
+        klass.AddPoint(gfx::CurvePoint({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+        klass.AddPoint(gfx::CurvePoint({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+        klass.AddPoint(gfx::CurvePoint({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+        klass.AddPoint(gfx::CurvePoint({3.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0.2f));
+
+        gfx::GeometryBuffer buffer;
+        TEST_REQUIRE(!klass.Construct(&buffer));
+    }
+}
+
 void unit_test_simple_shape_mesh()
 {
     TEST_CASE(test::Type::Feature)
@@ -1949,6 +2177,8 @@ int test_main(int argc, char* argv[])
     unit_test_polygon_builder_build();
     unit_test_particle_engine_data();
     unit_test_polygon_data();
+    unit_test_curve_catmull_rom_tessellation();
+    unit_test_curve_data();
     unit_test_simple_shape_mesh();
     unit_test_polygon_simple_render_mesh();
     unit_test_polygon_simple_shard_mesh();

@@ -292,6 +292,7 @@ add_library(GfxLib
     device/vertex.cpp
     graphics/bitmap.cpp
     graphics/bitmap_noise.cpp
+    graphics/curve.cpp
     graphics/debug_drawable.cpp
     graphics/effect_drawable.cpp
     graphics/drawable_effect.cpp

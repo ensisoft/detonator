@@ -32,6 +32,18 @@ namespace gfx
 
     using TextureFormat = dev::TextureFormat;
 
+    enum class CurveType {
+        PolylineSpline, CatmullRomSpline
+    };
+
+    enum class CurveJointStyle {
+        Miter, Bevel, Round
+    };
+
+    enum class CurveEndCapStyle {
+        Square, Round, Butt
+    };
+
     enum class GradientType : int {
         Bilinear, Radial, Conical
     };
