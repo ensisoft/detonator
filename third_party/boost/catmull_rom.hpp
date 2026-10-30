@@ -86,7 +86,11 @@ namespace boost{ namespace math{
             }
             bool is_valid() const noexcept
             {
-                return m_pnts.size() >= 4;
+                return m_error.empty();
+            }
+            auto get_error() const noexcept
+            {
+                return m_error;
             }
 
             Point evaluate(const value_type s) const
@@ -98,6 +102,7 @@ namespace boost{ namespace math{
             RandomAccessContainer m_pnts;
             std::vector<value_type> m_s;
             value_type m_max_s;
+            std::string m_error;
         };
 
         template<class Point, size_t Dimensions, class RandomAccessContainer >
@@ -105,15 +110,19 @@ namespace boost{ namespace math{
         {
             std::size_t num_pnts = m_pnts.size();
             //std::cout << "Number of points = " << num_pnts << "\n";
-            //if (num_pnts < 4)
-            //{
-            //    throw std::domain_error("The Catmull-Rom curve requires at least 4 points.");
-            //}
-            //if (alpha < 0 || alpha > 1)
-            //{
-            //    throw std::domain_error("The parametrization alpha must be in the range [0,1].");
-            //}
-            assert(!(alpha < 0 || alpha > 1));
+            if (num_pnts < 4)
+            {
+                //throw std::domain_error("The Catmull-Rom curve requires at least 4 points.");
+                m_error = "The Catmull-Rom curve requires at least 4 points.";
+                return;
+            }
+
+            if (alpha < 0 || alpha > 1)
+            {
+                //throw std::domain_error("The parametrization alpha must be in the range [0,1].");
+                m_error = "The Catmull-Rom curve parametrization alpha must be in the range [0,1].";
+                return;
+            }
 
             using std::abs;
             m_s.resize(num_pnts+3);
@@ -133,7 +142,9 @@ namespace boost{ namespace math{
             m_s[0] = -detail::alpha_distance<Point, Dimensions>(m_pnts[0], m_pnts[1], alpha);
             if (abs(m_s[0]) < std::numeric_limits<typename Point::value_type>::epsilon())
             {
-                throw std::domain_error("The first and last point should not be the same.\n");
+                //throw std::domain_error("The first and last point should not be the same.\n");
+                m_error = "The Catmull-Rom curve first and last point should not be the same.";
+                return;
             }
             m_s[1] = 0;
             for (size_t i = 2; i < m_s.size(); ++i)
@@ -141,7 +152,9 @@ namespace boost{ namespace math{
                 typename Point::value_type d = detail::alpha_distance<Point, Dimensions>(m_pnts[i], m_pnts[i-1], alpha);
                 if (abs(d) < std::numeric_limits<typename Point::value_type>::epsilon())
                 {
-                    throw std::domain_error("The control points of the Catmull-Rom curve are too close together; this will lead to ill-conditioning.\n");
+                    //throw std::domain_error("The control points of the Catmull-Rom curve are too close together; this will lead to ill-conditioning.\n");
+                    m_error = "The Catmull-Rom curve control points are too close together.";
+                    return;
                 }
                 m_s[i] = m_s[i-1] + d;
             }
@@ -164,7 +177,8 @@ namespace boost{ namespace math{
             using std_workaround::size;
             if (s < 0 || s > m_max_s)
             {
-                throw std::domain_error("Parameter outside bounds.");
+                //throw std::domain_error("Parameter outside bounds.");
+                assert(!"Parameter outside bounds.");
             }
             auto it = std::upper_bound(m_s.begin(), m_s.end(), s);
             //Now *it >= s. We want the index such that m_s[i] <= s < m_s[i+1]:
@@ -231,7 +245,8 @@ namespace boost{ namespace math{
             // http://denkovacs.com/2016/02/catmull-rom-spline-derivatives/
             if (s < 0 || s > m_max_s)
             {
-                throw std::domain_error("Parameter outside bounds.\n");
+                //throw std::domain_error("Parameter outside bounds.\n");
+                assert(!"Parameter outside bounds.");
             }
             auto it = std::upper_bound(m_s.begin(), m_s.end(), s);
             //Now *it >= s. We want the index such that m_s[i] <= s < m_s[i+1]:

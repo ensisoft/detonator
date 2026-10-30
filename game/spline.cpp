@@ -20,6 +20,7 @@
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
+#include "base/logging.h"
 #include "base/math.h"
 #include "base/hash.h"
 #include "data/writer.h"
@@ -92,12 +93,13 @@ size_t Spline::GetHash() const noexcept
 
 std::shared_ptr<const Spline::CatmullRomFunction> Spline::MakeCatmullRom() const
 {
-    if (mPoints.size() < 4)
-        return nullptr;
-
     auto copy = mPoints;
     auto func = std::make_shared<CatmullRomFunction>(std::move(copy));
-    return func;
+    if (func->is_valid())
+        return func;
+
+    ERROR("%1", func->get_error());
+    return nullptr;
 }
 
 std::shared_ptr<const Spline::PolyLineFunction> Spline::MakePolyLine() const
