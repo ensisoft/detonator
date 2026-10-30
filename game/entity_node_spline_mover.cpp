@@ -97,6 +97,7 @@ double SplineMoverClass::GetPathLength() const
             return it->second.spline_path_length;
 
         auto spline = MakeCatmullRom();
+        ASSERT(spline);
         return Spline::CalcArcLength(*spline, 0.0f, 1.0f);
     }
     if (mPathCurveType == PathCurveType::Linear)
@@ -213,9 +214,9 @@ bool SplineMoverClass::InitClassRuntime() const
 bool SplineMoverClass::InitCatmullRomCache() const
 {
     auto catmull_rom = mSpline.MakeCatmullRom();
-    if (!catmull_rom || !catmull_rom->is_valid())
+    if (!catmull_rom)
     {
-        WARN("Entity node spline mover spline definition is invalid.");
+        ERROR("Entity node spline mover spline definition is invalid.");
         return false;
     }
 
@@ -273,7 +274,10 @@ SplineMover::SplineMover(std::shared_ptr<const SplineMoverClass> klass)
     {
         mCatmullRom = mClass->GetCatmullRom();
         if (!mCatmullRom)
+        {
+            ERROR("Entity node spline mover spline definition is invalid.");
             return;
+        }
 
         if (mClass->GetPathCoordinateSpace() == PathCoordinateSpace::Local)
             mStartPos = mCatmullRom->evaluate(0.0f).GetPosition();
