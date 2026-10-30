@@ -42,7 +42,7 @@ namespace gfx
           : mId(std::move(id))
           , mName(std::move(name))
           , mShape(shape)
-          , mArgs(args)
+          , mArgs(std::move(args))
         {}
         SimpleShapeClass(const SimpleShapeClass& other, std::string id)
           : mId(std::move(id))

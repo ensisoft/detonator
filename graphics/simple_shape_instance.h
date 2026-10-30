@@ -38,7 +38,7 @@ namespace gfx
     // drawable shape on the fly (as in a temporary just for the
     // draw call) the optimized version is to use SimpleShape,
     // which will eliminate the need to use a class object.
-    class SimpleShapeInstance : public Drawable
+    class SimpleShapeInstance final : public Drawable
     {
     public:
         using Class = SimpleShapeClass;
@@ -46,23 +46,23 @@ namespace gfx
         using Style = SimpleShapeClass::Style;
         using ShapeAttribute = SimpleShapeClass::ShapeAttribute;
 
-        explicit SimpleShapeInstance(std::shared_ptr<const Class> klass, Style style = Style::Solid) noexcept
+        explicit SimpleShapeInstance(std::shared_ptr<const Class> klass, const Style style = Style::Solid) noexcept
           : mClass(std::move(klass))
           , mStyle(style)
         {}
-        explicit SimpleShapeInstance(const Class& klass, Style style = Style::Solid)
+        explicit SimpleShapeInstance(const Class& klass, const Style style = Style::Solid)
           : mClass(std::make_shared<Class>(klass))
           , mStyle(style)
         {}
-        explicit SimpleShapeInstance(Class&& klass, Style style = Style::Solid)
+        explicit SimpleShapeInstance(Class&& klass, const Style style = Style::Solid)
           : mClass(std::make_shared<Class>(std::move(klass)))
           , mStyle(style)
         {}
-        void SetFlag(Flags flag, bool on_off) noexcept override
+        void SetFlag(const Flags flag, const bool on_off) noexcept override
         {
             mFlags = base::SetFlag(mFlags, flag, on_off);
         }
-        bool TestFlag(Flags flag) const noexcept override
+        bool TestFlag(const Flags flag) const noexcept override
         {
             return base::TestFlag(mFlags, flag);
         }
@@ -116,20 +116,20 @@ namespace gfx
         using Style = SimpleShapeStyle;
         using ShapeAttribute = SimpleShapeAttribute;
 
-        explicit SimpleShape(SimpleShapeType shape, Style style = Style::Solid) noexcept
+        explicit SimpleShape(const SimpleShapeType shape, const Style style = Style::Solid) noexcept
           : mShape(shape)
           , mStyle(style)
         {}
-        explicit SimpleShape(SimpleShapeType shape, detail::SimpleShapeArgs args, Style style = Style::Solid) noexcept
+        explicit SimpleShape(const SimpleShapeType shape, detail::SimpleShapeArgs args, const Style style = Style::Solid) noexcept
           : mShape(shape)
-          , mArgs(args)
+          , mArgs(std::move(args))
           , mStyle(style)
         {}
-        void SetFlag(Flags flag, bool on_off) noexcept override
+        void SetFlag(const Flags flag, const bool on_off) noexcept override
         {
             mFlags = base::SetFlag(mFlags, flag, on_off);
         }
-        bool TestFlag(Flags flag) const noexcept override
+        bool TestFlag(const Flags flag) const noexcept override
         {
             return base::TestFlag(mFlags, flag);
         }
@@ -152,8 +152,6 @@ namespace gfx
         { return mShape; }
         Style GetStyle() const noexcept
         { return mStyle; }
-        void SetStyle(Style style) noexcept
-        { mStyle = style; }
 
         float GetShapeAttribute(ShapeAttribute attribute) const noexcept;
     private:
