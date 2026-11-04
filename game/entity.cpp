@@ -123,6 +123,31 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
             rigid_body->AddJointConnection(joint_ptr);
     }
 
+    mCurves.reserve(mClass->GetNumCurves());
+    for (size_t i=0; i<mClass->GetNumCurves(); ++i)
+    {
+        const auto& curve_class = mClass->GetSharedCurve(i);
+
+        mCurves.emplace_back(curve_class);
+        auto* curve = &mCurves.back();
+
+        if (!curve->PrepareCurve())
+        {
+            ERROR("Failed to prepare curve instance. [curve='%1']", curve_class->GetName());
+            continue;
+        }
+
+        for (auto& node : mNodes)
+        {
+            if (auto* mover = node.GetSplineMover())
+            {
+                const auto& curveId = mover->GetCurveId();
+                if (curveId == curve_class->GetClassId())
+                    mover->Initialize(curve);
+            }
+        }
+    }
+
     if (mClass->HasStateController())
     {
         mStateController = EntityStateController(mClass->GetSharedEntityControllerClass());
@@ -782,6 +807,16 @@ const ScriptVar* Entity::FindScriptVarById(const std::string& id) const
             return &var;
     }
     return mClass->FindScriptVarById(id);
+}
+
+const Curve* Entity::FindCurveById(const std::string& id) const
+{
+    for (const auto& curve : mCurves)
+    {
+        if (curve.GetClassId() == id)
+            return &curve;
+    }
+    return nullptr;
 }
 
 std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass)

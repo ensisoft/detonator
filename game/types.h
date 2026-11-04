@@ -53,6 +53,7 @@ namespace game
     using Color     = base::Color;
     using FVector2D = base::FVector2D;
     using Float2    = base::Float2;
+    using Float3    = base::Float3;
 
     using LightParam = std::variant<float,
             glm::vec2, glm::vec3, glm::vec4,

@@ -65,6 +65,7 @@ enum class TransformHandle3D {
 
 void DrawSplineControlPoint(gfx::Painter& painter, const glm::vec2& pos, bool active);
 void DrawSpline(gfx::Painter& painter,
+                const game::CurveClass* curve,
                 const game::SplineMoverClass* spline,
                 const game::EntityNodeClass* coordinate_reference_node, const game::EntityClass& entity);
 void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst);

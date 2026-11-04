@@ -1478,6 +1478,7 @@ namespace base
         {
             return { x, y, z };
         }
+
 #endif
     };
 

@@ -32,6 +32,7 @@
 #include "graphics/texture_map.h"
 #include "graphics/texture_source.h"
 #include "game/enum.h"
+#include "game/curve.h"
 #include "game/scene_class.h"
 #include "game/timeline_animator.h"
 #include "game/timeline_property_animator.h"
@@ -76,7 +77,7 @@ namespace game {
     std::string TranslateEnum(CoordinateSpace space);
     std::string TranslateEnum(TileOcclusion occlusion);
     std::string TranslateEnum(SplineMoverClass::PathCoordinateSpace mode);
-    std::string TranslateEnum(SplineMoverClass::PathCurveType type);
+    std::string TranslateEnum(CurveClass::Type type);
     std::string TranslateEnum(SplineMoverClass::RotationMode mode);
     std::string TranslateEnum(SplineMoverClass::IterationMode mode);
     std::string TranslateEnum(TextItemClass::VerticalTextAlign align);

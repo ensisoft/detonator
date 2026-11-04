@@ -22,6 +22,7 @@
 #include "data/reader.h"
 #include "data/writer.h"
 #include "game/util.h"
+#include "game/curve.h"
 #include "game/treeop.h"
 #include "game/timeline_animation.h"
 #include "game/timeline_property_animator.h"
@@ -98,6 +99,11 @@ EntityClass::EntityClass(const EntityClass& other)
     for (const auto& joint : other.mJoints)
     {
         mJoints.push_back(std::make_shared<PhysicsJoint>(*joint));
+    }
+
+    for (const auto& curve : other.mCurves)
+    {
+        mCurves.push_back(std::make_shared<CurveClass>(*curve));
     }
 
     // Deepy copy animators
@@ -222,6 +228,82 @@ void EntityClass::DeleteJointById(const std::string& id)
 void EntityClass::DeleteJoint(std::size_t index)
 {
     base::SafeErase(mJoints, index);
+}
+
+CurveClass* EntityClass::AddCurve(const CurveClass& curve)
+{
+    mCurves.push_back(std::make_shared<CurveClass>(curve));
+    return mCurves.back().get();
+}
+
+CurveClass* EntityClass::AddCurve(CurveClass&& curve)
+{
+    mCurves.push_back(std::make_shared<CurveClass>(std::move(curve)));
+    return mCurves.back().get();
+}
+
+void EntityClass::SetCurve(size_t index, const CurveClass& curve)
+{
+    *base::SafeIndex(mCurves, index) = curve;
+}
+void EntityClass::SetCurve(size_t index, CurveClass&& curve)
+{
+    *base::SafeIndex(mCurves, index) = std::move(curve);
+}
+
+CurveClass& EntityClass::GetCurve(size_t index)
+{
+    return *base::SafeIndex(mCurves, index);
+}
+CurveClass* EntityClass::FindCurveById(const std::string& id)
+{
+    for (auto& curve : mCurves)
+        if (curve->GetClassId() == id) return curve.get();
+
+    return nullptr;
+}
+CurveClass* EntityClass::FindCurveByName(const std::string& name)
+{
+    for (auto& curve : mCurves)
+        if (curve->GetName() == name) return curve.get();
+
+    return nullptr;
+}
+
+const CurveClass& EntityClass::GetCurve(size_t index) const
+{
+    return *base::SafeIndex(mCurves, index);
+}
+const CurveClass* EntityClass::FindCurveById(const std::string& id) const
+{
+    for (auto& curve : mCurves)
+        if (curve->GetClassId() == id) return curve.get();
+
+    return nullptr;
+}
+const CurveClass* EntityClass::FindCurveByName(const std::string& name) const
+{
+    for (auto& curve : mCurves)
+        if (curve->GetName() == name) return curve.get();
+
+    return nullptr;
+}
+
+void EntityClass::DeleteCurveById(const std::string& id)
+{
+    for (auto it = mCurves.begin(); it != mCurves.end(); ++it)
+    {
+        if ((*it)->GetClassId() == id)
+        {
+            mCurves.erase(it);
+            return;
+        }
+    }
+}
+
+void EntityClass::DeleteCurve(size_t index)
+{
+    base::SafeErase(mCurves, index);
 }
 
 void EntityClass::DeleteInvalidJoints()
@@ -427,6 +509,20 @@ void EntityClass::DeleteNode(EntityNodeClass* node)
                joint->dst_node_id == node->GetId();
     }), mJoints.end());
     game::DeleteNode(mRenderTree, node, mNodes);
+
+    // delete curves that are no longer used.
+    base::EraseRemove(mCurves, [this](const auto& curve) {
+        const auto id = curve->GetClassId();
+        for (const auto& node : mNodes)
+        {
+            if (const auto* mover = node->GetSplineMover())
+            {
+                if (mover->GetCurveId() == id)
+                    return false;
+            }
+        }
+        return true;
+    });
 }
 
 EntityNodeClass* EntityClass::DuplicateNode(const EntityNodeClass* node)
@@ -435,7 +531,18 @@ EntityNodeClass* EntityClass::DuplicateNode(const EntityNodeClass* node)
 
     auto* ret = game::DuplicateNode(mRenderTree, node, &clones);
     for (auto& clone : clones)
+    {
+        if (auto* mover = clone->GetSplineMover())
+        {
+            const auto curveId = mover->GetCurveId();
+            const auto* curve = FindCurveById(curveId);
+            ASSERT(curve);
+            auto dupe_curve = std::make_shared<CurveClass>(*curve, base::RandomString(10));
+            mover->SetCurveId(dupe_curve->GetClassId());
+            mCurves.push_back(std::move(dupe_curve));
+        }
         mNodes.push_back(std::move(clone));
+    }
     return ret;
 
 }
@@ -598,6 +705,11 @@ std::size_t EntityClass::GetHash() const
         hash = base::hash_combine(hash, joint->GetHash());
     }
 
+    for (const auto& curve : mCurves)
+    {
+        hash = base::hash_combine(hash, curve->GetHash());
+    }
+
     if (mStateController)
     {
         hash = base::hash_combine(hash, mStateController->GetHash());
@@ -619,6 +731,11 @@ void EntityClass::InitClassGameRuntime() const
     auto rt = std::make_unique<ClassRuntime>();
 
     bool ok = true;
+
+    for (auto& curve : mCurves)
+    {
+        ok &= curve->InitClassRuntime(mName);
+    }
 
     for (const auto& node : mNodes)
     {
@@ -688,6 +805,13 @@ void EntityClass::IntoJson(data::Writer& data) const
         data.AppendChunk("joints", std::move(chunk));
     }
 
+    for (const auto& curve : mCurves)
+    {
+        auto chunk = data.NewWriteChunk();
+        curve->IntoJson(*chunk);
+        data.AppendChunk("curves", std::move(chunk));
+    }
+
     if (mStateController)
     {
         auto chunk = data.NewWriteChunk();
@@ -750,6 +874,17 @@ bool EntityClass::FromJson(const data::Reader& data)
             ok = false;
         }
         mJoints.push_back(std::move(joint));
+    }
+    for (unsigned i=0; i<data.GetNumChunks("curves"); ++i)
+    {
+        const auto& chunk = data.GetReadChunk("curves", i);
+        auto curve = std::make_shared<CurveClass>();
+        if (!curve->FromJson(*chunk))
+        {
+            WARN("Failed to load entity curve completely. [entity='%1', curve='%2']", mName, curve->GetName());
+            ok = false;
+        }
+        mCurves.push_back(std::move(curve));
     }
 
     // migration, animators array becomes a single state-controller
@@ -855,6 +990,24 @@ EntityClass EntityClass::Clone() const
         clone->dst_node_id = map[old_dst_node]->GetId();
         ret.mJoints.push_back(std::move(clone));
     }
+
+    for (const auto& curve : mCurves)
+    {
+        auto clone = std::make_shared<CurveClass>(*curve, base::RandomString(10));
+
+        // remap the curve IDs in the node attachments (drawable item, spline mover)
+        for (auto& node : ret.mNodes)
+        {
+            if  (auto* mover = node->GetSplineMover())
+            {
+                if (mover->GetCurveId() == curve->GetClassId())
+                    mover->SetCurveId(clone->GetClassId());
+            }
+        }
+
+        ret.mCurves.push_back(std::move(clone));
+    }
+
     // remap property animator joint ids
     for (auto& animation : ret.mAnimations)
     {
@@ -896,6 +1049,7 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     mIdleTrackId     = std::move(tmp.mIdleTrackId);
     mNodes           = std::move(tmp.mNodes);
     mJoints          = std::move(tmp.mJoints);
+    mCurves          = std::move(tmp.mCurves);
     mScriptVars      = std::move(tmp.mScriptVars);
     mScriptFile      = std::move(tmp.mScriptFile);
     mRenderTree      = std::move(tmp.mRenderTree);

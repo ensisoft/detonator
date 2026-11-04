@@ -117,6 +117,9 @@ namespace base
         { return mPoints[index].point; }
         auto GetPoint(size_t index) noexcept
         { return mPoints[index].point; }
+
+        auto IsValid() const noexcept
+        { return mPoints.size() >= 2; }
     private:
         struct P {
             float distance = 0.0f;
