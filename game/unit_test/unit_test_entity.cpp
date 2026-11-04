@@ -31,6 +31,7 @@
 #include "data/json.h"
 #include "game/entity.h"
 #include "game/entity_class.h"
+#include "game/curve.h"
 #include "game/entity_node_rigid_body_joint.h"
 #include "game/entity_node_spline_mover.h"
 #include "game/entity_node_linear_mover.h"
@@ -154,17 +155,13 @@ void unit_test_entity_node()
     mover.SetLinearVelocity(glm::vec2{-1.0f, 2.0f});
 
     game::SplineMoverClass spline;
-    {
-        glm::vec2 point = {-200.0f, 0.0f};
-        for(unsigned i=0; i<=4; ++i)
-        {
-            game::SplinePoint p;
-            p.SetPosition(point);
-
-            spline.AppendPoint(p);
-            point += glm::vec2{100.0f, 0.0f};
-        }
-    }
+    spline.SetPathCoordinateSpace(game::SplineMoverClass::PathCoordinateSpace::Parent);
+    spline.SetRotationMode(game::SplineMoverClass::RotationMode::IgnoreSplineRotation);
+    spline.SetIterationMode(game::SplineMoverClass::IterationMode::PingPong);
+    spline.SetCurveId("123curve");
+    spline.SetSpeed(5.0f);
+    spline.SetAcceleration(2.0f);
+    spline.Enable(false);
 
     game::MeshEffectClass mesh_effect;
     game::MeshEffectClass::MeshExplosionEffectArgs args;
@@ -252,9 +249,12 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetLinearMover()->GetAngularVelocity() == 5.0f);
     TEST_REQUIRE(node.GetLinearMover()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
     TEST_REQUIRE(node.GetLinearMover()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
-    TEST_REQUIRE(node.GetSplineMover()->GetPointCount() == 5);
-    TEST_REQUIRE(node.GetSplineMover()->GetPoint(0).GetPosition().ToVec2() == glm::vec2(-200.0f, 0.0f));
-    TEST_REQUIRE(node.GetSplineMover()->GetPoint(4).GetPosition().ToVec2() == glm::vec2( 200.0f, 0.0f));
+    TEST_REQUIRE(node.GetSplineMover()->GetPathCoordinateSpace() == game::SplineMoverClass::PathCoordinateSpace::Parent);
+    TEST_REQUIRE(node.GetSplineMover()->GetRotationMode() == game::SplineMoverClass::RotationMode::IgnoreSplineRotation);
+    TEST_REQUIRE(node.GetSplineMover()->GetIterationMode() == game::SplineMoverClass::IterationMode::PingPong);
+    TEST_REQUIRE(node.GetSplineMover()->GetCurveId() == "123curve");
+    TEST_REQUIRE(node.GetSplineMover()->GetSpeed() == 5.0f);
+    TEST_REQUIRE(node.GetSplineMover()->GetAcceleration() == 2.0f);
     TEST_REQUIRE(node.GetBasicLight()->GetQuadraticAttenuation() == 1.0f);
     TEST_REQUIRE(node.GetBasicLight()->GetAmbientColor() == game::Color::Red);
     TEST_REQUIRE(node.GetBasicLight()->GetDiffuseColor() == game::Color::Green);
@@ -320,9 +320,13 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.GetLinearMover()->GetAngularVelocity() == 5.0f);
         TEST_REQUIRE(ret.GetLinearMover()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
         TEST_REQUIRE(ret.GetLinearMover()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
-        TEST_REQUIRE(ret.GetSplineMover()->GetPointCount() == 5);
-        TEST_REQUIRE(ret.GetSplineMover()->GetPoint(0).GetPosition().ToVec2() == glm::vec2(-200.0f, 0.0f));
-        TEST_REQUIRE(ret.GetSplineMover()->GetPoint(4).GetPosition().ToVec2() == glm::vec2( 200.0f, 0.0f));
+        TEST_REQUIRE(ret.GetLinearMover()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(ret.GetSplineMover()->GetPathCoordinateSpace() == game::SplineMoverClass::PathCoordinateSpace::Parent);
+        TEST_REQUIRE(ret.GetSplineMover()->GetRotationMode() == game::SplineMoverClass::RotationMode::IgnoreSplineRotation);
+        TEST_REQUIRE(ret.GetSplineMover()->GetIterationMode() == game::SplineMoverClass::IterationMode::PingPong);
+        TEST_REQUIRE(ret.GetSplineMover()->GetCurveId() == "123curve");
+        TEST_REQUIRE(ret.GetSplineMover()->GetSpeed() == 5.0f);
+        TEST_REQUIRE(ret.GetSplineMover()->GetAcceleration() == 2.0f);
         TEST_REQUIRE(ret.GetBasicLight()->GetQuadraticAttenuation() == 1.0f);
         TEST_REQUIRE(ret.GetBasicLight()->GetAmbientColor() == game::Color::Red);
         TEST_REQUIRE(ret.GetBasicLight()->GetDiffuseColor() == game::Color::Green);
@@ -368,9 +372,12 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetBasicLight()->GetAmbientColor() == game::Color::Red);
         TEST_REQUIRE(clone.GetBasicLight()->GetDiffuseColor() == game::Color::Green);
         TEST_REQUIRE(clone.GetBasicLight()->GetSpecularColor() == game::Color::Blue);
-        TEST_REQUIRE(clone.GetSplineMover()->GetPointCount() == 5);
-        TEST_REQUIRE(clone.GetSplineMover()->GetPoint(0).GetPosition().ToVec2() == glm::vec2(-200.0f, 0.0f));
-        TEST_REQUIRE(clone.GetSplineMover()->GetPoint(4).GetPosition().ToVec2() == glm::vec2( 200.0f, 0.0f));
+        TEST_REQUIRE(clone.GetSplineMover()->GetPathCoordinateSpace() == game::SplineMoverClass::PathCoordinateSpace::Parent);
+        TEST_REQUIRE(clone.GetSplineMover()->GetRotationMode() == game::SplineMoverClass::RotationMode::IgnoreSplineRotation);
+        TEST_REQUIRE(clone.GetSplineMover()->GetIterationMode() == game::SplineMoverClass::IterationMode::PingPong);
+        TEST_REQUIRE(clone.GetSplineMover()->GetCurveId() == "123curve");
+        TEST_REQUIRE(clone.GetSplineMover()->GetSpeed() == 5.0f);
+        TEST_REQUIRE(clone.GetSplineMover()->GetAcceleration() == 2.0f);
     }
 
     // test instance state.
@@ -588,6 +595,23 @@ void unit_test_entity_class()
         entity.AddJoint(std::move(joint));
     }
 
+    // curve
+    {
+        game::CurveData curve;
+        curve.AppendPoint(game::CurvePoint(game::Float3(0.0f,  0.0f, 0.0f), game::Float3(1.0f, 0.0f, 0.0f), game::Float2(0.0f, 0.0f), 0.1f));
+        curve.AppendPoint(game::CurvePoint(game::Float3(1.0f, -1.0f, 0.0f), game::Float3(1.0f, 0.0f, 0.0f), game::Float2(0.5f, 0.0f), 0.2f));
+        curve.AppendPoint(game::CurvePoint(game::Float3(2.0f,  0.0f, 0.0f), game::Float3(1.0f, 0.0f, 0.0f), game::Float2(1.0f, 0.0f), 0.3f));
+        curve.AppendPoint(game::CurvePoint(game::Float3(3.0f, -1.0f, 0.0f), game::Float3(1.0f, 0.0f, 0.0f), game::Float2(1.0f, 1.0f), 0.4f));
+
+        game::CurveClass klass;
+        klass.SetName("curve");
+        klass.SetCurveType(game::CurveClass::Type::Polyline);
+        klass.SetJointStyle(game::CurveClass::JointStyle::Round);
+        klass.SetEndCapStyle(game::CurveClass::EndCapStyle::Square);
+        klass.SetCurve(std::move(curve));
+        entity.AddCurve(std::move(klass));
+    }
+
     // joint property animator (needed for joint ID mapping on clone)
     {
         game::PropertyAnimatorClass prop;
@@ -639,6 +663,15 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetNumJoints() == 4);
     TEST_REQUIRE(entity.GetJoint(0).dst_node_id == entity.GetNode(0).GetId());
     TEST_REQUIRE(entity.GetJoint(0).src_node_id == entity.GetNode(1).GetId());
+    TEST_REQUIRE(entity.GetNumCurves() == 1);
+    TEST_REQUIRE(entity.GetCurve(0).GetName() == "curve");
+    TEST_REQUIRE(entity.GetCurve(0).GetCurveType() == game::CurveClass::Type::Polyline);
+    TEST_REQUIRE(entity.GetCurve(0).GetJointStyle() == game::CurveClass::JointStyle::Round);
+    TEST_REQUIRE(entity.GetCurve(0).GetEndCapStyle() == game::CurveClass::EndCapStyle::Square);
+    TEST_REQUIRE(entity.FindCurveByName("curve") == &entity.GetCurve(0));
+    TEST_REQUIRE(entity.FindCurveByName("foobar") == nullptr);
+    TEST_REQUIRE(entity.FindCurveById(entity.GetCurve(0).GetClassId()) == &entity.GetCurve(0));
+    TEST_REQUIRE(entity.FindCurveById("foobar") == nullptr);
     TEST_REQUIRE(entity.HasStateController());
     TEST_REQUIRE(entity.GetStateController()->GetNumStates() == 2);
     TEST_REQUIRE(entity.GetStateController()->GetNumTransitions() == 1);
@@ -748,6 +781,15 @@ void unit_test_entity_class()
         }
 
 
+        TEST_REQUIRE(ret.GetNumCurves() == 1);
+        TEST_REQUIRE(ret.GetCurve(0).GetClassId() == entity.GetCurve(0).GetClassId());
+        TEST_REQUIRE(ret.GetCurve(0).GetName() == "curve");
+        TEST_REQUIRE(ret.GetCurve(0).GetCurveType() == game::CurveClass::Type::Polyline);
+        TEST_REQUIRE(ret.GetCurve(0).GetJointStyle() == game::CurveClass::JointStyle::Round);
+        TEST_REQUIRE(ret.GetCurve(0).GetEndCapStyle() == game::CurveClass::EndCapStyle::Square);
+        TEST_REQUIRE(ret.GetCurve(0).GetCurve().GetHash() == entity.GetCurve(0).GetCurve().GetHash());
+        TEST_REQUIRE(ret.GetCurve(0).GetHash() == entity.GetCurve(0).GetHash());
+
         TEST_REQUIRE(ret.HasStateController());
         TEST_REQUIRE(ret.GetStateController()->GetNumStates() == 2);
         TEST_REQUIRE(ret.GetStateController()->GetNumTransitions() == 1);
@@ -766,6 +808,10 @@ void unit_test_entity_class()
         TEST_REQUIRE(copy.GetNumAnimations() == 3);
         TEST_REQUIRE(copy.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(copy) == "root child_1 child_2");
+        TEST_REQUIRE(copy.GetNumCurves() == 1);
+        TEST_REQUIRE(copy.GetCurve(0).GetClassId() == entity.GetCurve(0).GetClassId());
+        TEST_REQUIRE(copy.GetCurve(0).GetHash() == entity.GetCurve(0).GetHash());
+        TEST_REQUIRE(&copy.GetCurve(0) != &entity.GetCurve(0));
 
         game::EntityClass temp;
         temp = entity;
@@ -774,6 +820,37 @@ void unit_test_entity_class()
         TEST_REQUIRE(temp.GetNumAnimations() == 3);
         TEST_REQUIRE(temp.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(temp) == "root child_1 child_2");
+        TEST_REQUIRE(temp.GetNumCurves() == 1);
+        TEST_REQUIRE(temp.GetCurve(0).GetClassId() == entity.GetCurve(0).GetClassId());
+        TEST_REQUIRE(temp.GetCurve(0).GetHash() == entity.GetCurve(0).GetHash());
+        TEST_REQUIRE(&temp.GetCurve(0) != &entity.GetCurve(0));
+    }
+
+    // curve set/delete
+    {
+        auto copy(entity);
+
+        game::CurveClass curve(entity.GetCurve(0), "foobar");
+        curve.SetName("other-curve");
+        copy.AddCurve(curve);
+        TEST_REQUIRE(copy.GetNumCurves() == 2);
+        TEST_REQUIRE(copy.FindCurveById("foobar") == &copy.GetCurve(1));
+        TEST_REQUIRE(copy.FindCurveByName("other-curve") == &copy.GetCurve(1));
+
+        curve.SetName("set-curve");
+        copy.SetCurve(1, curve);
+        TEST_REQUIRE(copy.GetNumCurves() == 2);
+        TEST_REQUIRE(copy.GetCurve(1).GetName() == "set-curve");
+        TEST_REQUIRE(copy.FindCurveByName("other-curve") == nullptr);
+
+        copy.DeleteCurveById("foobar");
+        TEST_REQUIRE(copy.GetNumCurves() == 1);
+        TEST_REQUIRE(copy.FindCurveById("foobar") == nullptr);
+        TEST_REQUIRE(copy.GetCurve(0).GetName() == "curve");
+
+        copy.DeleteCurve(0);
+        TEST_REQUIRE(copy.GetNumCurves() == 0);
+        TEST_REQUIRE(entity.GetNumCurves() == 1);
     }
 
     // clone
@@ -797,6 +874,11 @@ void unit_test_entity_class()
         TEST_REQUIRE(clone.GetNumAnimations() == 3);
         TEST_REQUIRE(clone.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(clone) == "root child_1 child_2");
+        TEST_REQUIRE(clone.GetNumCurves() == 1);
+        TEST_REQUIRE(clone.GetCurve(0).GetClassId() != entity.GetCurve(0).GetClassId());
+        TEST_REQUIRE(clone.GetCurve(0).GetName() == "curve");
+        TEST_REQUIRE(clone.GetCurve(0).GetCurveType() == game::CurveClass::Type::Polyline);
+        TEST_REQUIRE(clone.GetCurve(0).GetCurve().GetHash() == entity.GetCurve(0).GetCurve().GetHash());
 
         TEST_REQUIRE(clone.GetNumJoints() == 4);
         {
@@ -1365,21 +1447,27 @@ void unit_test_entity_node_spline_mover()
     TEST_CASE(test::Type::Feature)
 
     // initialize some spline points.
-    std::vector<game::SplinePoint> points;
+    game::CurveData points;
     glm::vec2 point = {0.0f, 0.0f};
     for(unsigned i=0; i<=4; ++i)
     {
         game::SplinePoint p;
         p.SetPosition(point);
 
-        points.push_back(p);
+        points.AppendPoint(p.ToCurvePoint());
         point += glm::vec2{100.0f, 0.0f};
     }
 
     // test that the velocity is approx constant.
     {
+        game::CurveClass curve_class;
+        curve_class.SetCurve(game::CurveData(std::move(points)));
+        curve_class.SetCurveType(game::CurveClass::Type::Polyline);
+
+        game::Curve curve(curve_class);
+        TEST_REQUIRE(curve.PrepareCurve());
+
         game::SplineMoverClass spline;
-        spline.SetPoints(points);
         spline.SetSpeed(100.0f); // 100 u/s
 
         game::EntityNodeClass node_class;
@@ -1389,6 +1477,8 @@ void unit_test_entity_node_spline_mover()
         TEST_REQUIRE(node.HasSplineMover());
 
         auto* mover = node.GetSplineMover();
+        mover->Initialize(&curve);
+
         mover->TransformObject(0.0f, node);
         TEST_REQUIRE(node.GetTranslation().x == 0.0f);
         TEST_REQUIRE(node.GetTranslation().y == 0.0f);

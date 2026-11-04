@@ -40,6 +40,7 @@
 #include "game/types.h"
 #include "game/enum.h"
 #include "game/color.h"
+#include "game/curve.h"
 #include "game/scriptvar.h"
 #include "game/entity_node.h"
 #include "game/entity_node_rigid_body_joint.h"
@@ -305,6 +306,8 @@ namespace game
         const ScriptVar* FindScriptVarByName(const std::string& name) const;
         const ScriptVar* FindScriptVarById(const std::string& id) const;
 
+        const Curve* FindCurveById(const std::string& id) const;
+
         template<typename T>
         T GetVar(const std::string& name) const
         {
@@ -447,6 +450,8 @@ namespace game
         std::vector<ScriptVar> mScriptVars;
         // list of physics joints between nodes with rigid bodies.
         std::vector<PhysicsJoint> mJoints;
+        // Instances of curves associated with the class.
+        std::vector<Curve> mCurves;
         // the render tree for hierarchical traversal and transformation
         // of the entity and its nodes.
         RenderTree mRenderTree;

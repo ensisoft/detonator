@@ -30,6 +30,7 @@
 #include "base/polyline.h"
 #include "data/fwd.h"
 #include "game/types.h"
+#include "game/curve_types.h"
 
 namespace game
 {
@@ -53,6 +54,23 @@ namespace game
             mData[2] = v2;
             mData[3] = v3;
         }
+        SplinePoint(const CurvePoint& point) noexcept
+        {
+            const auto& position = point.GetPosition();
+            const auto& look_at = point.GetLookAt();
+            mData[0] = position.x;
+            mData[1] = position.y;
+            mData[2] = look_at.x;
+            mData[3] = look_at.y;
+        }
+
+        CurvePoint ToCurvePoint() const
+        {
+            CurvePoint point;
+            point.SetPosition(mData[0], mData[1], 0.0f);
+            point.SetLookAt(mData[2], mData[3], 0.0f);
+            return point;
+        }
 
         float operator[](size_t index) const noexcept
         {
@@ -71,6 +89,11 @@ namespace game
         {
             return { mData[2], mData[3] };
         }
+        void SetPosition(float x, float y) noexcept
+        {
+            mData[0] = x;
+            mData[1] = y;
+        }
         void SetPosition(const Float2& position) noexcept
         {
             mData[0] = position.x;
@@ -80,6 +103,11 @@ namespace game
         {
             mData[2] = look_at.x;
             mData[3] = look_at.y;
+        }
+        void SetLookAt(float x, float y) noexcept
+        {
+            mData[2] = x;
+            mData[3] = y;
         }
     private:
         friend class Spline;
@@ -91,51 +119,97 @@ namespace game
     SplinePoint InterpolatePoint(const SplinePoint& p0, const SplinePoint& p1, float t) noexcept;
     SplinePoint ComputePointTangent(const SplinePoint& p0, const SplinePoint& p1, float dist) noexcept;
 
-    class Spline
+    using SplineCatmullRomFunction = boost::math::catmull_rom<SplinePoint, 4>;
+    using SplinePolyLineFunction = base::PolyLine<SplinePoint>;
+
+    SplinePoint EvaluateSpline(const SplineCatmullRomFunction& spline, float t);
+    SplinePoint EvaluateSpline(const SplinePolyLineFunction& spline, float dt);
+    double CalcSplineArcLength(const SplineCatmullRomFunction& spline, float threshold = 1e-4);
+    double CalcSplineArcLength(const SplineCatmullRomFunction& spline, float t0, float t1, float threshold = 1e-4);
+
+    class CatmullRomSpline
     {
     public:
-        using CatmullRomFunction = boost::math::catmull_rom<SplinePoint, 4>;
-        using PolyLineFunction = base::PolyLine<SplinePoint>;
+        CatmullRomSpline(std::vector<SplinePoint> points);
 
-        void SetPoints(std::vector<SplinePoint> points) noexcept
-        { mPoints = std::move(points); }
+        bool IsValid() const noexcept
+        {
+            return mCatmullRom.is_valid();
+        }
 
-        // Get the current number of spline control points.
-        auto GetPointCount() const noexcept
-        { return mPoints.size(); }
+        // take the curve displacement (travel along the curve)
+        // and map that to a smoothed interpolated t value for sampling
+        // the spline.
+        float Reparametrize(float t) const noexcept;
 
-        // Get a spline control point at the given index.
-        // The index must be valid.
-        const auto& GetPoint(size_t i) const noexcept
-        { return base::SafeIndex(mPoints, i); }
+        auto GetError() const noexcept
+        { return mCatmullRom.get_error(); }
 
-        // Redefine a spline control point at the given index.
-        // The index must be valid.
-        void SetPoint(const SplinePoint& point, size_t index);
+        auto Evaluate(const float t) const
+        {
+            const auto max = mCatmullRom.max_parameter();
+            const auto& sample = mCatmullRom.evaluate(t * max);
+            return sample;
+        }
+        auto Tangent(const float t) const
+        {
+            const auto max = mCatmullRom.max_parameter();
+            const auto& sample = mCatmullRom.prime(t * max);
+            return sample;
+        }
 
-        // Append a new control point to the spline.
-        void AppendPoint(const SplinePoint& point);
+        auto GetArcLength() const noexcept
+        {
+            return CalcSplineArcLength(mCatmullRom, 0.0f, 1.0f);
+        }
 
-        void PrependPoint(const SplinePoint& point);
+        auto& GetFunction() const noexcept
+        {
+            return mCatmullRom;
+        }
 
-        // Erase a spline control point. The index must be valid.i
-        void ErasePoint(size_t index);
-
-        std::shared_ptr<const CatmullRomFunction> MakeCatmullRom() const;
-        std::shared_ptr<const PolyLineFunction> MakePolyLine() const;
-
-        std::size_t GetHash() const noexcept;
-        void IntoJson(data::Writer& data) const;
-        bool FromJson(const data::Reader& data);
-
-        static SplinePoint Evaluate(const CatmullRomFunction& spline, float t);
-        static SplinePoint Evaluate(const PolyLineFunction& spline, float t);
-
-        static double CalcArcLength(const CatmullRomFunction& spline, float threshold = 1e-4);
-        static double CalcArcLength(const CatmullRomFunction& spline, float t0, float t1, float threshold = 1e-4);
     private:
-        std::vector<SplinePoint> mPoints;
+        const SplineCatmullRomFunction mCatmullRom;
+        double mPathLength = 0.0f;
+        struct DisplacementMapping {
+            double d = 0.0f; // displacement along the  spline path
+            double t = 0.0f; // spline sampling t value at that point.
+        };
+        std::vector<DisplacementMapping> mDisplacementMappings;
+    };
+
+    class PolyLineSpline
+    {
+    public:
+        PolyLineSpline(std::vector<SplinePoint> points)
+            : mPolyline(std::move(points))
+        {}
+
+        auto Evaluate(const float t) const
+        {
+            return mPolyline.Interpolate(t);
+        }
+        auto Tangent(const float t) const
+        {
+            return mPolyline.FindTangent(t);
+        }
+
+        auto GetLineLength() const noexcept
+        {
+            return mPolyline.GetLineLength();
+        }
+
+        bool IsValid() const noexcept
+        {
+            return mPolyline.IsValid();
+        }
+
+        auto& GetFunction() const noexcept
+        {
+            return mPolyline;
+        }
     private:
+        SplinePolyLineFunction mPolyline;
     };
 
 } // namespace

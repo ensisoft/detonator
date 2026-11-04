@@ -143,6 +143,8 @@ add_executable(UnitTest
     ../game/scene.cpp
     ../game/scriptvar.cpp
     ../game/spline.cpp
+    ../game/curve_types.cpp
+    ../game/curve.cpp
     ../game/tilemap.cpp
     ../game/tilemap_layer.cpp
     ../game/tilemap_layer_class.cpp
@@ -321,6 +323,8 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/scene.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/scriptvar.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/spline.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/curve.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/curve_types.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap_layer.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap_layer_class.cpp

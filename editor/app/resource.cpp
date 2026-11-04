@@ -31,6 +31,7 @@
 
 #include "base/assert.h"
 #include "data/chunk.h"
+#include "game/curve.h"
 #include "game/timeline_animator.h"
 #include "game/timeline_animation.h"
 #include "game/timeline_animation_trigger.h"
@@ -897,6 +898,63 @@ std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::un
             animation_chunk->GetWriter()->AppendChunk("animators", std::move(actuator_meta_chunk));
         }
         chunk->OverwriteChunk("tracks", std::move(animation_chunk), i);
+    }
+
+    // spline mover used to own the spline points directly. now the points
+    // live in a curve class in the entity scope and the mover refers to the
+    // curve by the curve ID.
+    const auto num_nodes = chunk->GetReader()->GetNumChunks("nodes");
+    for (unsigned i=0; i<num_nodes; ++i)
+    {
+        auto node_chunk = chunk->GetReader()->GetChunk("nodes", i);
+        if (!node_chunk)
+            continue;
+        auto mover_chunk = node_chunk->GetReader()->GetChunk("spline_mover");
+        if (!mover_chunk)
+            continue;
+        // already migrated (or the mover has no old style spline data)
+        if (!mover_chunk->GetReader()->HasArray("spline_points"))
+            continue;
+
+        std::string node_name;
+        node_chunk->GetReader()->Read("name", &node_name);
+
+        // old point layout: x,y = position, z,w = look at.
+        game::CurveData curve_data;
+        const auto num_points = mover_chunk->GetReader()->GetNumItems("spline_points");
+        for (unsigned j=0; j<num_points; ++j)
+        {
+            const auto point_reader = mover_chunk->GetReader()->GetReadChunk("spline_points", j);
+            float x = 0.0f, y = 0.0f, z = 0.0f, w = 0.0f;
+            point_reader->Read("x", &x);
+            point_reader->Read("y", &y);
+            point_reader->Read("z", &z);
+            point_reader->Read("w", &w);
+            game::CurvePoint point;
+            point.SetPosition(game::Float3(x, y, 0.0f));
+            point.SetLookAt(game::Float3(z, w, 0.0f));
+            curve_data.AppendPoint(point);
+        }
+
+        std::string old_curve_type = "CatmullRom";
+        mover_chunk->GetReader()->Read("path-curve-type", &old_curve_type);
+
+        game::CurveClass curve(base::RandomString(10));
+        curve.SetName(node_name.empty() ? "Spline" : node_name + " Spline");
+        curve.SetCurve(std::move(curve_data));
+        curve.SetCurveType(old_curve_type == "Linear" ? game::CurveType::Polyline : game::CurveType::CatmullRom);
+
+        auto curve_chunk = chunk->GetWriter()->NewChunk();
+        curve.IntoJson(*curve_chunk->GetWriter());
+        chunk->GetWriter()->AppendChunk("curves", std::move(curve_chunk));
+
+        mover_chunk->GetWriter()->Write("curve-id", curve.GetClassId());
+        node_chunk->OverwriteChunk("spline_mover", std::move(mover_chunk));
+        chunk->OverwriteChunk("nodes", std::move(node_chunk), i);
+
+        if (log)
+            log->WriteLog(resource_id, resource_name, "EntityClass",
+                toString("Spline mover spline data of node '%1' migrated to curve '%2'.", node_name, curve.GetName()));
     }
     return chunk;
 }

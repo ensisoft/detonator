@@ -22,6 +22,18 @@
 
 namespace game {
 
+    enum class CurveType {
+        CatmullRom, Polyline
+    };
+
+    enum class CurveJointStyle {
+        Miter, Bevel, Round
+    };
+
+    enum class CurveEndCapStyle {
+        Square, Round, Butt
+    };
+
     enum class TileOcclusion : uint8_t {
         // warning, do not reorganize this enum
         // the order of the fields is used directly in sorting.

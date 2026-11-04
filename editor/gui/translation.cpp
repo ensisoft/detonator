@@ -386,11 +386,11 @@ std::string TranslateEnum(SplineMoverClass::PathCoordinateSpace mode)
     return "???";
 }
 
-std::string TranslateEnum(SplineMoverClass::PathCurveType type)
+std::string TranslateEnum(CurveClass::Type type)
 {
-    using T = SplineMoverClass::PathCurveType;
-    if (type == T::Linear)
-        return "Linear";
+    using T = CurveClass::Type;
+    if (type == T::Polyline)
+        return "Polyline";
     else if (type == T::CatmullRom)
         return "Catmull-Rom";
     else BUG("Missing translation");

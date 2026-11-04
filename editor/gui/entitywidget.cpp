@@ -42,6 +42,7 @@
 #include "base/math.h"
 #include "base/utility.h"
 #include "data/json.h"
+#include "game/curve.h"
 #include "game/treeop.h"
 #include "game/entity_class.h"
 #include "game/entity_node_linear_mover.h"
@@ -133,7 +134,7 @@ public:
         if (!success)
             return false;
 
-        auto point = mSpline->GetPoint(row);
+        auto point = mCurve->GetPoint(row);
         auto position = point.GetPosition();
         if (col == 0)
             position.x = value;
@@ -142,7 +143,7 @@ public:
 
         point.SetPosition(position);
 
-        mSpline->SetPoint(point, row);
+        mCurve->SetPoint(point, row);
 
         emit dataChanged(this->index(row, 0), this->index(row, 4));
         return true;
@@ -154,7 +155,7 @@ public:
         const auto col = static_cast<size_t>(index.column());
         if (role == Qt::DisplayRole)
         {
-            const auto& point = mSpline->GetPoint(row).GetPosition();
+            const auto& point = mCurve->GetPoint(row).GetPosition();
             if (col == 0)
                 return QString::number(point.x, 'f', 2);
             else if (col == 1)
@@ -175,8 +176,8 @@ public:
     }
     int rowCount(const QModelIndex&) const override
     {
-        if (mSpline)
-            return static_cast<int>(mSpline->GetPointCount());
+        if (mCurve)
+            return static_cast<int>(mCurve->GetPointCount());
 
         return 0;
     }
@@ -185,52 +186,65 @@ public:
         return 2;
     }
 
-    void UpdatePoint(const game::SplinePoint& point, size_t index)
+    void UpdatePoint(const game::CurvePoint& point, size_t index)
     {
         const auto row = static_cast<int>(index);
 
-        mSpline->SetPoint(point, index);
+        mCurve->SetPoint(point, index);
 
         emit dataChanged(this->index(row, 0), this->index(row, 4));
     }
-
-    void AppendPoint(const game::SplinePoint& point)
+    void UpdatePoint(const game::SplinePoint& point, size_t index)
     {
-        const auto first_index = mSpline->GetPointCount();
+        UpdatePoint(point.ToCurvePoint(), index);
+    }
+
+    void AppendPoint(const game::CurvePoint& point)
+    {
+        const auto first_index = mCurve->GetPointCount();
         const auto last_index = first_index + 1 - 1;
 
         beginInsertRows(QModelIndex(), static_cast<int>(first_index), static_cast<int>(last_index));
-        mSpline->AppendPoint(point);
+        mCurve->AppendPoint(point);
         endInsertRows();
     }
-    void PrependPoint(const game::SplinePoint& point)
+    void AppendPoint(const game::SplinePoint& point)
+    {
+        AppendPoint(point.ToCurvePoint());
+    }
+
+    void PrependPoint(const game::CurvePoint& point)
     {
         const auto first_index = 0;
         const auto last_index = 0;
 
         beginInsertRows(QModelIndex(), static_cast<int>(first_index), static_cast<int>(last_index));
-        mSpline->PrependPoint(point);
+        mCurve->PrependPoint(point);
         endInsertRows();
+    }
+    void PrependPoint(const game::SplinePoint& point)
+    {
+        PrependPoint(point.ToCurvePoint());
     }
 
     void ErasePoint(size_t index)
     {
         beginRemoveRows(QModelIndex(), static_cast<int>(index), static_cast<int>(index));
-        mSpline->ErasePoint(index);
+        mCurve->ErasePoint(index);
         endRemoveRows();
     }
 
-    void Reset(game::SplineMoverClass* spline = nullptr)
+    void Reset(game::CurveClass* curve = nullptr)
     {
-        if (spline == mSpline)
+        if (curve == mCurve)
             return;
 
         beginResetModel();
-        mSpline = spline;
+        mCurve = curve;
         endResetModel();
     }
 private:
-    game::SplineMoverClass* mSpline = nullptr;
+    game::CurveClass* mCurve = nullptr;
 };
 
 
@@ -713,11 +727,15 @@ private:
 class EntityWidget::SplineTool : public MouseTool
 {
 public:
-    explicit SplineTool(gui::EntityWidget::State& state, game::EntityNodeClass* node,
-                        game::SplineMoverClass* spline, size_t point_index)
+    explicit SplineTool(gui::EntityWidget::State& state,
+                        game::EntityNodeClass* node,
+                        game::SplineMoverClass* mover,
+                        game::CurveClass* curve,
+                        size_t point_index)
       : mState(state)
       , mNode(node)
-      , mSpline(spline)
+      , mMover(mover)
+      , mCurve(curve)
       , mIndex(point_index)
     {}
     void Render(gfx::Painter& window_painter, gfx::Painter& entity_painter) const override
@@ -725,7 +743,7 @@ public:
         if (mPlacePoint)
         {
             const auto* parent = mState.entity->FindNodeParent(mNode);
-            const auto& mode = mSpline->GetPathCoordinateSpace();
+            const auto& mode = mMover->GetPathCoordinateSpace();
 
             const game::EntityNodeClass* coordinate_reference_node = nullptr;
             if (mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
@@ -734,7 +752,7 @@ public:
                 coordinate_reference_node = mNode;
             else BUG("Bug on spline path mode.");
 
-            const auto& spline_local_point = mSpline->GetPathRelativePoint(mIndex).GetPosition();
+            const auto& spline_local_point = mMover->GetPathRelativePoint(*mCurve, mIndex).GetPosition();
             const auto& spline_world_point = mState.entity->MapCoordsFromNode(spline_local_point, coordinate_reference_node);
             const auto& mouse_world_point  = mState.entity->MapCoordsFromNode(mMousePosLocal, coordinate_reference_node);
             DrawLine(entity_painter, spline_world_point, mouse_world_point);
@@ -743,7 +761,7 @@ public:
     void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
         const auto parent_node = mState.entity->FindNodeParent(mNode);
-        const auto spline_path_mode = mSpline->GetPathCoordinateSpace();
+        const auto spline_path_mode = mMover->GetPathCoordinateSpace();
         if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Local && mIndex == 0)
             return;
 
@@ -760,12 +778,12 @@ public:
 
         if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
         {
-            offset = mSpline->GetPoint(0).GetPosition().ToVec2();
+            offset = mMover->GetPoint(*mCurve, 0).GetPosition().ToVec2();
         }
 
         if (mickey.TestModKey(Qt::KeyboardModifier::ShiftModifier))
         {
-            const auto last_index = mSpline->GetPointCount() - 1;
+            const auto last_index = mCurve->GetPointCount() - 1;
             if ((mIndex == 0 && spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent) ||
                     (mIndex == last_index))
                 mPlacePoint = true;
@@ -773,7 +791,7 @@ public:
 
         if (!mPlacePoint)
         {
-            auto p = mSpline->GetPoint(mIndex);
+            auto p = mMover->GetPoint(*mCurve, mIndex);
             p.SetPosition(mMousePosLocal + offset);
             mState.spline_model->UpdatePoint(p, mIndex);
         }
@@ -786,8 +804,8 @@ public:
         if (mPlacePoint)
         {
             const auto parent_node = mState.entity->FindNodeParent(mNode);
-            const auto path_mode  = mSpline->GetPathCoordinateSpace();
-            const auto last_index = mSpline->GetPointCount() - 1;
+            const auto path_mode  = mMover->GetPathCoordinateSpace();
+            const auto last_index = mCurve->GetPointCount() - 1;
 
             const game::EntityNodeClass* coordinate_reference_node = nullptr;
             if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
@@ -799,9 +817,8 @@ public:
             glm::vec2 offset;
             if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
             {
-                offset = mSpline->GetPoint(0).GetPosition().ToVec2();
+                offset = mMover->GetPoint(*mCurve, 0).GetPosition().ToVec2();
             }
-
 
             if (mIndex == 0)
             {
@@ -821,7 +838,8 @@ public:
 private:
     EntityWidget::State& mState;
     game::EntityNodeClass* mNode = nullptr;
-    game::SplineMoverClass* mSpline = nullptr;
+    game::SplineMoverClass* mMover = nullptr;
+    game::CurveClass* mCurve = nullptr;
     std::size_t mIndex = 0;
     glm::vec2 mMousePosLocal = {0.0f, 0.0f};
     bool mPlacePoint = false;
@@ -1618,7 +1636,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::BasicLightClass::LightType>(mUI.ltType);
     PopulateFromEnum<game::TileOcclusion>(mUI.nodeTileOcclusion);
     PopulateFromEnum<game::SplineMoverClass::PathCoordinateSpace>(mUI.splineCoordSpace);
-    PopulateFromEnum<game::SplineMoverClass::PathCurveType>(mUI.splineCurveType);
+    PopulateFromEnum<game::CurveClass::Type>(mUI.splineCurveType);
     PopulateFromEnum<game::SplineMoverClass::RotationMode>(mUI.splineRotation);
     PopulateFromEnum<game::SplineMoverClass::IterationMode>(mUI.splineLooping);
     PopulateFromEnum<game::MeshEffectClass::EffectType>(mUI.meshEffectType);
@@ -2068,6 +2086,17 @@ void EntityWidget::Cut(Clipboard& clipboard)
         const auto& tree = mState.entity->GetRenderTree();
         game::RenderTreeIntoJson(tree, [this, &clipboard](data::Writer& data, const auto* node) {
             node->IntoJson(data);
+
+            if (const auto* mover = node->GetSplineMover())
+            {
+                const auto& curveId = mover->GetCurveId();
+                const auto* curve = mState.entity->FindCurveById(curveId);
+                ASSERT(curve);
+                auto curve_chunk = data.NewWriteChunk();
+                curve->IntoJson(*curve_chunk);
+                data.Write("mover-curve", std::move(curve_chunk));
+            }
+
             if (const auto* comment = base::SafeFind(mComments, node->GetId()))
                 clipboard.SetProperty("comment_" + node->GetId(), *comment);
             mComments.erase(node->GetId());
@@ -2092,6 +2121,17 @@ void EntityWidget::Copy(Clipboard& clipboard) const
         const auto& tree = mState.entity->GetRenderTree();
         game::RenderTreeIntoJson(tree, [this, &clipboard](data::Writer& data, const auto* node) {
             node->IntoJson(data);
+
+            if (const auto* mover = node->GetSplineMover())
+            {
+                const auto& curveId = mover->GetCurveId();
+                const auto* curve = mState.entity->FindCurveById(curveId);
+                ASSERT(curve);
+                auto curve_chunk = data.NewWriteChunk();
+                curve->IntoJson(*curve_chunk);
+                data.Write("mover-curve", std::move(curve_chunk));
+            }
+
             if (const auto* comment = base::SafeFind(mComments, node->GetId()))
                 clipboard.SetProperty("comment_" + node->GetId(), *comment);
         }, json, node);
@@ -2129,9 +2169,11 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     std::vector<std::unique_ptr<game::EntityNodeClass>> nodes;
     std::unordered_map<std::string, QString> comments;
 
+    std::vector<game::CurveClass> curves;
+
     bool error = false;
     game::EntityClass::RenderTree tree;
-    game::RenderTreeFromJson(tree, [&nodes, &error, &comments, &clipboard](const data::Reader& data) {
+    game::RenderTreeFromJson(tree, [&nodes, &error, &comments, &curves, &clipboard](const data::Reader& data) {
 
         game::EntityNodeClass ret;
         if (ret.FromJson(data))
@@ -2142,6 +2184,23 @@ void EntityWidget::Paste(const Clipboard& clipboard)
             QString comment;
             if (clipboard.GetProperty("comment_" + ret.GetId(), &comment))
                 comments[node->GetId()] = comment;
+
+            if (auto* mover = node->GetSplineMover())
+            {
+                const auto& mover_curve_chunk = data.GetReadChunk("mover-curve");
+                ASSERT(mover_curve_chunk);
+
+                // use a temp curve to read the JSON and then create a copy
+                // with a new unique CurveID
+                game::CurveClass temp_curve;
+                if (!temp_curve.FromJson(*mover_curve_chunk))
+                    error = true;
+
+                game::CurveClass curve(temp_curve, base::RandomString(10));
+
+                mover->SetCurveId(curve.GetClassId());
+                curves.push_back(std::move(curve));
+            }
 
             nodes.push_back(std::move(node));
             return nodes.back().get();
@@ -2177,6 +2236,12 @@ void EntityWidget::Paste(const Clipboard& clipboard)
         // thus the tree is still valid!
         mState.entity->AddNode(std::move(node));
     }
+
+    for (auto& curve : curves)
+    {
+        mState.entity->AddCurve(std::move(curve));
+    }
+
     nodes.clear();
     // walk the tree and link the nodes into the scene.
     tree.PreOrderTraverseForEach([this, &tree](game::EntityNodeClass* node) {
@@ -4552,9 +4617,13 @@ void EntityWidget::ToggleSplineMover(bool on)
     {
         if (on && !node->HasSplineMover())
         {
+            game::CurveClass curve;
+            curve.SetName(base::FormatString("%1 Spline", node->GetName()));
+
             game::SplineMoverClass mover;
             mover.SetPathCoordinateSpace(game::SplineMoverClass::PathCoordinateSpace::Parent);
             mover.SetSpeed(100.0f);
+            mover.SetCurveId(curve.GetClassId());
 
             glm::vec2 point = {-200.0f, 0.0f};
             for(unsigned i=0; i<=4; ++i)
@@ -4562,11 +4631,13 @@ void EntityWidget::ToggleSplineMover(bool on)
                 game::SplinePoint p;
                 p.SetPosition(point);
 
-                mover.AppendPoint(p);
+                curve.AppendPoint(p.ToCurvePoint());
                 point += glm::vec2{100.0f, 0.0f};
             }
 
             node->SetSplineMover(mover);
+
+            mState.entity->AddCurve(std::move(curve));
 
             ScrollEntityNodeArea();
 
@@ -4574,7 +4645,11 @@ void EntityWidget::ToggleSplineMover(bool on)
         }
         else if (!on && node->HasSplineMover())
         {
+            const auto curveId = node->GetSplineMover()->GetCurveId();
+
             node->RemoveSplineMover();
+
+            mState.entity->DeleteCurveById(curveId);
         }
         DisplayCurrentNodeProperties();
 
@@ -5140,10 +5215,12 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
                 entity_painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
             }
         }
-        if (const auto* spline = node->GetSplineMover())
+        if (const auto* mover = node->GetSplineMover())
         {
             const auto* parent = mState.entity->FindNodeParent(node);
-            const auto& mode = spline->GetPathCoordinateSpace();
+            const auto* curve = mState.entity->FindCurveById(mover->GetCurveId());
+            const auto& mode = mover->GetPathCoordinateSpace();
+            ASSERT(curve);
 
             const game::EntityNodeClass* coordinate_reference_node = nullptr;
             if (mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
@@ -5152,12 +5229,12 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
                 coordinate_reference_node = node;
             else BUG("Bug on spline path mode.");
 
-            DrawSpline(entity_painter, spline, coordinate_reference_node, *mState.entity);
+            DrawSpline(entity_painter, curve, mover, coordinate_reference_node, *mState.entity);
 
-            for (int i=0; i<spline->GetPointCount(); ++i)
+            for (int i=0; i<curve->GetPointCount(); ++i)
             {
                 const auto selected_row = GetSelectedRow(mUI.splinePointView);
-                const auto& spline_local_point = spline->GetPathRelativePoint(i).GetPosition();
+                const auto& spline_local_point = mover->GetPathRelativePoint(*curve, i).GetPosition();
                 const auto& spline_world_point = mState.entity->MapCoordsFromNode(spline_local_point, coordinate_reference_node);
 
                 DrawSplineControlPoint(entity_painter, spline_world_point, selected_row == i);
@@ -5313,11 +5390,14 @@ void EntityWidget::MousePress(QMouseEvent* event)
 
         if (auto* current = GetCurrentNode())
         {
-            if (auto* spline = current->GetSplineMover())
+            if (auto* mover = current->GetSplineMover())
             {
                 const auto* parent_node = mState.entity->FindNodeParent(current);
-                const auto spline_path_mode = spline->GetPathCoordinateSpace();
+                const auto spline_path_mode = mover->GetPathCoordinateSpace();
                 const game::EntityNodeClass* coordinate_reference_node = nullptr;
+
+                auto* curve = mState.entity->FindCurveById(mover->GetCurveId());
+                ASSERT(curve);
 
                 if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
                     coordinate_reference_node = parent_node;
@@ -5325,9 +5405,9 @@ void EntityWidget::MousePress(QMouseEvent* event)
                     coordinate_reference_node = current;
                 else BUG("Bug on spline path mode.");
 
-                for (size_t i=0; i<spline->GetPointCount(); ++i)
+                for (size_t i=0; i<curve->GetPointCount(); ++i)
                 {
-                    const auto& spline_local_point = spline->GetPathRelativePoint(i).GetPosition();
+                    const auto& spline_local_point = mover->GetPathRelativePoint(*curve, i).GetPosition();
                     const auto& spline_world_point = mState.entity->MapCoordsFromNode(spline_local_point, coordinate_reference_node);
                     gfx::FRect box;
                     box.Resize(20.0f, 20.0f);
@@ -5335,7 +5415,7 @@ void EntityWidget::MousePress(QMouseEvent* event)
                     box.Translate(-10.0f, -10.0f);
                     if (box.TestPoint(mickey.MapToPlane()))
                     {
-                        mCurrentTool = std::make_unique<SplineTool>(mState, current, spline, i);
+                        mCurrentTool = std::make_unique<SplineTool>(mState, current, mover, curve, i);
                         SelectRow(mUI.splinePointView, i);
                         break;
                     }
@@ -5571,11 +5651,14 @@ bool EntityWidget::KeyPress(QKeyEvent* event)
         case Qt::Key_Delete:
             if (auto* node = GetCurrentNode())
             {
-                auto* spline = node->GetSplineMover();
-                const int spline_point_index = spline ? GetSelectedRow(mUI.splinePointView) : -1;
-                if (spline && spline_point_index != -1)
+                const auto* mover = node->GetSplineMover();
+
+                const int spline_point_index = mover ? GetSelectedRow(mUI.splinePointView) : -1;
+                if (mover && spline_point_index != -1)
                 {
-                    const auto spline_point_count = spline->GetPointCount();
+                    auto* curve = mState.entity->FindCurveById(mover->GetCurveId());
+                    ASSERT(curve);
+                    const auto spline_point_count = curve->GetPointCount();
                     if (spline_point_count > 4)
                         mSplineModel->ErasePoint(spline_point_index);
                     else NOTE("Spline needs a minimum of 4 control points.");
@@ -5783,7 +5866,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeMapLayer, 0);
     SetValue(mUI.nodeTileOcclusion, game::TileOcclusion::None);
     SetValue(mUI.splineCoordSpace, game::SplineMoverClass::PathCoordinateSpace::Parent);
-    SetValue(mUI.splineCurveType, game::SplineMoverClass::PathCurveType::CatmullRom);
+    SetValue(mUI.splineCurveType, game::CurveClass::Type::CatmullRom);
     SetValue(mUI.splineRotation, game::SplineMoverClass::RotationMode::ApplySplineRotation);
     SetValue(mUI.splineLooping, game::SplineMoverClass::IterationMode::Once);
     SetValue(mUI.splineSpeed, 0.0f);
@@ -6017,16 +6100,19 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (auto* mover = node->GetSplineMover())
         {
+            auto* curve = mState.entity->FindCurveById(mover->GetCurveId());
+            ASSERT(curve);
+
             SetEnabled(mUI.actionAddSplineMover, false);
             SetVisible(mUI.splineMover, true);
             SetValue(mUI.splineCoordSpace, mover->GetPathCoordinateSpace());
-            SetValue(mUI.splineCurveType, mover->GetPathCurveType());
+            SetValue(mUI.splineCurveType, curve->GetCurveType());
             SetValue(mUI.splineRotation, mover->GetRotationMode());
             SetValue(mUI.splineLooping, mover->GetIterationMode());
             SetValue(mUI.splineSpeed, mover->GetSpeed());
             SetValue(mUI.splineAcceleration, mover->GetAcceleration());
             SetValue(mUI.splineFlagEnabled, mover->IsEnabled());
-            mSplineModel->Reset(mover);
+            mSplineModel->Reset(curve);
         }
 
         if (const auto* light = node->GetBasicLight())
@@ -6272,8 +6358,11 @@ void EntityWidget::UpdateCurrentNodeProperties()
 
     if (auto* mover = node->GetSplineMover())
     {
+        auto* curve = mState.entity->FindCurveById(mover->GetCurveId());
+        ASSERT(curve);
+
         mover->SetPathCoordinateSpace(GetValue(mUI.splineCoordSpace));
-        mover->SetPathCurveType(GetValue(mUI.splineCurveType));
+        curve->SetCurveType(GetValue(mUI.splineCurveType));
         mover->SetRotationMode(GetValue(mUI.splineRotation));
         mover->SetIterationMode(GetValue(mUI.splineLooping));
         mover->SetSpeed(GetValue(mUI.splineSpeed));
