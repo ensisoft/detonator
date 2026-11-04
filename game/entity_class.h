@@ -38,6 +38,7 @@
 namespace game
 {
     class AnimationClass;
+    class CurveClass;
     class EntityStateControllerClass;
     class ScriptVar;
 
@@ -140,6 +141,28 @@ namespace game
 
         // Discover and list currently invalid joints.
         void FindInvalidJoints(std::vector<PhysicsJoint*>* invalid);
+
+        // Curves are entity specific (logical and/or visual) curves that can
+        // be referred to by entity node attachments such as the drawable
+        // item and the spline mover.
+
+        CurveClass* AddCurve(const CurveClass& curve);
+        CurveClass* AddCurve(CurveClass&& curve);
+
+        // Respecify the details of a curve at the given index.
+        void SetCurve(size_t index, const CurveClass& curve);
+        void SetCurve(size_t index, CurveClass&& curve);
+
+        CurveClass& GetCurve(size_t index);
+        CurveClass* FindCurveById(const std::string& id);
+        CurveClass* FindCurveByName(const std::string& name);
+
+        const CurveClass& GetCurve(size_t index) const;
+        const CurveClass* FindCurveById(const std::string& id) const;
+        const CurveClass* FindCurveByName(const std::string& name) const;
+
+        void DeleteCurve(size_t index);
+        void DeleteCurveById(const std::string& id);
 
         // Add a new entity animation track. Animations change the entity
         // node properties over time in order to produce motion or visual
@@ -376,6 +399,9 @@ namespace game
         inline auto GetNumJoints() const noexcept
         { return mJoints.size(); }
 
+        inline auto GetNumCurves() const noexcept
+        { return mCurves.size(); }
+
         // Get the unique class ID.
         inline const auto& GetId() const noexcept
         { return mClassId; }
@@ -422,6 +448,8 @@ namespace game
         { return std::shared_ptr<const ScriptVar>(mScriptVars[index]); }
         inline auto GetSharedJoint(size_t index) const noexcept
         { return std::shared_ptr<const PhysicsJoint>(mJoints[index]); }
+        inline auto GetSharedCurve(size_t index) const noexcept
+        { return std::shared_ptr<const CurveClass>(mCurves[index]); }
         inline auto GetSharedEntityControllerClass() const noexcept
         { return std::shared_ptr<const EntityStateControllerClass>(mStateController); }
 
@@ -479,6 +507,8 @@ namespace game
         std::vector<std::shared_ptr<EntityNodeClass>> mNodes;
         // the list of joints that belong to this entity.
         std::vector<std::shared_ptr<PhysicsJoint>> mJoints;
+        // entity curves (both logical and visual) if any.
+        std::vector<std::shared_ptr<CurveClass>> mCurves;
         // entity state controller if any.
         std::shared_ptr<EntityStateControllerClass> mStateController;
         // The render tree for hierarchical traversal and

@@ -348,6 +348,8 @@ add_library(GfxLib
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
 add_library(GameLib
+    game/curve.cpp
+    game/curve_types.cpp
     game/timeline_animation.cpp
     game/timeline_animator.cpp
     game/entity.cpp
