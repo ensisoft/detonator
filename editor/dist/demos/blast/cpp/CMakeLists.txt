@@ -26,6 +26,10 @@ else()
     install(TARGETS BlastEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 endif()
 
+# simplify project loading by having the debug library hame have
+# the same name as the release engine library.
+set_target_properties(BlastEngine PROPERTIES DEBUG_POSTFIX "")
+
 target_include_directories(BlastEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 target_include_directories(BlastEngine PRIVATE "${ENGINE_INC}")
 target_compile_definitions(BlastEngine PRIVATE "${ENGINE_DEF}")
