@@ -90,6 +90,7 @@ std::size_t CurveData::GetHash() const noexcept
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mPoints);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
@@ -101,6 +102,7 @@ void CurveData::IntoJson(data::Writer& data) const
         point.IntoJson(*chunk);
         data.AppendChunk("curve-points", std::move(chunk));
     }
+    data.Write("curve-data-flags", mFlags);
 }
 bool CurveData::FromJson(const data::Reader& data)
 {
@@ -113,6 +115,7 @@ bool CurveData::FromJson(const data::Reader& data)
         ok &= point.FromJson(*chunk);
         mPoints.push_back(point);
     }
+    ok &= data.Read("curve-data-flags", &mFlags);
     return ok;
 }
 

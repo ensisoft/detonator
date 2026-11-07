@@ -100,11 +100,13 @@ namespace game
         EntityNodeClass* FindNodeByName(const std::string& name);
         EntityNodeClass* FindNodeById(const std::string& id);
         EntityNodeClass* FindNodeParent(const EntityNodeClass* node);
+        EntityNodeClass* FindCurveOwner(const CurveClass* curve);
 
         const EntityNodeClass& GetNode(size_t index) const;
         const EntityNodeClass* FindNodeByName(const std::string& name) const;
         const EntityNodeClass* FindNodeById(const std::string& id) const;
         const EntityNodeClass* FindNodeParent(const EntityNodeClass* node) const;
+        const EntityNodeClass* FindCurveOwner(const CurveClass* curve) const;
 
         // PhysicsJoint connects between two rigid bodies and specifies a constraint
         // to the physics engine to alter their movement/motion relative to each other.
@@ -138,6 +140,8 @@ namespace game
         // or that no longer have a rigid body to which the fixture can
         // attach to.
         void DeleteInvalidFixtures();
+
+        void DeleteStaleCurves();
 
         // Discover and list currently invalid joints.
         void FindInvalidJoints(std::vector<PhysicsJoint*>* invalid);

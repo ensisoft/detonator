@@ -52,6 +52,7 @@
 #include "data/json.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
+#include "graphics/curve.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
@@ -789,6 +790,10 @@ ContentLoaderImpl::ContentLoaderImpl()
         mMaterials["_" + color_name] = ret;
     }
 
+    std::vector<gfx::CurvePoint> curve_points = {
+        {0.1f, -0.5f}, {0.3f, -0.15f}, {0.5f, -0.5f}, {0.7f, -0.85f}, {0.9f, -0.5f}
+    };
+
     // these are the current primitive cases that are not packed as part of the resources
     mDrawables["_rect"]               = std::make_shared<gfx::RectangleClass>("_rect");
     mDrawables["_isosceles_triangle"] = std::make_shared<gfx::IsoscelesTriangleClass>("_isosceles_triangle");
@@ -809,6 +814,7 @@ ContentLoaderImpl::ContentLoaderImpl()
     mDrawables["_cylinder"]           = std::make_shared<gfx::CylinderClass>("_cylinder", "", 100);
     mDrawables["_pyramid"]            = std::make_shared<gfx::PyramidClass>("_pyramid");
     mDrawables["_sphere"]             = std::make_shared<gfx::SphereClass>("_sphere", "", 100);
+    mDrawables["_curve"]              = std::make_shared<gfx::CurveClass>("_curve", "", std::move(curve_points));
 }
 
 ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassById(const std::string& id) const

@@ -95,6 +95,8 @@ namespace game
         { mDrawableId = klass; }
         void SetMaterialId(const std::string& klass)
         { mMaterialId = klass; }
+        void SetCurveId(std::string id) noexcept
+        { mCurveId = std::move(id); }
         void SetLayer(int layer) noexcept
         { mLayer = layer; }
         void ResetMaterial() noexcept
@@ -104,6 +106,8 @@ namespace game
         }
         void ResetDrawable() noexcept
         { mDrawableId.clear(); }
+        void ResetCurve() noexcept
+        { mCurveId.clear(); }
         void SetFlag(Flags flag, bool on_off) noexcept
         { mBitFlags.set(flag, on_off); }
         void SetRenderPass(RenderPass pass) noexcept
@@ -130,6 +134,10 @@ namespace game
         { return mDrawableId; }
         const std::string& GetMaterialId() const noexcept
         { return mMaterialId; }
+        const std::string& GetCurveId() const noexcept
+        { return mCurveId; }
+        bool HasCurve() const noexcept
+        { return !mCurveId.empty(); }
         int GetLayer() const noexcept
         { return mLayer; }
         float GetTimeScale() const noexcept
@@ -200,6 +208,9 @@ namespace game
         std::string mMaterialId;
         // class id of the drawable shape.
         std::string mDrawableId;
+        // id of the (entity class) curve that is used to produce the
+        // drawable geometry when the item is a curve drawable.
+        std::string mCurveId;
         // the layer in which this node should be drawn.
         int mLayer = 0;
         // scaler value for changing the time delta values
@@ -263,15 +274,19 @@ namespace game
         { mTimeAdjustment.reset(); }
         void AdjustMaterialTime(double time) noexcept
         { mTimeAdjustment = time; }
-        const std::string& GetMaterialId() const noexcept
+        const auto& GetMaterialId() const noexcept
         { return mMaterialId; }
-        const std::string& GetDrawableId() const noexcept
+        const auto& GetDrawableId() const noexcept
         { return mClass->GetDrawableId(); }
-        int GetLayer() const noexcept
+        const auto& GetCurveId() const noexcept
+        { return mClass->GetCurveId(); }
+        auto GetLayer() const noexcept
         { return mClass->GetLayer(); }
-        RenderPass GetRenderPass() const noexcept
+        auto HasCurve() const noexcept
+        { return mClass->HasCurve(); }
+        auto GetRenderPass() const noexcept
         { return mClass->GetRenderPass(); }
-        CoordinateSpace GetCoordinateSpace() const noexcept
+        auto GetCoordinateSpace() const noexcept
         { return mClass->GetCoordinateSpace(); }
         auto GetRenderRotation() const noexcept
         { return mInstanceRotator; }

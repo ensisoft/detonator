@@ -28,6 +28,8 @@
 #include "game/timeline_property_animator.h"
 #include "game/scriptvar.h"
 #include "game/entity_class.h"
+
+#include "entity_node_drawable_item.h"
 #include "game/entity_state_controller.h"
 #include "game/entity_node.h"
 #include "game/entity_node_fixture.h"
@@ -296,14 +298,33 @@ void EntityClass::DeleteCurveById(const std::string& id)
         if ((*it)->GetClassId() == id)
         {
             mCurves.erase(it);
-            return;
+            break;
+        }
+    }
+    for (auto& node : mNodes)
+    {
+        if (auto* draw = node->GetDrawable())
+        {
+            if (draw->GetCurveId() == id)
+                draw->ResetCurve();
         }
     }
 }
 
 void EntityClass::DeleteCurve(size_t index)
 {
+    const auto curveId = mCurves[index]->GetClassId();
+
     base::SafeErase(mCurves, index);
+
+    for (auto& node : mNodes)
+    {
+        if (auto* draw = node->GetDrawable())
+        {
+            if (draw->GetCurveId() == curveId)
+                draw->ResetCurve();
+        }
+    }
 }
 
 void EntityClass::DeleteInvalidJoints()
@@ -351,6 +372,31 @@ void EntityClass::DeleteInvalidFixtures()
     }
 }
 
+void EntityClass::DeleteStaleCurves()
+{
+    // a curve can be owned by either drawable or a mover.
+    // in either case if nothing is referring to it then
+    // it can be deleted.
+
+    base::EraseRemove(mCurves, [this](const auto& curve) {
+        for (const auto& node : mNodes)
+        {
+            if (const auto* draw = node->GetDrawable())
+            {
+                if (draw->GetCurveId() == curve->GetClassId())
+                    return false;
+            }
+            if (const auto* mover = node->GetSplineMover())
+            {
+                if (mover->GetCurveId() == curve->GetClassId())
+                    return false;
+            }
+        }
+        DEBUG("Deleting stale curve '%1'", curve->GetName());
+        return true;
+    });
+}
+
 EntityNodeClass& EntityClass::GetNode(size_t index)
 {
     ASSERT(index < mNodes.size());
@@ -376,6 +422,32 @@ EntityNodeClass* EntityClass::FindNodeParent(const EntityNodeClass* node)
     return mRenderTree.GetParent(node);
 }
 
+EntityNodeClass *EntityClass::FindCurveOwner(const CurveClass* curve)
+{
+    for (const auto& node : mNodes)
+    {
+        if (auto* mover = node->GetSplineMover())
+        {
+            if (mover->GetCurveId() == curve->GetClassId())
+                return node.get();
+        }
+    }
+    // if not a single spline mover owns the curve then one of the
+    // drawables should be the owner.. Note that if there are multiple
+    // drawables that point to the same curve then we don't  really
+    // know which would be considered the owner. We try to handle this
+    // situation in the editor and not let the user share drawable curves.
+    for (const auto& node : mNodes)
+    {
+        if (auto* draw = node->GetDrawable(); draw && draw->HasCurve())
+        {
+            if (draw->GetCurveId() == curve->GetClassId())
+                return node.get();
+        }
+    }
+    return nullptr;
+}
+
 const EntityNodeClass& EntityClass::GetNode(size_t index) const
 {
     ASSERT(index < mNodes.size());
@@ -399,6 +471,32 @@ const EntityNodeClass* EntityClass::FindNodeById(const std::string& id) const
 const EntityNodeClass* EntityClass::FindNodeParent(const EntityNodeClass* node) const
 {
     return mRenderTree.GetParent(node);
+}
+
+ const EntityNodeClass *EntityClass::FindCurveOwner(const CurveClass* curve) const
+{
+    for (const auto& node : mNodes)
+    {
+        if (auto* mover = node->GetSplineMover())
+        {
+            if (mover->GetCurveId() == curve->GetClassId())
+                return node.get();
+        }
+    }
+    // if not a single spline mover owns the curve then one of the
+    // drawables should be the owner.. Note that if there are multiple
+    // drawables that point to the same curve then we don't  really
+    // know which would be considered the owner. We try to handle this
+    // situation in the editor and not let the user share drawable curves.
+    for (const auto& node : mNodes)
+    {
+        if (auto* draw = node->GetDrawable(); draw && draw->HasCurve())
+        {
+            if (draw->GetCurveId() == curve->GetClassId())
+                return node.get();
+        }
+    }
+    return nullptr;
 }
 
 AnimationClass* EntityClass::AddAnimation(AnimationClass&& track)
@@ -501,6 +599,23 @@ void EntityClass::ReparentChild(EntityNodeClass* parent, EntityNodeClass* child,
 
 void EntityClass::DeleteNode(EntityNodeClass* node)
 {
+    std::unordered_set<std::string> dead_curves;
+
+    mRenderTree.PreOrderTraverseForEach([this, &dead_curves](EntityNodeClass* node) {
+        if (!node)
+            return;
+        if (const auto* mover = node->GetSplineMover()) {
+            // spline mover always owns a curve.
+            dead_curves.insert(mover->GetCurveId());
+        } else if (const auto* draw = node->GetDrawable(); draw && draw->HasCurve()) {
+            // drawable may refer to a curve owned by a spline mover
+            // or then it owns its own curve.
+            const auto* curve = FindCurveById(draw->GetCurveId());
+            if (curve->GetCurveSource() == CurveClass::CurveSource::Drawable)
+                dead_curves.insert(curve->GetClassId());
+        }
+    }, node);
+
     // Erase joints that refer to this node in order to maintain
     // the invariant that the joints are always valid.
     mJoints.erase(std::remove_if(mJoints.begin(), mJoints.end(),
@@ -511,18 +626,21 @@ void EntityClass::DeleteNode(EntityNodeClass* node)
     game::DeleteNode(mRenderTree, node, mNodes);
 
     // delete curves that are no longer used.
-    base::EraseRemove(mCurves, [this](const auto& curve) {
-        const auto id = curve->GetClassId();
-        for (const auto& node : mNodes)
-        {
-            if (const auto* mover = node->GetSplineMover())
-            {
-                if (mover->GetCurveId() == id)
-                    return false;
-            }
-        }
-        return true;
+    base::EraseRemove(mCurves, [&dead_curves](const auto& curve) {
+        return base::Contains(dead_curves, curve->GetClassId());
     });
+
+    // reset any potentially dangling curve reference in a
+    // drawable attachment
+
+    for (auto& node : mNodes)
+    {
+        if (auto* draw = node->GetDrawable())
+        {
+            if (base::Contains(dead_curves, draw->GetCurveId()))
+                draw->ResetCurve();
+        }
+    }
 }
 
 EntityNodeClass* EntityClass::DuplicateNode(const EntityNodeClass* node)
@@ -538,8 +656,22 @@ EntityNodeClass* EntityClass::DuplicateNode(const EntityNodeClass* node)
             const auto* curve = FindCurveById(curveId);
             ASSERT(curve);
             auto dupe_curve = std::make_shared<CurveClass>(*curve, base::RandomString(10));
+            dupe_curve->SetCurveSource(CurveClass::CurveSource::SplineMover);
             mover->SetCurveId(dupe_curve->GetClassId());
             mCurves.push_back(std::move(dupe_curve));
+        }
+        if (auto* draw = clone->GetDrawable(); draw && draw->HasCurve())
+        {
+            const auto curveId = draw->GetCurveId();
+            const auto* curve = FindCurveById(curveId);
+            ASSERT(curve);
+            if  (curve->GetCurveSource() == CurveClass::CurveSource::Drawable)
+            {
+                auto dupe_curve = std::make_shared<CurveClass>(*curve, base::RandomString(10));
+                dupe_curve->SetCurveSource(CurveClass::CurveSource::Drawable);
+                draw->SetCurveId(dupe_curve->GetClassId());
+                mCurves.push_back(std::move(dupe_curve));
+            }
         }
         mNodes.push_back(std::move(clone));
     }
@@ -1002,6 +1134,11 @@ EntityClass EntityClass::Clone() const
             {
                 if (mover->GetCurveId() == curve->GetClassId())
                     mover->SetCurveId(clone->GetClassId());
+            }
+            if (auto* draw = node->GetDrawable(); draw && draw->HasCurve())
+            {
+                if (draw->GetCurveId() == curve->GetClassId())
+                    draw->SetCurveId(clone->GetClassId());
             }
         }
 

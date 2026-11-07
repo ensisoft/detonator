@@ -117,6 +117,7 @@ namespace gui
         void on_actionNewTrapezoid_triggered();
         void on_actionNewHorizontalCapsule_triggered();
         void on_actionNewVerticalCapsule_triggered();
+        void on_actionNewCurve_triggered();
         void on_actionNewParallelogram_triggered();
         void on_actionNewAmbientLight_triggered();
         void on_actionNewDirectionalLight_triggered();
@@ -188,6 +189,7 @@ namespace gui
         void on_btnSetMaterialParams_clicked();
         void on_btnEditDrawable_clicked();
         void on_btnEditMaterial_clicked();
+        void on_dsCurveParams_clicked();
         void on_btnMoreViewportSettings_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
@@ -207,6 +209,7 @@ namespace gui
         void on_nodeMinus90_clicked();
         void on_dsDrawable_currentIndexChanged(const QString& name);
         void on_dsMaterial_currentIndexChanged(const QString& name);
+        void on_dsCurve_currentIndexChanged(const QString& name);
         void on_dsRenderPass_currentIndexChanged(const QString&);
         void on_dsCoordinateSpace_currentIndexChanged(int);
         void on_dsLayer_valueChanged(int layer);

@@ -397,6 +397,32 @@ std::string TranslateEnum(CurveClass::Type type)
     return "???";
 }
 
+std::string TranslateEnum(CurveJointStyle style)
+{
+    using S = CurveJointStyle;
+    if (style == S::Miter)
+        return "Miter";
+    else if (style == S::Bevel)
+        return "Bevel";
+    else if (style == S::Round)
+        return "Round";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(CurveEndCapStyle style)
+{
+    using S = CurveEndCapStyle;
+    if (style == S::Square)
+        return "Square";
+    else if (style == S::Round)
+        return "Round";
+    else if (style == S::Butt)
+        return "Butt";
+    else BUG("Missing translation");
+    return "???";
+}
+
 std::string TranslateEnum(SplineMoverClass::RotationMode mode)
 {
     using M = SplineMoverClass::RotationMode;
