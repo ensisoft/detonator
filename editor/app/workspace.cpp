@@ -53,6 +53,7 @@
 #include "engine/data.h"
 #include "data/json.h"
 #include "base/json.h"
+#include "graphics/curve.h"
 #include "graphics/resource.h"
 #include "graphics/color4f.h"
 #include "graphics/simple_shape.h"
@@ -604,6 +605,8 @@ Workspace::Workspace(const QString& dir)
         gfx::detail::CapsuleArgs::Orientation::Horizontal, 50, 0.25f), "2D Horizontal Capsule"));
     mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_vertical_capsule", "",
         gfx::detail::CapsuleArgs::Orientation::Vertical, 50, 0.25f), "2D Vertical Capsule"));
+    mResources.emplace_back(new DrawableResource<gfx::CurveClass>(gfx::CurveClass("_curve", "",
+        { {0.1f, -0.5f, 0.1f}, {0.3f, -0.15f, 0.1f}, {0.5f, -0.5f, 0.1f}, {0.7f, -0.85f, 0.1f}, {0.9f, -0.5f, 0.1f} }), "2D Curve"));
 
     mResources.emplace_back(new DrawableResource<gfx::RectangleClass>(gfx::RectangleClass("_rect"), "2D Rectangle"));
     mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>(gfx::IsoscelesTriangleClass("_isosceles_triangle"), "2D Isosceles Triangle"));

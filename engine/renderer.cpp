@@ -59,6 +59,7 @@
 #include "engine/renderer.h"
 #include "engine/graphics.h"
 #include "engine/camera.h"
+#include "graphics/curve.h"
 
 using namespace game;
 
@@ -1216,7 +1217,20 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
         const auto* mesh_effect = entity_node.GetMeshEffect();
 
         const auto& materialId = item->GetMaterialId();
-        const auto& drawableId = item->GetDrawableId() + (mesh_effect ? "+MeshEffect" : "");
+        const auto& drawableId = item->GetDrawableId();
+
+        std::string curveId;
+
+        if (drawableId == "_curve" && item->HasCurve())
+        {
+            if (const auto* curve = entity.FindCurveById(item->GetCurveId()))
+                curveId = curve->GetCurveId(!mEditingMode);
+        }
+
+        auto drawable_key = curveId.empty() ? drawableId : curveId;
+        if (mesh_effect)
+            drawable_key += "+MeshEffect";
+
         if (paint_node.materialId != materialId)
         {
             paint_node.material.reset();
@@ -1237,19 +1251,87 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                     paint_node.material->SetUniforms(*params);
             }
         }
-        if (paint_node.drawableId != drawableId)
+
+        if (paint_node.drawableId != drawable_key)
         {
             paint_node.drawable.reset();
-            paint_node.drawableId = drawableId;
+            paint_node.drawableId = drawable_key;
 
-            auto klass = mClassLib->FindDrawableClassById(item->GetDrawableId());
-            if (klass)
+            if (auto klass = mClassLib->FindDrawableClassById(drawableId))
             {
+                auto source_drawable = gfx::CreateDrawableInstance(klass);
+
+                if (klass->GetType() == gfx::DrawableClass::Type::Curve)
+                {
+                    if (const auto* curve = entity.FindCurveById(item->GetCurveId()))
+                    {
+                        auto* curve_drawable = dynamic_cast<gfx::CurveInstance*>(source_drawable.get());
+                        const auto joint_style = curve->GetJointStyle();
+                        const auto end_cap_style = curve->GetEndCapStyle();
+                        const auto curve_type = curve->GetCurveType();
+                        const auto curve_width_override = curve->HasWidthOverride();
+                        const auto& curve_data = curve->GetCurve();
+
+                        std::vector<gfx::CurvePoint> points;
+                        for (size_t i=0; i<curve_data.GetPointCount(); ++i)
+                        {
+                            const auto& src_point = curve_data.GetPoint(i);
+                            const auto& src_pos = src_point.GetPosition();
+
+                            gfx::CurvePoint dst_point;
+                            if (curve_width_override)
+                                dst_point.SetWidth(curve->GetWidthOverride());
+                            else
+                                dst_point.SetWidth(src_point.GetWidth());
+                            dst_point.SetPosition(base::Float2(src_pos.x, src_pos.y));
+                            points.push_back(dst_point);
+                        }
+
+                        // curves that are not in unit coordinates are flipped on y and fitted into the unit box.
+                        if (!curve_data.HasUnitCoordinates())
+                            gfx::NormalizeCurve(points, true);
+
+                        gfx::CurveArgs args;
+                        args.curve_id = curveId;
+                        args.curve_name = curve->GetName();
+                        args.make_fallback_on_fail = true;
+                        args.points = std::move(points);
+
+                        if (curve_type == CurveType::CatmullRom)
+                            args.curve_type = gfx::CurveType::CatmullRomSpline;
+                        else if (curve_type == CurveType::Polyline)
+                            args.curve_type = gfx::CurveType::PolylineSpline;
+                        else BUG("Missing curve type");
+
+                        if (joint_style == CurveJointStyle::Bevel)
+                            args.joint_style = gfx::CurveJointStyle::Bevel;
+                        else if (joint_style == CurveJointStyle::Miter)
+                            args.joint_style = gfx::CurveJointStyle::Miter;
+                        else if (joint_style == CurveJointStyle::Round)
+                            args.joint_style = gfx::CurveJointStyle::Round;
+                        else BUG("Missing joint style");
+
+                        if (end_cap_style == CurveEndCapStyle::Round)
+                            args.end_cap_style = gfx::CurveEndCapStyle::Round;
+                        else if (end_cap_style == CurveEndCapStyle::Butt)
+                            args.end_cap_style = gfx::CurveEndCapStyle::Butt;
+                        else if (end_cap_style == CurveEndCapStyle::Square)
+                            args.end_cap_style = gfx::CurveEndCapStyle::Square;
+                        else BUG("Missing end cap style");
+
+                        curve_drawable->SetInstanceCurve(std::move(args));
+
+                    }
+                    else if (!curveId.empty())
+                    {
+                        WARN("No such entity curve was found. [entity='%1', curve=%2]",  entity.GetName(), item->GetCurveId());
+                    }
+                }
+
                 if (mesh_effect)
                 {
                     const auto effect_type = mesh_effect->GetEffectType();
                     auto effect_id = entity.GetId();
-                    auto source_drawable = gfx::CreateDrawableInstance(klass);
                     auto effect_drawable = std::make_unique<gfx::EffectDrawable>(std::move(source_drawable), std::move(effect_id));
                     if (effect_type == game::MeshEffectClass::EffectType::MeshExplosion)
                     {
@@ -1282,13 +1364,14 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                 }
                 else
                 {
-                    paint_node.drawable = gfx::CreateDrawableInstance(klass);
+                    paint_node.drawable = std::move(source_drawable);
                 }
             }
 
             if (!paint_node.drawable)
                 WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", item->GetMaterialId(),
                      entity.GetName(), entity_node.GetName());
+
             if (paint_node.drawable)
             {
                 gfx::Transform transform;

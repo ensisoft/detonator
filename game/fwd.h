@@ -24,6 +24,8 @@ namespace game {
     class AnimatorClass;
     class AnimationTriggerClass;
     class AnimationTrigger;
+    class CurveClass;
+    class Curve;
     class EntityStateControllerClass;
     class EntityStateController;
     class TilemapClass;

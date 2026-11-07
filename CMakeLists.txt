@@ -636,6 +636,9 @@ if (BUILD_QT_STUFF)
         editor/gui/dlgcomplete.h
         editor/gui/dlgcomplete.ui
         editor/gui/dlgcomplete.cpp
+        editor/gui/dlgcurveparams.h
+        editor/gui/dlgcurveparams.ui
+        editor/gui/dlgcurveparams.cpp
         editor/gui/dlgjoint.h
         editor/gui/dlgjoint.ui
         editor/gui/dlgjoint.cpp

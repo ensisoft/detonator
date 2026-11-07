@@ -20,6 +20,7 @@
 
 #include <string>
 #include <memory>
+#include <optional>
 
 #include "data/fwd.h"
 #include "game/enum.h"
@@ -31,6 +32,10 @@ namespace game
     class CurveClass
     {
     public:
+        enum class CurveSource {
+            SplineMover, Drawable, User
+        };
+
         using Type = CurveType;
         using JointStyle = CurveJointStyle;
         using EndCapStyle = CurveEndCapStyle;
@@ -41,6 +46,8 @@ namespace game
         CurveClass();
        ~CurveClass();
 
+        void SetCurveSource(CurveSource source) noexcept
+        { mCurveSource = source; }
         void SetName(std::string name) noexcept
         { mName = std::move(name); }
         void SetCurveType(const Type type) noexcept
@@ -49,7 +56,18 @@ namespace game
         { mEndCapStyle = end_cap_style; }
         void SetJointStyle(const JointStyle joint_style) noexcept
         { mJointStyle = joint_style; }
+        void SetWidthOverride(float width) noexcept
+        { mWidthOverride = width; }
+        auto HasWidthOverride() const noexcept
+        { return mWidthOverride.has_value(); }
+        void ResetWidthOverride() noexcept
+        { mWidthOverride.reset(); }
 
+        auto GetCurveSource() const noexcept
+        { return mCurveSource; }
+
+        auto GetWidthOverride() const noexcept
+        { return mWidthOverride.value(); }
         auto GetClassId() const
         { return mClassId; }
         auto GetName() const
@@ -77,7 +95,9 @@ namespace game
         void PrependPoint(const CurvePoint& point);
         void ErasePoint(size_t index);
 
-        size_t GetHash() const noexcept;
+        std::size_t GetHash() const noexcept;
+        std::size_t GetCurveHash() const noexcept;
+        std::string GetCurveId(bool enable_id_caching) const noexcept;
 
         void IntoJson(data::Writer& writer) const;
         bool FromJson(const data::Reader& reader);
@@ -89,9 +109,11 @@ namespace game
         std::string mClassId;
         std::string mName;
         CurveData mCurve;
+        CurveSource mCurveSource = CurveSource::User;
         Type mCurveType = Type::CatmullRom;
         JointStyle mJointStyle = JointStyle::Bevel;
         EndCapStyle mEndCapStyle = EndCapStyle::Butt;
+        std::optional<float> mWidthOverride;
     private:
         // read comments in the curve.cpp about why having the
         // curves cached here is a bad idea.
@@ -121,6 +143,13 @@ namespace game
         { return mClass->GetEndCapStyle(); }
         auto GetJointStyle() const noexcept
         { return mClass->GetJointStyle(); }
+        auto HasWidthOverride() const noexcept
+        { return mClass->HasWidthOverride(); }
+        auto GetWidthOverride() const noexcept
+        { return mClass->GetWidthOverride(); }
+
+        std::size_t GetCurveHash() const noexcept;
+        std::string GetCurveId(bool enable_id_caching) const;
 
         const auto& GetCurve() const noexcept
         {
@@ -135,12 +164,20 @@ namespace game
         // prepare the curve to avoid messing up any previous
         // state while something is used the curve (such as a mover)
 
-        size_t GetInstanceHash() const noexcept
+        size_t GetPointCount() const noexcept
         {
-            size_t hash = 0;
             if (mInstanceCurve.has_value())
-                hash = mInstanceCurve->GetHash();
-            return hash;
+                return mInstanceCurve->GetPointCount();
+
+            return mClass->GetPointCount();
+        }
+
+        const auto& GetPoint(size_t index) const noexcept
+        {
+            if (mInstanceCurve.has_value())
+                return mInstanceCurve->GetPoint(index);
+
+            return mClass->GetPoint(index);
         }
 
         // take the curve displacement (travel along the curve)
@@ -156,6 +193,7 @@ namespace game
     private:
         std::shared_ptr<const CurveClass> mClass;
         std::optional<CurveData> mInstanceCurve;
+        mutable std::string mCurveId;
 
     private:
         // these have to be shared ptr because if the curve has

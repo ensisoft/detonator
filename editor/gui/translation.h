@@ -78,6 +78,8 @@ namespace game {
     std::string TranslateEnum(TileOcclusion occlusion);
     std::string TranslateEnum(SplineMoverClass::PathCoordinateSpace mode);
     std::string TranslateEnum(CurveClass::Type type);
+    std::string TranslateEnum(CurveJointStyle style);
+    std::string TranslateEnum(CurveEndCapStyle style);
     std::string TranslateEnum(SplineMoverClass::RotationMode mode);
     std::string TranslateEnum(SplineMoverClass::IterationMode mode);
     std::string TranslateEnum(TextItemClass::VerticalTextAlign align);

@@ -47,6 +47,7 @@ std::size_t DrawableItemClass::GetHash() const
     hash = base::hash_combine(hash, mBitFlags);
     hash = base::hash_combine(hash, mMaterialId);
     hash = base::hash_combine(hash, mDrawableId);
+    hash = base::hash_combine(hash, mCurveId);
     hash = base::hash_combine(hash, mLayer);
     hash = base::hash_combine(hash, mRenderPass);
     hash = base::hash_combine(hash, mTimeScale);
@@ -74,6 +75,7 @@ void DrawableItemClass::IntoJson(data::Writer& data) const
     data.Write("flags",       mBitFlags);
     data.Write("material",    mMaterialId);
     data.Write("drawable",    mDrawableId);
+    data.Write("curve",       mCurveId);
     data.Write("layer",       mLayer);
     data.Write("renderpass",  mRenderPass);
     data.Write("timescale",   mTimeScale);
@@ -117,6 +119,8 @@ bool DrawableItemClass::FromJson(const data::Reader& data)
     ok &= data.Read("flags",       &mBitFlags);
     ok &= data.Read("material",    &mMaterialId);
     ok &= data.Read("drawable",    &mDrawableId);
+    if (data.HasValue("curve"))
+        ok &= data.Read("curve", &mCurveId);
     ok &= data.Read("layer",       &mLayer);
     ok &= data.Read("renderpass",  &mRenderPass);
     ok &= data.Read("timescale",   &mTimeScale);

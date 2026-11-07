@@ -608,6 +608,7 @@ void unit_test_entity_class()
         klass.SetCurveType(game::CurveClass::Type::Polyline);
         klass.SetJointStyle(game::CurveClass::JointStyle::Round);
         klass.SetEndCapStyle(game::CurveClass::EndCapStyle::Square);
+        klass.SetWidthOverride(3.0f);
         klass.SetCurve(std::move(curve));
         entity.AddCurve(std::move(klass));
     }
@@ -668,6 +669,8 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetCurve(0).GetCurveType() == game::CurveClass::Type::Polyline);
     TEST_REQUIRE(entity.GetCurve(0).GetJointStyle() == game::CurveClass::JointStyle::Round);
     TEST_REQUIRE(entity.GetCurve(0).GetEndCapStyle() == game::CurveClass::EndCapStyle::Square);
+    TEST_REQUIRE(entity.GetCurve(0).HasWidthOverride() == true);
+    TEST_REQUIRE(entity.GetCurve(0).GetWidthOverride() == 3.0f);
     TEST_REQUIRE(entity.FindCurveByName("curve") == &entity.GetCurve(0));
     TEST_REQUIRE(entity.FindCurveByName("foobar") == nullptr);
     TEST_REQUIRE(entity.FindCurveById(entity.GetCurve(0).GetClassId()) == &entity.GetCurve(0));
@@ -1497,6 +1500,158 @@ void unit_test_entity_node_spline_mover()
     }
 }
 
+void unit_test_entity_curve_mapping()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // curves that are created for a spline mover can be shared
+    // across multiple drawables.
+    // f the node that owns the spline mover is deleted the
+    // drawables that refer to it are reset to nothing (no curve set)
+    {
+        auto entity = std::make_shared<game::EntityClass>();
+        game::CurveClass curve;
+        curve.SetCurveSource(game::CurveClass::CurveSource::SplineMover);
+        curve.SetName("mover curve");
+
+        game::EntityNodeClass mover_node;
+        mover_node.SetName("mover node");
+        mover_node.CreateSplineMover();
+        mover_node.GetSplineMover()->SetCurveId(curve.GetClassId());
+
+        game::EntityNodeClass draw_node;
+        draw_node.SetName("draw node");
+        draw_node.CreateDrawable();
+        draw_node.GetDrawable()->SetCurveId(curve.GetClassId());
+
+        const auto* c = entity->AddCurve(std::move(curve));
+        auto* n0 = entity->AddNode(std::move(mover_node));
+        auto* n1 = entity->AddNode(std::move(draw_node));
+        TEST_REQUIRE(entity->FindCurveOwner(c) == n0);
+
+        entity->DeleteNode(n0);
+        TEST_REQUIRE(entity->GetNumCurves() == 0);
+        TEST_REQUIRE(entity->FindCurveByName("mover curve") == nullptr);
+        TEST_REQUIRE(n1->GetDrawable()->HasCurve() == false);
+    }
+
+    // any curve that is created for a drawable cannot be shared
+    // and when the drawable for which the curve was created is
+    // deleted also the curve is deleted.
+    {
+        auto entity = std::make_shared<game::EntityClass>();
+        game::CurveClass mover_curve;
+        mover_curve.SetCurveSource(game::CurveClass::CurveSource::SplineMover);
+        mover_curve.SetName("mover curve");
+
+        game::CurveClass drawable_curve;
+        drawable_curve.SetCurveSource(game::CurveClass::CurveSource::Drawable);
+        drawable_curve.SetName("draw curve");
+
+        game::EntityNodeClass mover_node;
+        mover_node.SetName("mover node");
+        mover_node.CreateSplineMover();
+        mover_node.GetSplineMover()->SetCurveId(mover_curve.GetClassId());
+
+        game::EntityNodeClass draw_node;
+        draw_node.SetName("draw node");
+        draw_node.CreateDrawable();
+        draw_node.GetDrawable()->SetCurveId(drawable_curve.GetClassId());
+
+        const auto* c0 = entity->AddCurve(std::move(mover_curve));
+        const auto* c1 = entity->AddCurve(std::move(drawable_curve));
+        auto* n0 = entity->AddNode(std::move(mover_node));
+        auto* n1 = entity->AddNode(std::move(draw_node));
+        TEST_REQUIRE(entity->FindCurveOwner(c0) == n0);
+        TEST_REQUIRE(entity->FindCurveOwner(c1) == n1);
+
+        entity->DeleteNode(n0);
+        TEST_REQUIRE(entity->GetNumCurves() == 1);
+        TEST_REQUIRE(entity->FindCurveByName("mover curve") == nullptr);
+        TEST_REQUIRE(entity->FindCurveByName("draw curve") != nullptr);
+        TEST_REQUIRE(n1->GetDrawable()->HasCurve() == true);
+        TEST_REQUIRE(n1->GetDrawable()->GetCurveId() == c1->GetClassId());
+    }
+
+    {
+        auto entity = std::make_shared<game::EntityClass>();
+        game::CurveClass mover_curve;
+        mover_curve.SetCurveSource(game::CurveClass::CurveSource::SplineMover);
+        mover_curve.SetName("mover curve");
+
+        game::EntityNodeClass mover_node;
+        mover_node.SetName("mover node");
+        mover_node.CreateSplineMover();
+        mover_node.GetSplineMover()->SetCurveId(mover_curve.GetClassId());
+
+        entity->AddCurve(std::move(mover_curve));
+
+        auto* n0 = entity->AddNode(std::move(mover_node));
+        auto* n1 = entity->DuplicateNode(n0);
+
+        TEST_REQUIRE(entity->GetNumCurves() == 2);
+        TEST_REQUIRE(n0->GetSplineMover()->GetCurveId() == entity->GetCurve(0).GetClassId());
+        TEST_REQUIRE(n1->GetSplineMover()->GetCurveId() == entity->GetCurve(1).GetClassId());
+    }
+
+    // dupe node
+    {
+        auto entity = std::make_shared<game::EntityClass>();
+        game::CurveClass mover_curve;
+        mover_curve.SetCurveSource(game::CurveClass::CurveSource::SplineMover);
+        mover_curve.SetName("mover curve");
+
+        game::EntityNodeClass mover_node;
+        mover_node.SetName("mover node");
+        mover_node.CreateSplineMover();
+        mover_node.GetSplineMover()->SetCurveId(mover_curve.GetClassId());
+
+        game::EntityNodeClass draw_node;
+        draw_node.SetName("draw node");
+        draw_node.CreateDrawable();
+        draw_node.GetDrawable()->SetCurveId(mover_curve.GetClassId());
+
+        const auto* c0 = entity->AddCurve(std::move(mover_curve));
+        auto* n0 = entity->AddNode(std::move(mover_node));
+        auto* n1 = entity->AddNode(std::move(draw_node));
+        auto* n2 = entity->DuplicateNode(n0);
+
+        TEST_REQUIRE(entity->FindCurveOwner(c0) == n0);
+
+        TEST_REQUIRE(entity->GetNumCurves() == 2);
+        TEST_REQUIRE(n0->GetSplineMover()->GetCurveId() == entity->GetCurve(0).GetClassId());
+        TEST_REQUIRE(n1->GetDrawable()->GetCurveId() == entity->GetCurve(0).GetClassId());
+        TEST_REQUIRE(n2->GetSplineMover()->GetCurveId() == entity->GetCurve(1).GetClassId());
+    }
+
+    {
+        auto entity = std::make_shared<game::EntityClass>();
+        game::CurveClass mover_curve;
+        mover_curve.SetCurveSource(game::CurveClass::CurveSource::SplineMover);
+        mover_curve.SetName("mover curve");
+
+        game::EntityNodeClass mover_node;
+        mover_node.SetName("mover node");
+        mover_node.CreateSplineMover();
+        mover_node.CreateDrawable();
+        mover_node.GetSplineMover()->SetCurveId(mover_curve.GetClassId());
+        mover_node.GetDrawable()->SetCurveId(mover_curve.GetClassId());
+
+        entity->AddCurve(std::move(mover_curve));
+        auto* n0 = entity->AddNode(std::move(mover_node));
+        auto* n1 = entity->DuplicateNode(n0);
+
+        TEST_REQUIRE(entity->GetNumCurves() == 2);
+        TEST_REQUIRE(entity->FindCurveOwner(&entity->GetCurve(0)) == n0);
+        TEST_REQUIRE(entity->FindCurveOwner(&entity->GetCurve(1)) == n1);
+
+        TEST_REQUIRE(n0->GetSplineMover()->GetCurveId() == entity->GetCurve(0).GetClassId());
+        TEST_REQUIRE(n0->GetDrawable()->GetCurveId() == entity->GetCurve(0).GetClassId());
+        TEST_REQUIRE(n1->GetSplineMover()->GetCurveId() == entity->GetCurve(1).GetClassId());
+    }
+
+}
+
 struct PerfTestDrawableTag{};
 
 namespace mem {
@@ -1653,6 +1808,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_animation_state();
     unit_test_entity_args();
     unit_test_entity_node_spline_mover();
+    unit_test_entity_curve_mapping();
 
     measure_item_allocation_time();
     measure_entity_allocation_time();

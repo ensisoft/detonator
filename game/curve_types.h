@@ -20,6 +20,7 @@
 
 #include <vector>
 
+#include  "base/bitflag.h"
 #include "base/utility.h"
 #include "data/fwd.h"
 #include "game/types.h"
@@ -85,6 +86,10 @@ namespace game
     class CurveData
     {
     public:
+        enum class Flags {
+            UnitCoordinates
+        };
+
         CurveData() = default;
         CurveData(const std::vector<CurvePoint>& points);
         CurveData(std::vector<CurvePoint>&& points);
@@ -93,6 +98,14 @@ namespace game
         void AppendPoint(const CurvePoint& point);
         void PrependPoint(const CurvePoint& point);
         void ErasePoint(size_t index);
+
+        void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
+        auto TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
+
+        auto HasUnitCoordinates() const noexcept
+        { return TestFlag(Flags::UnitCoordinates); }
 
         auto GetPointCount() const noexcept
         { return mPoints.size(); }
@@ -106,5 +119,6 @@ namespace game
 
     private:
         std::vector<CurvePoint> mPoints;
+        base::bitflag<Flags> mFlags;
     };
 } // name

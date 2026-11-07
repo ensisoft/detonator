@@ -111,6 +111,7 @@
     <file>16x16_ico_png/transmit_error.png</file>
     <file>16x16_ico_png/transmit_go.png</file>
 
+    <file>32x32_ico_png/curve.png</file>
     <file>32x32_ico_png/translate-gizmo.png</file>
     <file>32x32_ico_png/select-gizmo.png</file>
     <file>32x32_ico_png/rotate-gizmo.png</file>

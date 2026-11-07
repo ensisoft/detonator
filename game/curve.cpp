@@ -88,18 +88,22 @@ CurveClass::CurveClass(const CurveClass& other)
     : mClassId(other.mClassId)
     , mName(other.mName)
     , mCurve(other.mCurve)
+    , mCurveSource(other.mCurveSource)
     , mCurveType(other.mCurveType)
     , mJointStyle(other.mJointStyle)
     , mEndCapStyle(other.mEndCapStyle)
+    , mWidthOverride(other.mWidthOverride)
 {}
 
 CurveClass::CurveClass(const CurveClass& other, std::string id)
     : mClassId(std::move(id))
     , mName(other.mName)
     , mCurve(other.mCurve)
+    , mCurveSource(other.mCurveSource)
     , mCurveType(other.mCurveType)
     , mJointStyle(other.mJointStyle)
     , mEndCapStyle(other.mEndCapStyle)
+    , mWidthOverride(other.mWidthOverride)
 {}
 
 CurveClass::~CurveClass()
@@ -143,10 +147,36 @@ size_t CurveClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mCurve.GetHash());
+    hash = base::hash_combine(hash, mCurveSource);
     hash = base::hash_combine(hash, mCurveType);
     hash = base::hash_combine(hash, mJointStyle);
     hash = base::hash_combine(hash, mEndCapStyle);
+    if (mWidthOverride.has_value())
+        hash = base::hash_combine(hash, mWidthOverride.value());
     return hash;
+}
+
+size_t CurveClass::GetCurveHash() const noexcept
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mCurve.GetHash());
+    hash = base::hash_combine(hash, mCurveType);
+    hash = base::hash_combine(hash, mJointStyle);
+    hash = base::hash_combine(hash, mEndCapStyle);
+    if (mWidthOverride.has_value())
+        hash = base::hash_combine(hash, mWidthOverride.value());
+    return hash;
+}
+
+std::string CurveClass::GetCurveId(bool /* enable_id_caching */) const noexcept
+{
+    // enable_id_caching parameter is only taken in order to
+    // keep the method signature compatible with the instance version.
+    // the instance may cache the ID for performance reasons but
+    // only when the game is running in deployed mode (i.e not in
+    // the editor in the design mode)
+
+    return std::to_string(GetCurveHash());
 }
 
 void CurveClass::IntoJson(data::Writer& writer) const
@@ -157,9 +187,11 @@ void CurveClass::IntoJson(data::Writer& writer) const
     writer.Write("curve-class-id",      mClassId);
     writer.Write("curve-name",          mName);
     writer.Write("curve-type",          mCurveType);
+    writer.Write("curve-source",        mCurveSource);
     writer.Write("curve-joint-style",   mJointStyle);
     writer.Write("curve-end-cap-style", mEndCapStyle);
     writer.Write("curve-data",          std::move(curve_data));
+    writer.Write("curve-width",         mWidthOverride);
 }
 
 bool CurveClass::FromJson(const data::Reader& reader)
@@ -168,11 +200,17 @@ bool CurveClass::FromJson(const data::Reader& reader)
     if (const auto& chunk = reader.GetReadChunk("curve-data"))
         ok &= mCurve.FromJson(*chunk);
 
+    // migration
+    if (!reader.HasValue("curve-source"))
+        mCurveSource = CurveSource::SplineMover;
+    else ok &= reader.Read("curve-source", &mCurveSource);
+
     ok &= reader.Read("curve-class-id",      &mClassId);
     ok &= reader.Read("curve-name",          &mName);
     ok &= reader.Read("curve-type",          &mCurveType);
     ok &= reader.Read("curve-joint-style",   &mJointStyle);
     ok &= reader.Read("curve-end-cap-style", &mEndCapStyle);
+    ok &= reader.Read("curve-width",         &mWidthOverride);
     return ok;
 }
 
@@ -240,6 +278,33 @@ bool CurveClass::InitClassRuntime(const std::string& debug_name) const
     }
     else BUG("Unhandled curve type.");
     return true;
+}
+
+std::size_t Curve::GetCurveHash() const noexcept
+{
+    if (mInstanceCurve.has_value())
+    {
+        size_t hash = 0;
+        hash = base::hash_combine(hash, mInstanceCurve->GetHash());
+        hash = base::hash_combine(hash, mClass->GetCurveType());
+        hash = base::hash_combine(hash, mClass->GetJointStyle());
+        hash = base::hash_combine(hash, mClass->GetEndCapStyle());
+        return hash;
+    }
+    return mClass->GetCurveHash();
+}
+
+std::string Curve::GetCurveId(bool enable_id_caching) const
+{
+    if (enable_id_caching && !mCurveId.empty())
+        return mCurveId;
+
+    auto curve_id = std::to_string(GetCurveHash());
+
+    if (enable_id_caching)
+        mCurveId = curve_id;
+
+    return curve_id;
 }
 
 float Curve::Reparametrize(float t) const
