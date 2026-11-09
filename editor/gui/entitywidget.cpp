@@ -1585,7 +1585,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     mBasicShapes2D = new QMenu(this);
     mBasicShapes2D->menuAction()->setIcon(QIcon("icons32:rectangle.png"));
-    mBasicShapes2D->menuAction()->setText("Basic 2D Shapes");
+    mBasicShapes2D->menuAction()->setText("2D Shapes");
     mBasicShapes2D->menuAction()->setToolTip(tr("Place new basic 2D shape"));
     mBasicShapes2D->addAction(mUI.actionNewRect);
     mBasicShapes2D->addAction(mUI.actionNewRoundRect);
@@ -1601,7 +1601,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     mBasicShapes3D = new QMenu(this);
     mBasicShapes3D->menuAction()->setIcon(QIcon("icons32:cube.png"));
-    mBasicShapes3D->menuAction()->setText("Basic 3D Shapes");
+    mBasicShapes3D->menuAction()->setText("3D Shapes");
     mBasicShapes3D->menuAction()->setToolTip(tr("Place new basic 3D shape"));
     mBasicShapes3D->addAction(mUI.actionNewCone);
     mBasicShapes3D->addAction(mUI.actionNewCube);
