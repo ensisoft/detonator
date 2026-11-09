@@ -105,7 +105,7 @@ unsigned AudioGraphSource::FillBuffer(void* buff, unsigned max_bytes)
         return min_bytes;
     }
 
-    class Allocator : public BufferAllocator {
+    class Allocator final : public BufferAllocator {
     public:
         Allocator(void* native_buffer, unsigned native_buffer_size)
         {
@@ -122,7 +122,6 @@ unsigned AudioGraphSource::FillBuffer(void* buff, unsigned max_bytes)
                 return ret;
             }
             return std::make_shared<VectorBuffer>(bytes);
-            mDeviceBuffer.reset();
         }
     private:
         BufferHandle mDeviceBuffer;

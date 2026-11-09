@@ -95,23 +95,23 @@ namespace audio
             for (size_t i=0; i<src.GetNumInfoTags(); ++i)
                 dst.AddInfoTag(src.GetInfoTag(i));
         }
-        inline void CopyData(const void* src, size_t bytes) noexcept
+        void CopyData(const void* src, size_t bytes) noexcept
         {
             ASSERT(GetCapacity() >= bytes);
             std::memcpy(GetPtr(), src, bytes);
             SetByteSize(bytes);
         }
-        inline void CopyData(const Buffer& src) noexcept
+        void CopyData(const Buffer& src) noexcept
         {
             ASSERT(GetCapacity() >= src.GetByteSize());
             std::memcpy(GetPtr(), src.GetPtr(), src.GetByteSize());
             SetByteSize(src.GetByteSize());
         }
-        inline void CopyInfoTags(const Buffer& src)
+        void CopyInfoTags(const Buffer& src)
         {
             Buffer::CopyInfoTags(src, *this);
         }
-        inline bool IsLastBuffer() const noexcept
+        bool IsLastBuffer() const noexcept
         {
             return TestFlag(Flags::LastBuffer);
         }
@@ -120,40 +120,40 @@ namespace audio
     };
     using BufferHandle = std::shared_ptr<Buffer>;
 
-    class BufferView : public Buffer
+    class BufferView final : public Buffer
     {
     public:
         BufferView(void* data, size_t capacity)
           : mCapacity(capacity)
           , mData(data)
         {}
-        virtual void SetFlag(Flags flag, bool on_off) noexcept override
+        void SetFlag(Flags flag, bool on_off) noexcept override
         { mFlags.set(flag, on_off); }
-        virtual bool TestFlag(Flags flag) const noexcept override
+        bool TestFlag(Flags flag) const noexcept override
         { return mFlags.test(flag); }
 
-        virtual void SetFormat(const Format& format) noexcept override
+        void SetFormat(const Format& format) noexcept override
         { mFormat = format; }
-        virtual Format GetFormat() const noexcept override
+        Format GetFormat() const noexcept override
         { return mFormat; }
-        virtual const void* GetPtr() const noexcept override
+        const void* GetPtr() const noexcept override
         { return mData; }
-        virtual void* GetPtr() noexcept override
+        void* GetPtr() noexcept override
         { return mData; }
-        virtual size_t GetByteSize() const noexcept override
+        size_t GetByteSize() const noexcept override
         { return mSize; }
-        virtual size_t GetCapacity() const noexcept override
+        size_t GetCapacity() const noexcept override
         { return mCapacity; }
-        virtual void SetByteSize(size_t bytes) noexcept override
+        void SetByteSize(size_t bytes) noexcept override
         {
             ASSERT(bytes <= mCapacity);
             mSize = bytes;
         }
-        virtual size_t GetNumInfoTags() const noexcept override
+        size_t GetNumInfoTags() const noexcept override
         { return mInfos.size(); }
-        virtual void AddInfoTag(const InfoTag& tag) override
+        void AddInfoTag(const InfoTag& tag) override
         { mInfos.push_back(tag); }
-        virtual const InfoTag& GetInfoTag(size_t index) const noexcept override
+        const InfoTag& GetInfoTag(size_t index) const noexcept override
         { return base::SafeIndex(mInfos, index); }
     private:
         const std::size_t mCapacity = 0;
@@ -165,46 +165,46 @@ namespace audio
     };
 
     // backing data storage.
-    class VectorBuffer : public Buffer
+    class VectorBuffer final : public Buffer
     {
     public:
         explicit VectorBuffer(size_t capacity = 0)
         { Resize(capacity); }
-       ~VectorBuffer()
+       ~VectorBuffer() override
         {
             ASSERT(mBuffer.size() >= sizeof(canary));
             const auto canary_offset = mBuffer.size() - sizeof(canary);
             ASSERT(!std::memcmp(&mBuffer[canary_offset], &canary, sizeof(canary)) &&
                    "Audio buffer out of bounds write detected.");
         }
-        virtual bool TestFlag(Flags flag) const noexcept override
+        bool TestFlag(Flags flag) const noexcept override
         { return mFlags.test(flag); }
-        virtual void SetFlag(Flags flag, bool on_off) noexcept override
+        void SetFlag(Flags flag, bool on_off) noexcept override
         { mFlags.set(flag, on_off); }
 
-        virtual void SetFormat(const Format& format) noexcept override
+        void SetFormat(const Format& format) noexcept override
         { mFormat = format; }
-        virtual Format GetFormat() const noexcept override
+        Format GetFormat() const noexcept override
         { return mFormat; }
-        virtual const void* GetPtr() const noexcept override
+        const void* GetPtr() const noexcept override
         { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
-        virtual void* GetPtr() noexcept override
+        void* GetPtr() noexcept override
         { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
-        virtual size_t GetByteSize() const noexcept override
+        size_t GetByteSize() const noexcept override
         { return mSize; }
-        virtual size_t GetCapacity() const noexcept override
+        size_t GetCapacity() const noexcept override
         { return mBuffer.size() - sizeof(canary); }
-        virtual void SetByteSize(size_t bytes) noexcept override
+        void SetByteSize(size_t bytes) noexcept override
         {
             const auto limit = mBuffer.size() - sizeof(canary);
             ASSERT(bytes <= limit);
             mSize = bytes;
         }
-        virtual size_t GetNumInfoTags() const noexcept override
+        size_t GetNumInfoTags() const noexcept override
         { return mInfos.size(); }
-        virtual void AddInfoTag(const InfoTag& tag) override
+        void AddInfoTag(const InfoTag& tag) override
         { mInfos.push_back(tag); }
-        virtual const InfoTag& GetInfoTag(size_t index) const noexcept override
+        const InfoTag& GetInfoTag(size_t index) const noexcept override
         { return base::SafeIndex(mInfos, index); }
 
         void Resize(size_t bytes)
@@ -214,7 +214,7 @@ namespace audio
             std::memcpy(&mBuffer[bytes], &canary, sizeof(canary));
         }
 
-        inline void Clear() noexcept
+        void Clear() noexcept
         {
             mSize = 0;
             mFormat = {};
@@ -241,6 +241,7 @@ namespace audio
     class BufferAllocator
     {
     public:
+        virtual ~BufferAllocator() = default;
         virtual BufferHandle Allocate(size_t bytes)
         { return std::make_shared<VectorBuffer>(bytes); }
     private:
