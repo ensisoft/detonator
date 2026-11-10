@@ -95,6 +95,8 @@ namespace game
         void PrependPoint(const CurvePoint& point);
         void ErasePoint(size_t index);
 
+        std::size_t GetPointHash(size_t index) const noexcept;
+
         std::size_t GetHash() const noexcept;
         std::size_t GetCurveHash() const noexcept;
         std::string GetCurveId(bool enable_id_caching) const noexcept;

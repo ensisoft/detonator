@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>359</width>
-    <height>147</height>
+    <width>379</width>
+    <height>167</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,20 +23,10 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>End cap style</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
-       <widget class="QComboBox" name="cmbEndCapStyle"/>
-      </item>
-      <item row="0" column="1">
        <widget class="QComboBox" name="cmbJointStyle"/>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -50,6 +40,9 @@
        </widget>
       </item>
       <item row="2" column="1">
+       <widget class="QComboBox" name="cmbEndCapStyle"/>
+      </item>
+      <item row="3" column="1">
        <widget class="gui::DoubleSpinBox" name="width">
         <property name="focusPolicy">
          <enum>Qt::WheelFocus</enum>
@@ -70,11 +63,28 @@
        </widget>
       </item>
       <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>End cap style</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Thickness</string>
         </property>
        </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cmbCurveStyle"/>
       </item>
      </layout>
     </widget>
@@ -88,6 +98,12 @@
    <header>spinboxwidget.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>cmbCurveStyle</tabstop>
+  <tabstop>cmbEndCapStyle</tabstop>
+  <tabstop>cmbJointStyle</tabstop>
+  <tabstop>width</tabstop>
+ </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>

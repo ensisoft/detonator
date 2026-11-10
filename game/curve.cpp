@@ -141,6 +141,18 @@ void CurveClass::ErasePoint(const size_t index)
     curve_cache.erase(mClassId);
 }
 
+std::size_t CurveClass::GetPointHash(size_t index) const noexcept
+{
+    const auto& p = mCurve.GetPoint(index);
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mClassId);
+    hash = base::hash_combine(hash, p.GetPosition());
+    hash = base::hash_combine(hash, p.GetLookAt());
+    hash = base::hash_combine(hash, p.GetData());
+    hash = base::hash_combine(hash, p.GetWidth());
+    return hash;
+}
+
 size_t CurveClass::GetHash() const noexcept
 {
     size_t hash = 0;

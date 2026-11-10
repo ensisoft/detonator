@@ -40,6 +40,7 @@ namespace gui
         DlgCurveParams(QWidget* parent, game::CurveClass* curve);
 
     private slots:
+        void on_cmbCurveStyle_currentIndexChanged(int);
         void on_cmbJointStyle_currentIndexChanged(int);
         void on_cmbEndCapStyle_currentIndexChanged(int);
         void on_width_valueChanged(bool, double value);

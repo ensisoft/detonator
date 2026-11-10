@@ -189,12 +189,14 @@ namespace gui
         void on_btnSetMaterialParams_clicked();
         void on_btnEditDrawable_clicked();
         void on_btnEditMaterial_clicked();
+        void on_dsNewCurve_clicked();
         void on_dsCurveParams_clicked();
         void on_btnMoreViewportSettings_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
         void on_scriptFile_currentIndexChanged(int);
         void on_nodeName_textChanged(const QString& text);
+        void on_nodeName_editingFinished();
         void on_nodeComment_textChanged(const QString& text);
         void on_nodeTag_textChanged(const QString& text);
         void on_nodeIndex_valueChanged(int);
@@ -399,6 +401,7 @@ namespace gui
         void SelectTile();
         void UpdateGizmos();
         bool CanApplyGizmo() const;
+        std::unique_ptr<MouseTool> StartCurveTool(const MouseEvent& mickey, game::EntityNodeClass* node);
         std::unique_ptr<MouseTool> StartSplineTool(const MouseEvent& mickey, game::EntityNodeClass* node);
         std::unique_ptr<MouseTool> SelectNodeTool(const MouseEvent& mickey, game::EntityNodeClass* node);
         std::unique_ptr<MouseTool> StartMouseTool(const MouseEvent& mickey);
@@ -427,6 +430,7 @@ namespace gui
     private:
         class Transform3DTool;
         class SplineTool;
+        class CurveTool;
         class JointTool;
         class PlaceRigidBodyTool;
         class PlaceTextTool;
@@ -449,6 +453,8 @@ namespace gui
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
             Ui::EntityWidget* view = nullptr;
+
+            std::size_t curve_point_hash = 0;
         } mState;
 
         // Tree model impl for displaying scene's render tree

@@ -2790,6 +2790,20 @@
                   <widget class="QComboBox" name="dsCurve"/>
                  </item>
                  <item>
+                  <widget class="QToolButton" name="dsNewCurve">
+                   <property name="toolTip">
+                    <string>Edit curve rendering parameters</string>
+                   </property>
+                   <property name="text">
+                    <string>...</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="../resource/resource.qrc">
+                     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QToolButton" name="dsCurveParams">
                    <property name="toolTip">
                     <string>Edit curve rendering parameters</string>
@@ -6261,6 +6275,9 @@
    <property name="text">
     <string>Curve</string>
    </property>
+   <property name="toolTip">
+    <string>Place new smooth curve</string>
+   </property>
   </action>
  </widget>
  <customwidgets>
@@ -6369,6 +6386,7 @@
   <tabstop>btnSetMaterialParams</tabstop>
   <tabstop>btnEditMaterial</tabstop>
   <tabstop>dsCurve</tabstop>
+  <tabstop>dsNewCurve</tabstop>
   <tabstop>dsCurveParams</tabstop>
   <tabstop>dsRenderPass</tabstop>
   <tabstop>dsCoordinateSpace</tabstop>
