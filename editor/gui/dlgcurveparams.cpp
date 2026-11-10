@@ -23,6 +23,7 @@
 #include "editor/gui/spinboxwidget.h"
 #include "editor/gui/translation.h"
 #include "editor/gui/utility.h"
+#include "game/curve.h"
 
 namespace gui
 {
@@ -33,12 +34,21 @@ DlgCurveParams::DlgCurveParams(QWidget* parent, game::CurveClass* curve)
 {
     mUI.setupUi(this);
 
+    PopulateFromEnum<game::CurveClass::Type>(mUI.cmbCurveStyle);
     PopulateFromEnum<game::CurveJointStyle>(mUI.cmbJointStyle);
     PopulateFromEnum<game::CurveEndCapStyle>(mUI.cmbEndCapStyle);
     SetValue(mUI.cmbJointStyle,  mCurve->GetJointStyle());
     SetValue(mUI.cmbEndCapStyle, mCurve->GetEndCapStyle());
     if (curve->HasWidthOverride())
         SetValue(mUI.width, curve->GetWidthOverride());
+
+    // spline curve is edited in the spline mover UI
+    SetEnabled(mUI.cmbCurveStyle, curve->GetCurveSource() == game::CurveClass::CurveSource::Drawable);
+}
+
+void DlgCurveParams::on_cmbCurveStyle_currentIndexChanged(int)
+{
+    mCurve->SetCurveType(GetValue(mUI.cmbCurveStyle));
 }
 
 void DlgCurveParams::on_cmbJointStyle_currentIndexChanged(int)

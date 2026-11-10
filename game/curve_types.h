@@ -76,6 +76,7 @@ namespace game
 
         void IntoJson(data::Writer& writer) const;
         bool FromJson(const data::Reader& reader);
+
     private:
         Float3 mPosition;
         Float3 mLookAt;
