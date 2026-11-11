@@ -399,6 +399,9 @@ namespace gui
         void SelectTile();
         void UpdateGizmos();
         bool CanApplyGizmo() const;
+        std::unique_ptr<MouseTool> StartSplineTool(const MouseEvent& mickey, game::EntityNodeClass* node);
+        std::unique_ptr<MouseTool> SelectNodeTool(const MouseEvent& mickey, game::EntityNodeClass* node);
+        std::unique_ptr<MouseTool> StartMouseTool(const MouseEvent& mickey);
         game::EntityNodeClass* GetCurrentNode();
         const game::EntityNodeClass* GetCurrentNode() const;
         size_t ComputeHash() const;
