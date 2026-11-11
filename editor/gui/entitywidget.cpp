@@ -5490,129 +5490,36 @@ void EntityWidget::MouseMove(QMouseEvent* event)
 }
 void EntityWidget::MousePress(QMouseEvent* event)
 {
+    if (mViewerMode)
+        return;
+
+    const auto button = event->button();
     const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
     const MouseEvent mickey(event, mUI, mState, projection);
 
-    if (!mCurrentTool && !mViewerMode && (mickey->button() == Qt::RightButton))
+    if (!mCurrentTool)
     {
-        if (auto* current = GetCurrentNode())
+        if (auto tool = StartMouseTool(mickey))
         {
-            if (mTransformGizmo != TransformGizmo3D::None && mTransformHandle != TransformHandle3D::None)
-            {
-                mCurrentTool.reset(new Transform3DTool(mTransformGizmo, mTransformHandle, mState, current, true));
-            }
+            const auto *current = GetCurrentNode();
+            ASSERT(current);
+            if (tool->GetToolFunction() == MouseTool::ToolFunctionType::TransformNode && current->TestFlag(game::EntityNodeClass::Flags::LockedInEditor))
+                NOTE("Unlock node to apply node transformations.");
+            else mCurrentTool = std::move(tool);
         }
     }
 
-    if (!mCurrentTool && !mViewerMode && (mickey->button() == Qt::LeftButton))
-    {
-        const auto snap = (bool)GetValue(mUI.chkSnap);
-        const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-        const auto grid_size = static_cast<unsigned>(grid);
-
-        if (auto* current = GetCurrentNode())
-        {
-            if (current->HasSplineMover())
-            {
-                auto* spline_mover = current->GetSplineMover();
-                auto* mover_curve = mState.entity->FindCurveById(spline_mover->GetCurveId());
-                auto* mover_node = current;
-
-                ASSERT(mover_node && mover_curve);
-                const auto* parent_node = mState.entity->FindNodeParent(mover_node);
-                const auto spline_path_mode = spline_mover->GetPathCoordinateSpace();
-                const game::EntityNodeClass* coordinate_reference_node = nullptr;
-
-                if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
-                    coordinate_reference_node = parent_node;
-                else if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
-                    coordinate_reference_node = mover_node;
-                else BUG("Bug on spline path mode.");
-
-                for (size_t i=0; i<mover_curve->GetPointCount(); ++i)
-                {
-                    const auto& spline_local_point = spline_mover->GetPathRelativePoint(*mover_curve, i).GetPosition();
-                    const auto& spline_world_point = mState.entity->MapCoordsFromNode(spline_local_point, coordinate_reference_node);
-                    gfx::FRect box;
-                    box.Resize(20.0f, 20.0f);
-                    box.Move(spline_world_point);
-                    box.Translate(-10.0f, -10.0f);
-                    if (box.TestPoint(mickey.MapToPlane()))
-                    {
-                        mCurrentTool = std::make_unique<SplineTool>(mState, mover_node, spline_mover, mover_curve, i);
-                        if (current->HasSplineMover())
-                            SelectRow(mUI.splinePointView, i);
-                        break;
-                    }
-                }
-            }
-
-            if (mTransformGizmo != TransformGizmo3D::None && mTransformHandle != TransformHandle3D::None)
-            {
-                mCurrentTool.reset(new Transform3DTool(mTransformGizmo, mTransformHandle, mState, current, false));
-            }
-
-            if (!mCurrentTool)
-            {
-                const auto node_box_size = current->GetSize();
-                const auto& node_to_world = mState.entity->FindNodeTransform(current);
-                gfx::FRect box;
-                box.Resize(node_box_size.x, node_box_size.y);
-                box.Translate(-node_box_size.x * 0.5f, -node_box_size.y * 0.5f);
-
-                const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, mickey->pos(), projection);
-                if (hotspot == ToolHotspot::Resize)
-                    mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
-                else if (hotspot == ToolHotspot::Rotate)
-                    mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, current));
-                else if (hotspot == ToolHotspot::Remove)
-                    mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
-                else mUI.tree->ClearSelection();
-            }
-        }
-
-        if (!GetCurrentNode())
-        {
-            auto [hitnode, hitpos] = SelectNode(mickey.MapToPlane(), *mState.entity, GetCurrentNode());
-            if (hitnode)
-            {
-                const auto node_box_size = hitnode->GetSize();
-                const auto& node_to_world = mState.entity->FindNodeTransform(hitnode);
-                gfx::FRect box;
-                box.Resize(node_box_size.x, node_box_size.y);
-                box.Translate(-node_box_size.x*0.5f, -node_box_size.y*0.5f);
-
-                const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, mickey->pos(), projection);
-                if (hotspot == ToolHotspot::Resize)
-                    mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
-                else if (hotspot == ToolHotspot::Rotate)
-                    mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hitnode));
-                else if (hotspot == ToolHotspot::Remove)
-                    mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
-
-                mUI.tree->SelectItemById(hitnode->GetId());
-                mTransformGizmo = TransformGizmo3D::None;
-                mTransformHandle = TransformHandle3D::None;
-                UpdateGizmos();
-            }
-        }
-    }
-    else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
+    if (!mCurrentTool && button == Qt::RightButton)
     {
         mCurrentTool.reset(new PerspectiveCorrectCameraTool(mUI, mState));
     }
 
     if (mCurrentTool)
     {
-        if (mCurrentTool->GetToolFunction() == MouseTool::ToolFunctionType::TransformNode &&
-            GetCurrentNode()->TestFlag(game::EntityNodeClass::Flags::LockedInEditor))
-        {
-            NOTE("Unlock node to apply node transformations.");
-            mCurrentTool.reset();
-        } else mCurrentTool->MousePress(mickey);
+        mCurrentTool->MousePress(mickey);
     }
-
 }
+
 void EntityWidget::MouseRelease(QMouseEvent* event)
 {
     if (mViewerMode)
@@ -6692,6 +6599,121 @@ void EntityWidget::UpdateGizmos()
     SetValue(mUI.actionSelectObject, mTransformGizmo == TransformGizmo3D::None);
     SetValue(mUI.actionRotateObject, mTransformGizmo == TransformGizmo3D::Rotate);
     SetValue(mUI.actionTranslateObject, mTransformGizmo == TransformGizmo3D::Translate);
+}
+
+std::unique_ptr<MouseTool> EntityWidget::StartSplineTool(const MouseEvent& mickey, game::EntityNodeClass* node)
+{
+    if (auto* spline_mover = node->GetSplineMover())
+    {
+        auto* mover_curve = mState.entity->FindCurveById(spline_mover->GetCurveId());
+        auto* mover_node = node;
+
+        ASSERT(mover_node && mover_curve);
+        const auto* parent_node = mState.entity->FindNodeParent(mover_node);
+        const auto spline_path_mode = spline_mover->GetPathCoordinateSpace();
+        const game::EntityNodeClass* coordinate_reference_node = nullptr;
+
+        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Parent)
+            coordinate_reference_node = parent_node;
+        else if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Local)
+            coordinate_reference_node = mover_node;
+        else BUG("Bug on spline path mode.");
+
+        for (size_t i=0; i<mover_curve->GetPointCount(); ++i)
+        {
+            const auto& spline_local_point = spline_mover->GetPathRelativePoint(*mover_curve, i).GetPosition();
+            const auto& spline_world_point = mState.entity->MapCoordsFromNode(spline_local_point, coordinate_reference_node);
+            gfx::FRect box;
+            box.Resize(20.0f, 20.0f);
+            box.Move(spline_world_point);
+            box.Translate(-10.0f, -10.0f);
+            if (box.TestPoint(mickey.MapToPlane()))
+            {
+                SelectRow(mUI.splinePointView, i);
+                return std::make_unique<SplineTool>(mState, mover_node, spline_mover, mover_curve, i);
+            }
+        }
+    }
+    return nullptr;
+}
+
+std::unique_ptr<MouseTool> EntityWidget::SelectNodeTool(const MouseEvent& mickey, game::EntityNodeClass* node)
+{
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    const auto grid_size = static_cast<unsigned>(grid);
+    const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
+
+    const auto button = mickey->button();
+    if (button == Qt::LeftButton)
+    {
+        if (mTransformGizmo != TransformGizmo3D::None && mTransformHandle != TransformHandle3D::None)
+            return std::make_unique<Transform3DTool>(mTransformGizmo, mTransformHandle, mState, node, false);
+
+        // try a node hot spot
+        const auto node_box_size = node->GetSize();
+        const auto& node_to_world = mState.entity->FindNodeTransform(node);
+        gfx::FRect box;
+        box.Resize(node_box_size.x, node_box_size.y);
+        box.Translate(-node_box_size.x * 0.5f, -node_box_size.y * 0.5f);
+
+        using ResizeNodeTool = ResizeRenderTreeNodeTool<game::EntityClass, game::EntityNodeClass>;
+        using RotateNodeTool = RotateRenderTreeNodeTool<game::EntityClass, game::EntityNodeClass>;
+        using MoveNodeTool = MoveRenderTreeNodeTool<game::EntityClass, game::EntityNodeClass>;
+
+        const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, mickey->pos(), projection);
+        if (hotspot == ToolHotspot::Resize)
+            return std::make_unique<ResizeNodeTool>(*mState.entity, node, snap, grid_size);
+        else if (hotspot == ToolHotspot::Rotate)
+            return std::make_unique<RotateNodeTool>(*mState.entity, node);
+        else if (hotspot == ToolHotspot::Remove)
+            return std::make_unique<MoveNodeTool>(*mState.entity, node, snap, grid_size);
+    }
+    else if (button == Qt::RightButton)
+    {
+        if (mTransformGizmo != TransformGizmo3D::None && mTransformHandle != TransformHandle3D::None)
+            return std::make_unique<Transform3DTool>(mTransformGizmo, mTransformHandle, mState, node, true);
+    }
+    return nullptr;
+}
+
+std::unique_ptr<MouseTool> EntityWidget::StartMouseTool(const MouseEvent& mickey)
+{
+    const auto button = mickey->button();
+
+    if (auto* current = GetCurrentNode())
+    {
+        // have to test for the spline tool first since the spline points
+        // may lie outside the node box
+        if  (auto spline_tool = StartSplineTool(mickey, current))
+            return spline_tool;
+
+        if (auto node_tool = SelectNodeTool(mickey, current))
+            return node_tool;
+    }
+
+    if (button == Qt::LeftButton)
+    {
+        auto [selection, _] = SelectNode(mickey.MapToPlane(), *mState.entity, GetCurrentNode());
+        if (selection)
+        {
+            mUI.tree->SelectItemById(selection->GetId());
+        }
+        else
+        {
+            mUI.tree->ClearSelection();
+        }
+        mTransformGizmo = TransformGizmo3D::None;
+        mTransformHandle = TransformHandle3D::None;
+        UpdateGizmos();
+    }
+
+    if (auto* current = GetCurrentNode())
+    {
+        if (auto tool = SelectNodeTool(mickey, current))
+            return tool;
+    }
+    return nullptr;
 }
 
 bool EntityWidget::CanApplyGizmo() const
