@@ -33,19 +33,138 @@
 #include "graphics/vertex.h"
 #include "graphics/vertex_buffer.h"
 
+// some geometries such as the vertical and horizontal capsule need special
+// care when being resized for rendering in order to retain their features
+// right. For example the capsule end caps must remain round. Right now
+// this is solved by tessellating the geometries based on the aspect ratio.
+
+// However, because tessellating based on any possible aspect ratio would
+// lead to an explosion of geometries the aspect ratios are assigned to
+// buckets where each bucket is considered "good enough fit" for a bunch of
+// real aspect ratios and the geometry is only tessellated per bucket. 
+// In other words we're collapsing and mapping multiple aspect ratios to 
+// a single bucket.
+
+// Let's say we take an aspect ratio and map it to a bucket linearly in
+// quarter steps:
+// [1.0 ... 1.25) |  [1.25 ... 1.50) | [1.50 ... 1.75) ... etc
+// This introduces some 'error'. The error means that the geometry of the
+// shape rendered will be off by some amount wrt the actual expected geometry
+// (as based on its aspect ratio).
+//
+// Let's say we map an aspect ratio of 1.24 to the first bucket and use 1.0
+// the shape will be off by 24%. If we map 1.24 to the mid-point value of
+// the bucket instead then we'd get aspect ratio of 1.125 and the error would
+// be (1.24-1.125) / 1.24 ~= 9.3%, or 0.115 in absolute units. The largest
+// absolute error any bucket can have is 0.125 (half of the bucket's width).
+//
+// However, the error wrt the true aspect ratio is NOT constant because
+// when the absolute error stays constant but the true aspect ratio varies
+// the error relative to the true aspect ratio also varies.
+//
+//  │ true ratio │ worst-case bucket ratio │ relative error │
+//  ---------------------------------------------------------
+//  │ 1.0        │ 1.125                   │ 12.5%          │
+//  │ 2.0        │ 2.125                   │ 6%             │
+//  │ 10.0       │ 10.125                  │ 1.25%          │
+//  │ 50.0       │ 50.125                  │ 0.25%          │
+//
+//
+// Another way to assign the buckets is to have a logarithmic scale
+// Let's say we assume a 10% growth between the buckets, i.e. the bucket
+//  values are 1.1^k = 1.0, 1.1, 1.21, 1.331 ...
+// Then we'd ask: "which bucket value 1.1^k is the nearest to this aspect
+// ratio?"
+//
+// so if we have an aspect ratio 'a', and a real valued exponent 'x' we get
+//
+//                        1.1^x = a
+//
+//                      x = log_1.1(a)
+//                      x = ln(a) / ln(1.1)
+//
+// The bucket index 'k' is the exponent rounded to the nearest integer,
+// k = round(x). (Remember kids, round breaks ties away from zero.)
+//
+//   x      k = round(x)
+// -------------------------
+//  0.3     0
+//  0.4     0
+//  0.5     1       (a tie, halfway between 0 and 1)
+//
+// So which aspect ratios go into which bucket? Any aspect ratio where round(x) 
+// yields the same integer goes into the same bucket, for example
+// x=0.4 gives k=0 and x=0.5 gives k=1.
+//   bucket k=0:   -0.5 <  x < 0.5
+//   bucket k=1:    0.5 <= x < 1.5
+//   bucket k=2:    1.5 <= x < 2.5
+//
+// In terms of the aspect ratio 'a' bucket k covers
+//   1.1^(k-0.5) <= a < 1.1^(k+0.5)
+// For example bucket 0 covers 0.953 ... 1.049 (the aspect ratio is never
+// below 1.0 so effectively 1.0 ... 1.049) and bucket 1 covers 1.049 ... 1.154.
+// The edges are always a factor of sqrt(1.1) ~= 1.049 from the bucket value
+// (half a step) so the worst case relative error is ~4.9% at every aspect ratio.
+
+// │ true ratio │    k     │ bucket value 1.1^k │ ratios in this bucket │ log worst-case error |
+// -----------------------------------------------------------------------------------------------
+// │ 1.0        │ 0        │ 1.000              │ 1.00 – 1.049          │ ±4.9%                |
+// │ 2.0        │ 7        │ 1.949              │ 1.858 – 2.044         │ ±4.9%                |
+// │ 10.0       │ 24       │ 9.850              │ 9.39 – 10.33          │ ±4.9%                |
+// │ 50.0       │ 41       │ 49.79              │ 47.5 – 52.2           │ ±4.9%                |
+
+// logarithm refresher:  b^x = y  =>  x = log_b(y) =>   x = ln(y) / ln(b)
+
 namespace {
-float HalfRound(float value)
+constexpr auto CapsuleAspectRatioStep = 1.1;
+
+int ComputeCapsuleAspectRatioBucket(float width, float height)
 {
-    const float fraction  = value - (int)value;
-    const float whole = (int)value;
-    if (fraction < 0.25)
-        return whole;
-    else if (fraction < 0.5)
-        return whole + 0.5f;
-    else if (fraction < 0.75)
-        return whole + 0.5f;
-    return whole + 1.0f;
+    // the negated comparison also catches NaN.
+    if (!(width >= 1e-3f) || !(height >= 1e-3f) ||
+        !std::isfinite(width) || !std::isfinite(height))
+        return 0;
+
+    const auto aspect = static_cast<double>(width) / static_cast<double>(height);
+    const auto x = std::log(aspect) / std::log(CapsuleAspectRatioStep);
+    return static_cast<int>(std::round(x));
 }
+
+float GetCapsuleAspectRatio(int bucket, float width, float height)
+{
+    // use some exact ratios for known width/height ratios.
+    // the bucketing change from linear to logarithmic causes
+    // some tests to fail on these ratios.
+    if (width > 0.0f && height > 0.0f && std::isfinite(width) && std::isfinite(height))
+    {
+        const auto aspect = width / height;
+        if (math::equals(aspect, 1.0f))
+            return 1.0f;
+        else if (math::equals(aspect, 2.0f))
+            return 2.0f;
+        else if (math::equals(aspect, 0.5f))
+            return 0.5f;
+    }
+
+    return static_cast<float>(std::pow(CapsuleAspectRatioStep, bucket));
+}
+
+std::string GetCapsuleGeometryId(float width, float height)
+{
+    if (width > 0.0f && height > 0.0f && std::isfinite(width) && std::isfinite(height))
+    {
+        const auto aspect = width / height;
+        if (math::equals(aspect, 1.0f))
+            return "1:1";
+        else if (math::equals(aspect, 2.0f))
+            return "2:1";
+        else if (math::equals(aspect, 0.5f))
+            return "1:2";
+    }
+    const auto bucket = ComputeCapsuleAspectRatioBucket(width, height);
+    return std::to_string(bucket);
+}
+
 int Truncate(float value)
 { return (int)value; }
 
@@ -150,11 +269,17 @@ void CapsuleGeometry::GenerateVertical(const SimpleShapeEnvironment& env, Style 
     const auto& model_matrix = *env.model_matrix;
     const auto rect_width  = glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
     const auto rect_height = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+
+    // make sure to use the  same rounded aspect ratio when generating
+    // the geometry so that the geometry matches the ID exactly.
+    const auto aspect_ratio_value = GetCapsuleAspectRatio(ComputeCapsuleAspectRatioBucket(rect_width, rect_height),
+        rect_width, rect_height);
+
     float w = radius;
     float h = radius;
-    if (rect_width > rect_height)
-        w = h / (rect_width/rect_height);
-    else h = w / (rect_height/rect_width);
+    if (aspect_ratio_value > 1.0f)
+        w = h / aspect_ratio_value;
+    else h = w * aspect_ratio_value;
 
     TypedVertexBuffer<Vertex2D> vs;
     vs.SetVertexLayout(GetVertexLayout<Vertex2D>());
@@ -263,14 +388,19 @@ void CapsuleGeometry::GenerateHorizontal(const SimpleShapeEnvironment& env, Styl
     // round rectangle out of it's square shape which would then
     // distort the rounded corners out of the shape too.
     const auto& model_matrix = *env.model_matrix;
-    const auto rect_width   = glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-    const auto rect_height  = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
-    const auto aspect_ratio = rect_width / rect_height;
+    const auto rect_width   =  glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+    const auto rect_height  =  glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+
+    // make sure to use the  same rounded aspect ratio when generating
+    // the geometry so that the geometry matches the ID exactly.
+    const auto aspect_ratio_value = GetCapsuleAspectRatio(ComputeCapsuleAspectRatioBucket(rect_width, rect_height),
+        rect_width, rect_height);
+
     float w = radius;
     float h = radius;
-    if (rect_width > rect_height)
-        w = h / (rect_width/rect_height);
-    else h = w / (rect_height/rect_width);
+    if (aspect_ratio_value > 1.0f)
+        w = h / aspect_ratio_value;
+    else h = w * aspect_ratio_value;
 
     TypedVertexBuffer<Vertex2D> vs;
     vs.SetVertexLayout(GetVertexLayout<Vertex2D>());
@@ -1310,11 +1440,15 @@ std::string GetSimpleShapeGeometryId(const SimpleShapeArgs& args,
         const auto& model_matrix = *env.model_matrix;
         const auto rect_width    = glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
         const auto rect_height   = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
-        const auto aspect_ratio  = rect_width / rect_height;
+
         if (type == SimpleShapeType::Capsule)
         {
             const auto& capsule_args = std::get<detail::CapsuleArgs>(args);
-            id += NameAspectRatio(rect_width, rect_height, HalfRound, "%1.1f:%1.1f");
+
+            // the bucket index is a signed integer that identifies both the
+            // aspect ratio and whether the shape is wide (k > 0) or tall (k < 0).
+            id += GetCapsuleGeometryId(rect_width, rect_height);
+            id += ":";
             id += base::ToString(capsule_args.orientation);
         }
         else if (type == SimpleShapeType::RoundRect)
