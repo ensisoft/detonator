@@ -1998,6 +1998,12 @@ private:
         }
 
         const auto& camera = GetCamera();
+        const auto& game_view = camera.viewport;
+        const float game_view_width = game_view.GetWidth();
+        const float game_view_height = game_view.GetHeight();
+        if (game_view_width <= 0.0f || game_view_height < 0.0f)
+            return;
+
         const auto device_viewport  = GetViewport(camera, mSurfaceWidth, mSurfaceHeight);
         const auto surface_width  = (float)mSurfaceWidth;
         const auto surface_height = (float)mSurfaceHeight;
