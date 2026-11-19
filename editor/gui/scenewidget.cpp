@@ -1058,6 +1058,10 @@ void SceneWidget::Update(double dt)
             mUIOverlayState.ui->UpdateState(mSceneTime, dt, &window_actions);
         }
     }
+    else
+    {
+        mState.renderer.Update(*mState.scene, nullptr, 0.0f, 0.0f);
+    }
     mCurrentTime += dt;
 
     mAnimator.Update(mUI, mState);
