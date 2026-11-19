@@ -68,6 +68,9 @@ namespace gfx
             // not the real geometry, because the real geometry failed
             // to load or could not be generated.
             bool fallback = false;
+            // flag to indicate that we want to re-specify the geometry
+            // buffer contents if the geometry already exists.
+            bool respecify_contents = false;
         };
 
         virtual ~Geometry() = default;
