@@ -110,7 +110,7 @@ private:
     MagFilter mDefaultMagTextureFilter = MagFilter::Nearest;
 
     std::unordered_map<std::string, std::shared_ptr<gfx::InstanceData>> mInstances;
-    std::unordered_map<std::string, std::shared_ptr<gfx::Geometry>> mGeoms;
+    std::unordered_map<std::string, std::shared_ptr<gfx::DeviceGeometry>> mGeoms;
     std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
     std::unordered_map<std::string, std::shared_ptr<gfx::Program>> mPrograms;
     std::unordered_map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
@@ -253,7 +253,16 @@ gfx::GeometryPtr GraphicsDevice::FindGeometry(const std::string& id)
 
 gfx::GeometryPtr GraphicsDevice::CreateGeometry(const std::string& id, gfx::Geometry::CreateArgs args)
 {
-    auto geometry = std::make_shared<gfx::DeviceGeometry>(mDevice);
+    std::shared_ptr<gfx::DeviceGeometry> geometry;
+    if (args.respecify_contents)
+    {
+        if (auto* existing = base::SafeFind(mGeoms, id))
+            geometry = *existing;
+    }
+
+    if (!geometry)
+        geometry = std::make_shared<gfx::DeviceGeometry>(mDevice);
+
     geometry->SetFrameStamp(mFrameNumber);
     geometry->SetName(std::move(args.content_name));
     geometry->SetErrorLog(std::move(args.error_log));
@@ -261,9 +270,11 @@ gfx::GeometryPtr GraphicsDevice::CreateGeometry(const std::string& id, gfx::Geom
     geometry->SetDataHash(args.content_hash);
     geometry->SetUsage(args.usage);
     geometry->SetProperties(std::move(args.properties));
+
     if (args.buffer_ptr)
         geometry->SetBuffer(args.buffer_ptr);
     else geometry->SetBuffer(std::make_shared<gfx::GeometryBuffer>(std::move(args.buffer)));
+
     geometry->Upload();
 
     mGeoms[id] = geometry;

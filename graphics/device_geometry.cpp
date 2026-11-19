@@ -51,7 +51,14 @@ void DeviceGeometry::Upload() const
     const auto vertex_ptr   = upload->GetVertexDataPtr();
     const auto index_ptr    = upload->GetIndexDataPtr();
     if (vertex_bytes == 0)
+    {
+        if (mIndexBuffer.IsValid())
+            mDevice->FreeBuffer(mIndexBuffer);
+
+        mDrawCommands.clear();
+        mIndexBuffer = dev::GraphicsBuffer {};
         return;
+    }
 
     if (mVertexBuffer.buffer_bytes != vertex_bytes)
     {
@@ -67,7 +74,13 @@ void DeviceGeometry::Upload() const
     mDrawCommands = upload->GetDrawCommands();
 
     if (index_bytes == 0)
+    {
+        if (mIndexBuffer.IsValid())
+            mDevice->FreeBuffer(mIndexBuffer);
+
+        mIndexBuffer = dev::GraphicsBuffer {};
         return;
+    }
 
     if (mIndexBuffer.buffer_bytes != index_bytes)
     {

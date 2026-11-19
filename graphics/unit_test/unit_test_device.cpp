@@ -1838,6 +1838,178 @@ void unit_test_ibo_allocation()
     }
 }
 
+void unit_test_respecify_geometry()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // geometry created with respecify_contents flag replaces the contents
+    // of an existing geometry object (same id) instead of creating a new
+    // geometry object. Any state left over from the previous contents,
+    // such as the draw commands or the index buffer must not leak through.
+
+    auto dev = CreateDevice();
+
+    constexpr const char* fragment_src =
+R"(#version 100
+precision mediump float;
+void main() {
+  gl_FragColor = vec4(1.0);
+})";
+
+    constexpr const char* vertex_src =
+R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+
+    auto prog = MakeTestProgram(*dev, vertex_src, fragment_src);
+
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
+
+    auto Render = [&](const gfx::Geometry& geometry) {
+        dev->BeginFrame();
+          dev->ClearColor(gfx::Color::Red);
+          dev->Draw(*prog, gfx::ProgramState(), geometry, state);
+        dev->EndFrame();
+        return dev->ReadColorBuffer(10, 10);
+    };
+
+    // full viewport quad, indexed.
+    auto MakeFullQuadIndexed = [] {
+        constexpr const gfx::Vertex2D vertices[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+        };
+        constexpr const gfx::Index16 indices[] = {
+            0, 1, 2,
+            0, 2, 3
+        };
+        gfx::Geometry::CreateArgs args;
+        args.usage = gfx::GeometryBuffer::Usage::Dynamic;
+        args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        args.buffer.SetVertexBuffer(vertices, 4);
+        args.buffer.SetIndexBuffer(indices, 6);
+        args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+        return args;
+    };
+    // the left half of the viewport, not indexed.
+    auto MakeLeftHalfQuad = [] {
+        constexpr const gfx::Vertex2D vertices[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 0, -1}, {1, 0} },
+
+            { {-1,  1}, {0, 1} },
+            { { 0, -1}, {1, 0} },
+            { { 0,  1}, {1, 1} }
+        };
+        gfx::Geometry::CreateArgs args;
+        args.usage = gfx::GeometryBuffer::Usage::Dynamic;
+        args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        args.buffer.SetVertexBuffer(vertices, 6);
+        args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+        return args;
+    };
+
+    // initial geometry.
+    auto geom = dev->CreateGeometry("geom", MakeFullQuadIndexed());
+    {
+        const auto& bmp = Render(*geom);
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
+    }
+
+    // without the respecify flag a new geometry object is created.
+    {
+        auto other = dev->CreateGeometry("other", MakeFullQuadIndexed());
+        auto again = dev->CreateGeometry("other", MakeFullQuadIndexed());
+        TEST_REQUIRE(other.get() != again.get());
+    }
+
+    // respecify indexed -> non-indexed. The same geometry object is reused
+    // and the old index buffer must not be used for drawing.
+    {
+        auto args = MakeLeftHalfQuad();
+        args.respecify_contents = true;
+        auto respecified = dev->CreateGeometry("geom", std::move(args));
+        TEST_REQUIRE(respecified.get() == geom.get());
+        TEST_REQUIRE(dev->FindGeometry("geom").get() == geom.get());
+        TEST_REQUIRE(geom->GetNumDrawCmds() == 1);
+
+        const auto& bmp = Render(*geom);
+        TEST_REQUIRE(bmp.GetPixel(5, 2) == gfx::Color::White);
+        TEST_REQUIRE(bmp.GetPixel(5, 7) == gfx::Color::Red);
+    }
+
+    // respecify non-indexed -> indexed.
+    {
+        auto args = MakeFullQuadIndexed();
+        args.respecify_contents = true;
+        auto respecified = dev->CreateGeometry("geom", std::move(args));
+        TEST_REQUIRE(respecified.get() == geom.get());
+
+        const auto& bmp = Render(*geom);
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
+    }
+
+    // respecify with an empty buffer. The draw commands and the index
+    // buffer of the previous contents must be gone.
+    {
+        gfx::Geometry::CreateArgs args;
+        args.usage = gfx::GeometryBuffer::Usage::Dynamic;
+        args.respecify_contents = true;
+        auto respecified = dev->CreateGeometry("geom", std::move(args));
+        TEST_REQUIRE(respecified.get() == geom.get());
+        TEST_REQUIRE(geom->GetNumDrawCmds() == 0);
+
+        const auto& bmp = Render(*geom);
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Red));
+    }
+
+    // respecify the empty geometry back to having contents.
+    {
+        auto args = MakeLeftHalfQuad();
+        args.respecify_contents = true;
+        auto respecified = dev->CreateGeometry("geom", std::move(args));
+        TEST_REQUIRE(respecified.get() == geom.get());
+        TEST_REQUIRE(geom->GetNumDrawCmds() == 1);
+
+        const auto& bmp = Render(*geom);
+        TEST_REQUIRE(bmp.GetPixel(5, 2) == gfx::Color::White);
+        TEST_REQUIRE(bmp.GetPixel(5, 7) == gfx::Color::Red);
+    }
+
+    // dropping the index data releases the index buffer memory.
+    {
+        dev->DeleteGeometries();
+
+        auto geometry = dev->CreateGeometry("geom", MakeFullQuadIndexed());
+
+        gfx::Device::ResourceStats stats;
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 6 * sizeof(gfx::Index16));
+
+        auto args = MakeLeftHalfQuad();
+        args.respecify_contents = true;
+        dev->CreateGeometry("geom", std::move(args));
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
+    }
+}
+
 void unit_test_empty_draw_lost_uniform_bug()
 {
     TEST_CASE(test::Type::Feature)
@@ -3313,6 +3485,7 @@ int test_main(int argc, char* argv[])
     unit_test_clean_textures();
     unit_test_vbo_allocation();
     unit_test_ibo_allocation();
+    unit_test_respecify_geometry();
     unit_test_max_texture_units_single_texture();
     unit_test_max_texture_units_many_textures();
     unit_test_algo_texture_copy();
