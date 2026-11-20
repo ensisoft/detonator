@@ -44,7 +44,7 @@ namespace gfx
         using DrawType    = GeometryBuffer::DrawType;
         using DrawCommand = GeometryBuffer::DrawCommand;
         using IndexType   = GeometryBuffer::IndexType;
-        using Property    = std::variant<float, glm::vec2, glm::vec3, glm::vec4>;
+        using Property    = std::variant<int, float, glm::vec2, glm::vec3, glm::vec4>;
 
         struct CreateArgs {
             std::unordered_map<std::string, Property> properties;

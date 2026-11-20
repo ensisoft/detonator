@@ -819,6 +819,11 @@ const Curve* Entity::FindCurveById(const std::string& id) const
     return nullptr;
 }
 
+const Curve &Entity::GetCurve(size_t index) const
+{
+    return base::SafeIndex(mCurves, index);
+}
+
 std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass)
 { return std::make_unique<Entity>(std::move(klass)); }
 

@@ -76,6 +76,8 @@ void Renderer::CreateRendererState(const game::Scene& scene, const game::Tilemap
     std::lock_guard<std::mutex> lock(mRendererLock);
 
     mPaintNodes.clear();
+    mInstanceCurves.clear();
+    mSharedCurves.clear();
 
     const auto& nodes = scene.CollectNodes();
 
@@ -84,6 +86,9 @@ void Renderer::CreateRendererState(const game::Scene& scene, const game::Tilemap
         const Entity* entity = p.entity;
         if (!entity->HasRenderableItems() && !entity->HasLights())
             continue;
+
+        CreateClassCurves(entity->GetClass());
+        CreateInstanceCurves(*entity);
 
         gfx::Transform transform(p.node_to_scene);
         CreatePaintNodes<Entity, EntityNode>(*p.entity, transform);
@@ -104,6 +109,15 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
 
         if (entity->HasBeenKilled())
         {
+            for (size_t i=0; i<entity->GetNumCurves(); ++i)
+            {
+                const auto& curve = entity->GetCurve(i);
+                if (!curve.HasInstanceData())
+                    continue;
+                const auto id = curve.GetInstanceId();
+                mInstanceCurves.erase(id);
+            }
+
             for (size_t i=0; i<entity->GetNumNodes(); ++i)
             {
                 const auto& node = entity->GetNode(i);
@@ -114,6 +128,12 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
         }
         else
         {
+            if (entity->HasBeenSpawned())
+            {
+                CreateClassCurves(entity->GetClass());
+                CreateInstanceCurves(*entity);
+            }
+
             gfx::Transform transform(node.node_to_scene);
             CreatePaintNodes<Entity, EntityNode>(*node.entity, transform);
         }
@@ -305,6 +325,8 @@ void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Ti
         if (entity == nullptr)
             continue;
 
+        CreateClassCurves(*entity);
+
         gfx::Transform transform(node.node_to_scene);
         CreatePaintNodes<game::EntityClass, game::EntityNodeClass>(*entity, transform, placement->GetId());
     }
@@ -312,12 +334,17 @@ void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Ti
 
 void Renderer::UpdateRendererState(const game::EntityClass& entity)
 {
+    CreateClassCurves(entity);
+
     gfx::Transform transform;
     CreatePaintNodes<EntityClass, EntityNodeClass>(entity, transform, "");
 }
 
 void Renderer::UpdateRendererState(const game::Entity& entity)
 {
+    CreateClassCurves(entity.GetClass());
+    CreateInstanceCurves(entity);
+
     gfx::Transform transform;
     CreatePaintNodes<Entity, EntityNode>(entity, transform, "");
 }
@@ -330,6 +357,9 @@ void Renderer::UpdateRendererState(const game::Tilemap& map)
 
 void Renderer::Update(const EntityClass& entity, double time, float dt)
 {
+    UpdateClassCurves(entity);
+    DeleteClassCurves(entity);
+
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
@@ -358,12 +388,26 @@ void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double 
 {
     const auto projection = scene.GetProjection();
 
+    std::unordered_set<std::string> dead_curves;
+    for (const auto& [key, _] : mSharedCurves)
+    {
+        dead_curves.insert(key);
+    }
+
     for (size_t i=0; i<scene.GetNumNodes(); ++i)
     {
         const auto& placement = scene.GetPlacement(i);
         const auto& entity = placement.GetEntityClass();
         if (!entity)
             continue;
+
+        UpdateClassCurves(*entity);
+
+        for (size_t i=0; i<entity->GetNumCurves(); ++i)
+        {
+            const auto& curve = entity->GetCurve(i);
+            dead_curves.erase(curve.GetClassId());
+        }
 
         for (size_t j=0; j<entity->GetNumNodes(); ++j)
         {
@@ -385,6 +429,15 @@ void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double 
             }
         }
     }
+
+    for (const auto& key : dead_curves)
+    {
+        auto it = mSharedCurves.find(key);
+        ASSERT(it != mSharedCurves.end());
+        const auto& curve = it->second;
+        DEBUG("Deleted a shared gfx curve. [name='%1']", curve->GetName());
+        mSharedCurves.erase(it);
+    }
 }
 
 void Renderer::Update(const game::Tilemap& map, double time, float dt)
@@ -395,6 +448,11 @@ void Renderer::Update(const game::Tilemap& map, double time, float dt)
 
 void Renderer::Update(const Entity& entity, double time, float dt)
 {
+    UpdateClassCurves(entity.GetClass());
+    DeleteClassCurves(entity.GetClass());
+    UpdateInstanceCurves(entity);
+    DeleteInstanceCurves(entity);
+
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
@@ -1216,20 +1274,10 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
     {
         const auto* mesh_effect = entity_node.GetMeshEffect();
 
-        const auto& materialId = item->GetMaterialId();
-        const auto& drawableId = item->GetDrawableId();
-
-        std::string curveId;
-
-        if (drawableId == "_curve" && item->HasCurve())
-        {
-            if (const auto* curve = entity.FindCurveById(item->GetCurveId()))
-                curveId = curve->GetCurveId(!mEditingMode);
-        }
-
-        auto drawable_key = curveId.empty() ? drawableId : curveId;
-        if (mesh_effect)
-            drawable_key += "+MeshEffect";
+        const auto& materialId   = item->GetMaterialId();
+        const auto& drawableId   = item->GetDrawableId();
+        const auto& curveId      = item->GetCurveId();
+        const auto& drawable_key = mesh_effect ? drawableId + "+MeshEffect" : drawableId;
 
         if (paint_node.materialId != materialId)
         {
@@ -1252,80 +1300,26 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             }
         }
 
-        if (paint_node.drawableId != drawable_key)
+        if (paint_node.drawableId != drawable_key ||
+            (paint_node.drawableId == "_curve" && paint_node.curveId != curveId))
         {
             paint_node.drawable.reset();
             paint_node.drawableId = drawable_key;
+            paint_node.curveId = curveId;
 
             if (auto klass = mClassLib->FindDrawableClassById(drawableId))
             {
-                auto source_drawable = gfx::CreateDrawableInstance(klass);
-
+                std::unique_ptr<gfx::Drawable> source_drawable;
                 if (klass->GetType() == gfx::DrawableClass::Type::Curve)
                 {
-                    if (const auto* curve = entity.FindCurveById(item->GetCurveId()))
-                    {
-                        auto* curve_drawable = dynamic_cast<gfx::CurveInstance*>(source_drawable.get());
-                        const auto joint_style = curve->GetJointStyle();
-                        const auto end_cap_style = curve->GetEndCapStyle();
-                        const auto curve_type = curve->GetCurveType();
-                        const auto curve_width_override = curve->HasWidthOverride();
-                        const auto& curve_data = curve->GetCurve();
-
-                        std::vector<gfx::CurvePoint> points;
-                        for (size_t i=0; i<curve_data.GetPointCount(); ++i)
-                        {
-                            const auto& src_point = curve_data.GetPoint(i);
-                            const auto& src_pos = src_point.GetPosition();
-
-                            gfx::CurvePoint dst_point;
-                            if (curve_width_override)
-                                dst_point.SetWidth(curve->GetWidthOverride());
-                            else
-                                dst_point.SetWidth(src_point.GetWidth());
-                            dst_point.SetPosition(base::Float2(src_pos.x, src_pos.y));
-                            points.push_back(dst_point);
-                        }
-
-                        // curves that are not in unit coordinates are flipped on y and fitted into the unit box.
-                        if (!curve_data.HasUnitCoordinates())
-                            gfx::NormalizeCurve(points, true);
-
-                        gfx::CurveArgs args;
-                        args.curve_id = curveId;
-                        args.curve_name = curve->GetName();
-                        args.make_fallback_on_fail = true;
-                        args.points = std::move(points);
-
-                        if (curve_type == CurveType::CatmullRom)
-                            args.curve_type = gfx::CurveType::CatmullRomSpline;
-                        else if (curve_type == CurveType::Polyline)
-                            args.curve_type = gfx::CurveType::PolylineSpline;
-                        else BUG("Missing curve type");
-
-                        if (joint_style == CurveJointStyle::Bevel)
-                            args.joint_style = gfx::CurveJointStyle::Bevel;
-                        else if (joint_style == CurveJointStyle::Miter)
-                            args.joint_style = gfx::CurveJointStyle::Miter;
-                        else if (joint_style == CurveJointStyle::Round)
-                            args.joint_style = gfx::CurveJointStyle::Round;
-                        else BUG("Missing joint style");
-
-                        if (end_cap_style == CurveEndCapStyle::Round)
-                            args.end_cap_style = gfx::CurveEndCapStyle::Round;
-                        else if (end_cap_style == CurveEndCapStyle::Butt)
-                            args.end_cap_style = gfx::CurveEndCapStyle::Butt;
-                        else if (end_cap_style == CurveEndCapStyle::Square)
-                            args.end_cap_style = gfx::CurveEndCapStyle::Square;
-                        else BUG("Missing end cap style");
-
-                        curve_drawable->SetInstanceCurve(std::move(args));
-
-                    }
-                    else if (!curveId.empty())
-                    {
-                        WARN("No such entity curve was found. [entity='%1', curve=%2]",  entity.GetName(), item->GetCurveId());
-                    }
+                    auto gfx_curve_klass = GetCurve(entity, entity_node);
+                    auto gfx_curve_drawable = std::make_unique<gfx::CurveInstance>(std::move(gfx_curve_klass));
+                    gfx_curve_drawable->SetAspectRatioOverride(TestFlag(Flags::OverrideCurveAspectRatio));
+                    source_drawable = std::move(gfx_curve_drawable);
+                }
+                else
+                {
+                    source_drawable = gfx::CreateDrawableInstance(klass);
                 }
 
                 if (mesh_effect)
@@ -1369,7 +1363,7 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             }
 
             if (!paint_node.drawable)
-                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", item->GetMaterialId(),
+                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", item->GetDrawableId(),
                      entity.GetName(), entity_node.GetName());
 
             if (paint_node.drawable)
@@ -1524,6 +1518,278 @@ void Renderer::CreateLightResources(const EntityType& entity, const EntityNodeTy
            light_node.light->spot_half_angle = light->GetSpotHalfAngle();
        }
    }
+}
+
+void Renderer::CreateClassCurves(const game::EntityClass& entity)
+{
+    for (unsigned i=0; i<entity.GetNumCurves(); ++i)
+    {
+        const auto& curve = entity.GetCurve(i);
+        const auto& id = curve.GetClassId();
+        if (base::Contains(mSharedCurves, id))
+            continue;
+
+        const auto& curve_name = base::FormatString("%1/%2", entity.GetClassName(), curve.GetName());
+        mSharedCurves[id] = CreateCurve(curve, id, curve_name);
+        DEBUG("Created a shared gfx curve. [name='%1']", curve_name);
+    }
+}
+
+void Renderer::UpdateClassCurves(const game::EntityClass& entity)
+{
+    for (unsigned i=0; i<entity.GetNumCurves(); ++i)
+    {
+        const auto& curve = entity.GetCurve(i);
+        const auto& curveId = curve.GetClassId();
+
+        if (auto* curve_class = base::SafeFind(mSharedCurves, curveId))
+            UpdateCurve(curve, *(*curve_class));
+    }
+}
+
+void Renderer::DeleteClassCurves(const game::EntityClass& entity)
+{
+    // delete curves that are no longer part of the entity class.
+    std::unordered_set<std::string> dead_curves;
+    for (const auto& [key, _] : mSharedCurves)
+    {
+        dead_curves.insert(key);
+    }
+
+    for (unsigned i=0; i<entity.GetNumCurves(); ++i)
+    {
+        const auto& curve = entity.GetCurve(i);
+        const auto& curveId = curve.GetClassId();
+        dead_curves.erase(curveId);
+    }
+
+    for (const auto& key : dead_curves)
+    {
+        auto it = mSharedCurves.find(key);
+        ASSERT(it != mSharedCurves.end());
+        auto& curve = it->second;
+        DEBUG("Deleted a shared gfx curve. [name='%1']", curve->GetName());
+        mSharedCurves.erase(it);
+    }
+}
+
+void Renderer::CreateInstanceCurves(const game::Entity& entity)
+{
+    for (unsigned i=0; i<entity.GetNumCurves(); ++i)
+    {
+        const auto& curve = entity.GetCurve(i);
+        if (!curve.HasInstanceData())
+            continue;
+
+        const auto& id = curve.GetInstanceId();
+        if (base::Contains(mInstanceCurves, id))
+            continue;
+
+        const auto& curve_name = base::FormatString("%1:%2/%3:%4",
+            entity.GetClassName(), entity.GetId(),
+            curve.GetClassName(), curve.GetInstanceId());
+
+        mInstanceCurves[id] = CreateCurve(curve, id, curve_name);
+        DEBUG("Created a gfx curve instance. name='%1']", curve_name);
+    }
+}
+void Renderer::UpdateInstanceCurves(const game::Entity& entity)
+{
+    for (unsigned i=0; i<entity.GetNumCurves(); ++i)
+    {
+        const auto& curve = entity.GetCurve(i);
+        const auto& id = curve.GetInstanceId();
+
+        if (auto* curve_class = base::SafeFind(mInstanceCurves, id))
+            UpdateCurve(curve, (**curve_class));
+    }
+}
+
+void Renderer::DeleteInstanceCurves(const game::Entity& entity)
+{
+    // delete curves that are no longer part of the entity.
+    std::unordered_set<std::string> dead_curves;
+    for (const auto& [key, _] : mInstanceCurves)
+    {
+        dead_curves.insert(key);
+    }
+
+    for (unsigned i=0; i<entity.GetNumCurves(); ++i)
+    {
+        const auto& curve = entity.GetCurve(i);
+        const auto& id = curve.GetInstanceId();
+        dead_curves.erase(id);
+    }
+
+    for (const auto& key : dead_curves)
+    {
+        auto it = mInstanceCurves.find(key);
+        ASSERT(it != mInstanceCurves.end());
+        auto& curve = it->second;
+        DEBUG("Deleted a gfx curve instance. [name='%1']", curve->GetName());
+        mInstanceCurves.erase(it);
+    }
+}
+
+
+template<typename CurveType>
+std::shared_ptr<gfx::CurveClass> Renderer::CreateCurve(const CurveType& curve, const std::string& curveId, const std::string& name) const
+{
+    const auto joint_style = curve.GetJointStyle();
+    const auto end_cap_style = curve.GetEndCapStyle();
+    const auto curve_type = curve.GetCurveType();
+    const auto curve_width_override = curve.HasWidthOverride();
+    const auto& curve_data = curve.GetCurve();
+
+    std::vector<gfx::CurvePoint> points;
+    for (size_t i=0; i<curve_data.GetPointCount(); ++i)
+    {
+        const auto& src_point = curve_data.GetPoint(i);
+        const auto& src_pos = src_point.GetPosition();
+
+        gfx::CurvePoint dst_point;
+        if (curve_width_override)
+            dst_point.SetWidth(curve.GetWidthOverride());
+        else
+            dst_point.SetWidth(src_point.GetWidth());
+        dst_point.SetPosition(base::Float2(src_pos.x, src_pos.y));
+        points.push_back(dst_point);
+    }
+    // curves that are not in unit coordinates are flipped on y and fitted into the unit box.
+    if (!curve_data.HasUnitCoordinates())
+        gfx::NormalizeCurve(points, true);
+
+    gfx::CurveArgs args;
+    args.curve_id   = curveId;
+    args.curve_name = name;
+    args.curve_hash = curve.GetCurveHash();
+    args.points     = std::move(points);
+
+    if (curve_type == game::CurveType::CatmullRom)
+        args.curve_type = gfx::CurveType::CatmullRomSpline;
+    else if (curve_type == game::CurveType::Polyline)
+        args.curve_type = gfx::CurveType::PolylineSpline;
+    else BUG("Missing curve type");
+
+    if (joint_style == game::CurveJointStyle::Bevel)
+        args.joint_style = gfx::CurveJointStyle::Bevel;
+    else if (joint_style == game::CurveJointStyle::Miter)
+        args.joint_style = gfx::CurveJointStyle::Miter;
+    else if (joint_style == game::CurveJointStyle::Round)
+        args.joint_style = gfx::CurveJointStyle::Round;
+    else BUG("Missing joint style");
+
+    if (end_cap_style == game::CurveEndCapStyle::Round)
+        args.end_cap_style = gfx::CurveEndCapStyle::Round;
+    else if (end_cap_style == game::CurveEndCapStyle::Butt)
+        args.end_cap_style = gfx::CurveEndCapStyle::Butt;
+    else if (end_cap_style == game::CurveEndCapStyle::Square)
+        args.end_cap_style = gfx::CurveEndCapStyle::Square;
+    else BUG("Missing end cap style");
+
+    return std::make_shared<gfx::CurveClass>(args);
+}
+
+std::shared_ptr<gfx::CurveClass> Renderer::GetCurve(const game::EntityClass& entity, const game::EntityNodeClass& node) const
+{
+    const auto* draw = node.GetDrawable();
+    const auto& curveId = draw->GetCurveId();
+    const auto* curve = entity.FindCurveById(curveId);
+    ASSERT(curve && curve->GetClassId() == curveId);
+
+    if (auto* gfx_curve = base::SafeFind(mSharedCurves, curveId))
+        return *gfx_curve;
+
+    const auto& curve_name = base::FormatString("%1/%2", entity.GetClassName(), curve->GetName());
+    auto gfx_curve = CreateCurve(*curve, curveId, curve_name);
+    mSharedCurves[curveId] = gfx_curve;
+
+    DEBUG("Created a shared gfx curve. [name='%1']", curve_name);
+    return gfx_curve;
+}
+
+std::shared_ptr<gfx::CurveClass> Renderer::GetCurve(const game::Entity& entity, const game::EntityNode& node) const
+{
+    const auto* draw = node.GetDrawable();
+    const auto& curveId = draw->GetCurveId();
+    const auto* curve = entity.FindCurveById(curveId);
+    ASSERT(curve && curve->GetClassId() == curveId);
+
+    if (curve->HasInstanceData())
+    {
+        const auto curve_instance_id = curve->GetInstanceId();
+
+        if (auto gfx_curve = base::SafeFind(mInstanceCurves, curve_instance_id))
+            return *gfx_curve;
+
+        const auto& curve_name = base::FormatString("%1:%2/%3:%4",
+            entity.GetClassName(), entity.GetId(),
+            curve->GetClassName(), curve->GetInstanceId());
+
+        auto gfx_curve = CreateCurve(*curve, curve_instance_id, curve_name);
+        mInstanceCurves[curve_instance_id] = gfx_curve;
+
+        DEBUG("Created a gfx curve instance. [name='%1']", curve_name);
+        return gfx_curve;
+    }
+    return GetCurve(entity.GetClass(), node.GetClass());
+}
+
+template<typename CurveType>
+void Renderer::UpdateCurve(const CurveType& curve, gfx::CurveClass& curve_class) const
+{
+    const auto curve_hash = curve.GetCurveHash();
+    if (curve_class.GetContentHash() == curve_hash)
+        return;
+
+    const auto joint_style = curve.GetJointStyle();
+    const auto end_cap_style = curve.GetEndCapStyle();
+    const auto curve_type = curve.GetCurveType();
+    const auto curve_width_override = curve.HasWidthOverride();
+    const auto& curve_data = curve.GetCurve();
+
+    std::vector<gfx::CurvePoint> points;
+    for (size_t i=0; i<curve_data.GetPointCount(); ++i)
+    {
+        const auto& src_point = curve_data.GetPoint(i);
+        const auto& src_pos = src_point.GetPosition();
+
+        gfx::CurvePoint dst_point;
+        if (curve_width_override)
+            dst_point.SetWidth(curve.GetWidthOverride());
+        else
+            dst_point.SetWidth(src_point.GetWidth());
+        dst_point.SetPosition(base::Float2(src_pos.x, src_pos.y));
+        points.push_back(dst_point);
+    }
+    // curves that are not in unit coordinates are flipped on y and fitted into the unit box.
+    if (!curve_data.HasUnitCoordinates())
+        gfx::NormalizeCurve(points, true);
+
+    curve_class.SetContentHash(curve_hash);
+    curve_class.SetPoints(std::move(points));
+
+    if (curve_type == game::CurveType::CatmullRom)
+        curve_class.SetCurveType(gfx::CurveType::CatmullRomSpline);
+    else if (curve_type == game::CurveType::Polyline)
+        curve_class.SetCurveType(gfx::CurveType::PolylineSpline);
+    else BUG("Missing curve type");
+
+    if (joint_style == CurveJointStyle::Bevel)
+        curve_class.SetJointStyle(gfx::CurveJointStyle::Bevel);
+    else if (joint_style == CurveJointStyle::Miter)
+        curve_class.SetJointStyle(gfx::CurveJointStyle::Miter);
+    else if (joint_style == CurveJointStyle::Round)
+        curve_class.SetJointStyle(gfx::CurveJointStyle::Round);
+    else BUG("Missing joint style");
+
+    if (end_cap_style == CurveEndCapStyle::Round)
+        curve_class.SetEndCapStyle(gfx::CurveEndCapStyle::Round);
+    else if (end_cap_style == CurveEndCapStyle::Butt)
+        curve_class.SetEndCapStyle(gfx::CurveEndCapStyle::Butt);
+    else if (end_cap_style == CurveEndCapStyle::Square)
+        curve_class.SetEndCapStyle(gfx::CurveEndCapStyle::Square);
+    else BUG("Missing end cap style");
 }
 
 template<typename EntityType, typename EntityNodeType>

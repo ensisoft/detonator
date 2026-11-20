@@ -16,6 +16,7 @@
 
 #include "config.h"
 
+#include <atomic>
 #include <unordered_map>
 
 #include "base/logging.h"
@@ -69,6 +70,12 @@ namespace {
         }
 
         return spline_points;
+    }
+
+    std::string FastId()
+    {
+        static std::atomic<std::uint64_t> counter = 1;
+        return std::to_string(counter++);
     }
 
 } //namespace
@@ -180,17 +187,6 @@ size_t CurveClass::GetCurveHash() const noexcept
     return hash;
 }
 
-std::string CurveClass::GetCurveId(bool /* enable_id_caching */) const noexcept
-{
-    // enable_id_caching parameter is only taken in order to
-    // keep the method signature compatible with the instance version.
-    // the instance may cache the ID for performance reasons but
-    // only when the game is running in deployed mode (i.e not in
-    // the editor in the design mode)
-
-    return std::to_string(GetCurveHash());
-}
-
 void CurveClass::IntoJson(data::Writer& writer) const
 {
     auto curve_data = writer.NewWriteChunk();
@@ -292,6 +288,18 @@ bool CurveClass::InitClassRuntime(const std::string& debug_name) const
     return true;
 }
 
+Curve::Curve(std::shared_ptr<const CurveClass> klass)
+    : mClass(std::move(klass))
+    , mInstanceId(FastId())
+{}
+Curve::Curve(const CurveClass& klass)
+    : Curve(std::make_shared<CurveClass>(klass))
+{}
+
+Curve::Curve(CurveClass&& klass)
+    : Curve(std::make_shared<CurveClass>(std::move(klass)))
+{}
+
 std::size_t Curve::GetCurveHash() const noexcept
 {
     if (mInstanceCurve.has_value())
@@ -304,19 +312,6 @@ std::size_t Curve::GetCurveHash() const noexcept
         return hash;
     }
     return mClass->GetCurveHash();
-}
-
-std::string Curve::GetCurveId(bool enable_id_caching) const
-{
-    if (enable_id_caching && !mCurveId.empty())
-        return mCurveId;
-
-    auto curve_id = std::to_string(GetCurveHash());
-
-    if (enable_id_caching)
-        mCurveId = curve_id;
-
-    return curve_id;
 }
 
 float Curve::Reparametrize(float t) const

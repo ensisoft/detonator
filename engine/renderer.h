@@ -116,6 +116,9 @@ namespace engine
         enum class Effects {
             Bloom
         };
+        enum class Flags {
+            OverrideCurveAspectRatio
+        };
 
         using BasicFogParams   = LowLevelRenderer::BasicFogParams;
         using BloomParams = LowLevelRenderer::BloomParams;
@@ -146,6 +149,10 @@ namespace engine
         { mEditingMode = on_off; }
         void SetName(std::string name) noexcept
         { mRendererName = std::move(name); }
+        void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
+        auto TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
 
 #if !defined(DETONATOR_ENGINE_BUILD)
         // these are not thread safe and are only available in the
@@ -261,6 +268,23 @@ namespace engine
         template<typename EntityType, typename EntityNodeType>
         void CreateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node) const;
 
+        void CreateClassCurves(const game::EntityClass& entity);
+        void UpdateClassCurves(const game::EntityClass& entity);
+        void DeleteClassCurves(const game::EntityClass& entity);
+        void CreateInstanceCurves(const game::Entity& entity);
+        void UpdateInstanceCurves(const game::Entity& entity);
+        void DeleteInstanceCurves(const game::Entity& entity);
+
+        template<typename CurveType>
+        std::shared_ptr<gfx::CurveClass> CreateCurve(const CurveType& curve, const std::string& curveId, const std::string& name) const;
+
+        std::shared_ptr<gfx::CurveClass> GetCurve(const game::EntityClass& entity, const game::EntityNodeClass& node) const;
+        std::shared_ptr<gfx::CurveClass> GetCurve(const game::Entity& entity, const game::EntityNode& node) const;
+
+        template<typename CurveType>
+        void UpdateCurve(const CurveType& curve, gfx::CurveClass& klass) const;
+
+
         template<typename EntityType, typename EntityNodeType>
         void CreateDrawableDrawPackets(const EntityType& entity,
                                        const EntityNodeType& entity_node,
@@ -324,12 +348,14 @@ namespace engine
     private:
         const ClassLibrary* mClassLib = nullptr;
         std::string mRendererName;
+        base::bitflag<Flags> mFlags;
         bool mEditingMode = false;
 
         struct PaintNode {
             bool visited = false;
             std::string materialId;
             std::string drawableId;
+            std::string curveId;
             std::shared_ptr<gfx::Material> material;
             std::shared_ptr<gfx::Drawable> drawable;
             glm::vec2 world_scale;
@@ -354,6 +380,14 @@ namespace engine
         std::mutex mRendererLock;
         std::unordered_map<std::string, PaintNode> mPaintNodes;
         std::unordered_map<std::string, LightNode> mLightNodes;
+
+        // Curves that are shared between many entity instances.
+        mutable std::unordered_map<std::string,
+            std::shared_ptr<gfx::CurveClass>> mSharedCurves;
+        // curve instances that contain private data and that are specific
+        // to an entity (and entity node)
+        mutable std::unordered_map<std::string,
+            std::shared_ptr<gfx::CurveClass>> mInstanceCurves;
 
         // tilemap material instances that are shared between all
         // tilemap layers that have Tilemap palette mode.

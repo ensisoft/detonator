@@ -115,11 +115,11 @@ namespace gfx
     struct CurveArgs {
         std::string curve_id;
         std::string curve_name;
+        std::size_t curve_hash = 0;
         std::vector<CurvePoint> points;
         CurveType curve_type = CurveType::CatmullRomSpline;
         CurveJointStyle joint_style = CurveJointStyle::Miter;
         CurveEndCapStyle end_cap_style = CurveEndCapStyle::Square;
-        bool make_fallback_on_fail = false;
     };
 
     // defines a curve as a set of control points and properties
@@ -144,6 +144,8 @@ namespace gfx
           , mName(std::move(name))
           , mPoints(std::move(points))
         {}
+        explicit CurveClass(const CurveArgs& args);
+        explicit CurveClass(CurveArgs&& args);
 
         void SetCurveType(const CurveType type) noexcept
         { mCurveType = type; }
@@ -158,6 +160,8 @@ namespace gfx
         { return  mJointStyle; }
         auto GetEndCapStyle() const noexcept
         { return mEndCapStyle; }
+        auto TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
 
         void AddPoint(const ControlPoint& point)
         { mPoints.push_back(point); }
@@ -174,6 +178,10 @@ namespace gfx
             mPoints.clear();
             mContentHash = 0;
         }
+        void SetPoints(std::vector<ControlPoint>&& points) noexcept
+        { mPoints = std::move(points); }
+        void SetPoints(const std::vector<ControlPoint>& points)
+        { mPoints = points; }
 
         auto IsStatic() const noexcept
         { return mFlags.test(Flags::StaticContent); }
@@ -193,10 +201,8 @@ namespace gfx
         void IntoJson(data::Writer& writer) const override;
         bool FromJson(const data::Reader& data) override;
 
-        bool Construct(GeometryBuffer* buffer) const;
-        // Construct the geometry with the control point positions scaled
-        // by the given factors. The point widths are not scaled.
         bool Construct(GeometryBuffer* buffer, const base::Float2& scale) const;
+        bool Construct(GeometryBuffer* buffer) const;
     private:
         std::string mId;
         std::string mName;
@@ -216,8 +222,11 @@ namespace gfx
         CurveInstance(std::shared_ptr<const CurveClass> klass) noexcept;
         CurveInstance(const CurveClass& klass);
         CurveInstance(CurveClass&& klass);
+        CurveInstance(const CurveArgs& curve);
+        CurveInstance(CurveArgs&& curve);
 
-        void SetInstanceCurve(CurveArgs&& curve);
+        void SetAspectRatioOverride(bool on_off) noexcept
+        { mOverrideAspectRatio = on_off; }
 
         bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
             Device& device, ProgramState& program, RasterState& raster) const override;
@@ -232,46 +241,12 @@ namespace gfx
         Type GetType() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         SpatialMode GetSpatialMode() const override;
-
-    private:
-        DrawGeometryHandle GetInstanceGeometry(const Environment& env, Device& device) const;
-        DrawGeometryHandle GetClassGeometry(const Environment& env, Device& device) const;
-
-        DrawGeometryBuffer ConstructInstanceBuffer(const Environment& env) const;
-        DrawGeometryBuffer ConstructClassBuffer(const Environment& env) const;
 
     private:
         std::shared_ptr<const CurveClass> mClass;
-        std::optional<CurveArgs> mInstanceCurve;
-    };
-
-    class Curve final : public Drawable
-    {
-    public:
-        using CurveType = CurveType;
-        using ControlPoint = CurvePoint;
-        using JointStyle = CurveJointStyle;
-        using EndCapStyle = CurveEndCapStyle;
-
-        Curve(const CurveArgs& args);
-        Curve(CurveArgs&& args);
-
-        bool ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
-            Device& device, ProgramState& program, RasterState& raster) const override;
-
-        ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        std::string GetShaderId(const Environment& env) const override;
-        std::string GetShaderName(const Environment& env) const override;
-
-        DrawGeometryHandle GetGeometry(const Environment& env, Device& device) const override;
-        DrawGeometryBuffer Construct(const Environment& env) const override;
-
-        Type GetType() const override;
-        DrawPrimitive GetDrawPrimitive() const override;
-        SpatialMode GetSpatialMode() const override;
-
-    private:
-        CurveArgs mArgs;
+        std::string mGeometryId;
+        std::string mGeometryName;
+        bool mOverrideAspectRatio = false;
     };
 
 } // namespace

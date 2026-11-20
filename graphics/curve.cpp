@@ -31,6 +31,8 @@
 #include "base/polyline.h"
 #include "graphics/curve.h"
 
+#include <regex>
+
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/device.h"
@@ -839,6 +841,26 @@ float GetPointDistance(const CurvePoint& p0, const CurvePoint& p1) noexcept
                        p0.GetPosition().ToVec2());
 }
 
+CurveClass::CurveClass(const CurveArgs& args)
+    : mId(args.curve_id)
+    , mName(args.curve_name)
+    , mContentHash(args.curve_hash)
+    , mPoints(args.points)
+    , mCurveType(args.curve_type)
+    , mJointStyle(args.joint_style)
+    , mEndCapStyle(args.end_cap_style)
+{}
+
+CurveClass::CurveClass(CurveArgs&& args)
+    : mId(std::move(args.curve_id))
+    , mName(std::move(args.curve_name))
+    , mContentHash(args.curve_hash)
+    , mPoints(std::move(args.points))
+    , mCurveType(args.curve_type)
+    , mJointStyle(args.joint_style)
+    , mEndCapStyle(args.end_cap_style)
+{}
+
 SpatialMode CurveClass::GetSpatialMode() const
 {
     return SpatialMode::Flat2D;
@@ -868,7 +890,7 @@ std::size_t CurveClass::GetHash() const
     hash = base::hash_combine(hash, mContentHash);
     hash = base::hash_combine(hash, mCurveType);
     hash = base::hash_combine(hash, mJointStyle);
-    hash = base::hash_combine(hash,  mEndCapStyle);
+    hash = base::hash_combine(hash, mEndCapStyle);
     hash = base::hash_combine(hash, mFlags);
     return hash;
 }
@@ -937,23 +959,22 @@ bool CurveClass::FromJson(const data::Reader& reader)
     return ok;
 }
 
-bool CurveClass::Construct(GeometryBuffer* buffer) const
-{
-    return Construct(buffer, base::Float2(1.0f, 1.0f));
-}
-
 bool CurveClass::Construct(GeometryBuffer* buffer, const base::Float2& scale) const
 {
     const auto points = ScaleCurvePoints(mPoints, glm::vec2(scale.x, scale.y));
 
     std::string error;
-    if (ConstructCurve(mCurveType,
-        mJointStyle, mEndCapStyle, points, buffer, &error))
+    if (ConstructCurve(mCurveType, mJointStyle, mEndCapStyle, points, buffer, &error))
         return true;
 
     ERROR("Failed to tessellate curve. [name='%1', type=%2]", mName, mCurveType);
     ERROR("%1", error);
     return false;
+}
+
+bool CurveClass::Construct(GeometryBuffer* buffer) const
+{
+    return Construct(buffer, {1.0f, 1.0f});
 }
 
 CurveInstance::CurveInstance(std::shared_ptr<const CurveClass> klass) noexcept
@@ -963,18 +984,20 @@ CurveInstance::CurveInstance(std::shared_ptr<const CurveClass> klass) noexcept
 CurveInstance::CurveInstance(const CurveClass& klass)
     : mClass(std::make_shared<CurveClass>(klass))
 {
+
 }
 CurveInstance::CurveInstance(CurveClass&& klass)
     : mClass(std::make_shared<CurveClass>(std::move(klass)))
 {
 }
-void CurveInstance::SetInstanceCurve(CurveArgs&& curve)
-{
-    if (curve.curve_id.empty())
-        ComputeCurveId(curve);
 
-    mInstanceCurve = std::move(curve);
-}
+CurveInstance::CurveInstance(const CurveArgs& args)
+    : mClass(std::make_shared<CurveClass>(args))
+{}
+
+CurveInstance::CurveInstance(CurveArgs&& args)
+    : mClass(std::make_shared<CurveClass>(std::move(args)))
+{}
 
 bool CurveInstance::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
     Device& device, ProgramState& program, RasterState& raster) const
@@ -1012,25 +1035,39 @@ std::string CurveInstance::GetShaderName(const Environment& env) const
 
 DrawGeometryHandle CurveInstance::GetGeometry(const Environment& env, Device& device) const
 {
-    if (mInstanceCurve)
-        return GetInstanceGeometry(env, device);
+    // Basically the contents of the GPU geometry object must change whenever
+    // there is a change in either:
+    // - the aspect ratio at which the curve will be rendered
+    // - the point data of the curve itself.
 
-    return GetClassGeometry(env, device);
-}
-DrawGeometryBuffer CurveInstance::Construct(const Environment& env) const
-{
-    if (mInstanceCurve)
-        return ConstructInstanceBuffer(env);
+    // This makes sharing geometry between instances a little bit more
+    // difficult because the only time a curve geometry can be shared
+    // between several curve instances is when the instances are also
+    // rendered at the same aspect ratio.
 
-    return ConstructClassBuffer(env);
-}
+    // If we blindly create a new geometry on every change in the content
+    // and/or in the aspect ratio the problem is that in the editor in
+    // the entity widget working on the curve creates a ton of geometries
+    // and GPU buffer objects that stay resident on the device.
+    // So in this case we want to *override* any existing GPU buffer data
+    // with new contents.
 
-DrawGeometryHandle CurveInstance::GetInstanceGeometry(const Environment& env, Device& device) const
-{
-    const auto& curve_args = mInstanceCurve.value();
+    // However if we override the contents on every single change outside
+    // of the entity widget then we end up in a situation when a curve
+    // that is being rendered by several nodes at different aspect ratios
+    // triggers re-tessellation on every call to GetGeometry. This will
+    // then change the underlying GPU geometry for any pending draw using
+    // the same geometry handle (plus causes more CPU work and more uploading)
 
-    std::string id;
+    // So to differentiate between these two conditions we have a boolean
+    // flag which controls the overriding. The flag is set to true in the
+    // editor's entity widget which sets the flag on the renderer which
+    // sets the flag on the CurveInstance object.
+
+    const auto aspect_ratio_bucket = ComputeCurveAspectRatioBucket(env.model_matrix);
+
     std::string name;
+    std::string id;
 
     if (env.mesh_type == MeshType::Wireframe)
     {
@@ -1044,72 +1081,55 @@ DrawGeometryHandle CurveInstance::GetInstanceGeometry(const Environment& env, De
     }
     else if (env.mesh_type == MeshType::PaintMesh)
     {
-        id = curve_args.curve_id + "/" + std::to_string(ComputeCurveAspectRatioBucket(env.model_matrix));
-        name = curve_args.curve_name;
-    }
+        if (mOverrideAspectRatio)
+        {
+            id = mClass->GetId();
+            name = mClass->GetName();
+        }
+        else
+        {
+            id = base::FormatString("%1:%2", mClass->GetId(), aspect_ratio_bucket);
+            name = base::FormatString("%1:%2", mClass->GetName(), aspect_ratio_bucket);
+        }
 
-    if (auto geometry = device.FindGeometry(id))
-        return geometry;
-
-    auto buffer = Construct(env);
-    if (buffer.IsNull())
-    {
-        if (!curve_args.make_fallback_on_fail)
-            return DrawGeometryHandle::Null;
-
-        return DrawGeometryHandle::CreateErrorGeometry(id,
-            base::FormatString("Failed to tessellate curve mesh '%1'", curve_args.curve_name),
-            base::FormatString("Curve '%1' fallback", curve_args.curve_name),
-            0, device);
-    }
-
-    Geometry::CreateArgs args;
-    args.buffer = buffer.TransferGeometryBuffer();
-    args.content_hash = 0; // we dont use this.
-    args.content_name = std::move(name);
-    args.usage = BufferUsage::Static;
-    auto geometry = device.CreateGeometry(id, std::move(args));
-    return DrawGeometryHandle { std::move(geometry) };
-}
-
-DrawGeometryHandle CurveInstance::GetClassGeometry(const Environment& env, Device& device) const
-{
-    std::string id;
-    std::string name;
-    if (env.mesh_type == MeshType::Wireframe)
-    {
-        GFX_PAINT_ERROR("Curve wireframe is not yet supported.");
-        return DrawGeometryHandle::Null;
-    }
-    else if (env.mesh_type == MeshType::DebugMesh)
-    {
-        GFX_PAINT_ERROR("Curve debug mesh is not yet supported.");
-        return DrawGeometryHandle::Null;
-    }
-    else if (env.mesh_type == MeshType::PaintMesh)
-    {
-        id = mClass->GetId() + "/" + std::to_string(ComputeCurveAspectRatioBucket(env.model_matrix));
-        name = mClass->GetName();
-    }
+    } else BUG("Unhandled mesh type.");
 
     const auto static_content = mClass->IsStatic();
 
-    if (auto geometry = device.FindGeometry(id))
-    {
-        if (static_content)
-        {
-            if (!env.editing_mode)
-                return DrawGeometryHandle { std::move(geometry) };
+    auto geometry = device.FindGeometry(id);
 
-            const auto content_hash = mClass->GetContentHash();
-            if (geometry->GetContentHash() == content_hash)
+    if (geometry)
+    {
+        if (geometry->IsFallback())
+        {
+            if (geometry->GetContentHash() == mClass->GetContentHash())
                 return DrawGeometryHandle { std::move(geometry) };
+        }
+        else if (static_content)
+        {
+            if (env.editing_mode)
+            {
+                const auto content_hash = mClass->GetContentHash();
+                if (geometry->GetContentHash() == content_hash)
+                {
+                    if (*geometry->GetProperty<int>("aspect-ratio-bucket") == aspect_ratio_bucket)
+                        return DrawGeometryHandle { std::move(geometry) };
+                }
+            }
+            else
+            {
+                if (*geometry->GetProperty<int>("aspect-ratio-bucket") == aspect_ratio_bucket)
+                    return DrawGeometryHandle { std::move(geometry) };
+            }
         }
         else
         {
             const auto content_hash = mClass->GetContentHash();
             if (geometry->GetContentHash() == content_hash)
-                return DrawGeometryHandle { std::move(geometry) };
+            {
+                if (*geometry->GetProperty<int>("aspect-ratio-bucket") == aspect_ratio_bucket)
+                    return DrawGeometryHandle { std::move(geometry) };
+            }
         }
     }
 
@@ -1121,18 +1141,21 @@ DrawGeometryHandle CurveInstance::GetClassGeometry(const Environment& env, Devic
             mClass->GetContentHash(), device);
 
     Geometry::CreateArgs args;
+    args.properties["aspect-ratio-bucket"] = aspect_ratio_bucket;
     args.buffer = buffer.TransferGeometryBuffer();
     args.content_hash = mClass->GetContentHash();
-    args.content_name = std::move(name);
+    args.content_name = name;
     args.usage = static_content ? BufferUsage::Static : BufferUsage::Dynamic;
-    auto geometry = device.CreateGeometry(id, std::move(args));
+    args.respecify_contents = geometry != nullptr;
+    geometry = device.CreateGeometry(id, std::move(args));
+
+    VERBOSE("Created polygon mesh on curve. [name='%1', aspect-ratio=%2, override=%3]",
+        name, aspect_ratio_bucket, mOverrideAspectRatio ? "yes" : "no");
+
     return DrawGeometryHandle { std::move(geometry) };
 }
-
-DrawGeometryBuffer CurveInstance::ConstructInstanceBuffer(const Environment& env) const
+DrawGeometryBuffer CurveInstance::Construct(const Environment& env) const
 {
-    const auto& args = mInstanceCurve.value();
-
     if (env.mesh_type == MeshType::Wireframe)
     {
         // not yet supported.
@@ -1145,62 +1168,18 @@ DrawGeometryBuffer CurveInstance::ConstructInstanceBuffer(const Environment& env
     }
     else if (env.mesh_type == MeshType::PaintMesh)
     {
-        std::string error;
-        GeometryBuffer buffer;
         const auto aspect = GetCurveAspectScale(ComputeCurveAspectRatioBucket(env.model_matrix));
-        const auto points = ScaleCurvePoints(args.points, aspect);
-        if (ConstructCurve(args.curve_type,
-                           args.joint_style, args.end_cap_style, points,
-                           &buffer, &error))
+
+        GeometryBuffer buffer;
+        if (mClass->Construct(&buffer, base::Float2(aspect.x, aspect.y)))
             return std::move(buffer);
 
-        if (args.make_fallback_on_fail)
-        {
-            ERROR("Failed to tessellate curve. ");
-            ERROR("%1", error);
-        }
-        else
-        {
-            GFX_PAINT_ERROR("%1", error);
-        }
         return DrawGeometryBuffer::Null;
+
     }
     else BUG("Missing mesh type handling.");
     return DrawGeometryBuffer::Null;
 }
-
-DrawGeometryBuffer CurveInstance::ConstructClassBuffer(const Environment& env) const
-{
-    const bool static_content = mClass->IsStatic();
-
-    if (env.mesh_type == MeshType::Wireframe)
-    {
-        // not yet supported.
-        return DrawGeometryBuffer::Null;
-    }
-    else if (env.mesh_type == MeshType::DebugMesh)
-    {
-        // not yet supported.
-        return DrawGeometryBuffer::Null;
-    }
-    else if (env.mesh_type == MeshType::PaintMesh)
-    {
-        const auto aspect = GetCurveAspectScale(ComputeCurveAspectRatioBucket(env.model_matrix));
-
-        GeometryBuffer buffer;
-        if (!mClass->Construct(&buffer, base::Float2(aspect.x, aspect.y)))
-            return DrawGeometryBuffer::Null;
-
-        if (static_content)
-            DEBUG("Created paint mesh on curve. [name='%1']", mClass->GetName());
-
-        return std::move(buffer);
-    }
-    else BUG("Missing mesh type handling.");
-    return DrawGeometryBuffer::Null;
-}
-
-
 
 Drawable::Type CurveInstance::GetType() const
 {
@@ -1212,147 +1191,6 @@ DrawPrimitive CurveInstance::GetDrawPrimitive() const
     return DrawPrimitive::Triangles;
 }
 SpatialMode CurveInstance::GetSpatialMode() const
-{
-    return SpatialMode::Flat2D;
-}
-
-Curve::Curve(const CurveArgs& args)
-    : mArgs(args)
-{
-    if (mArgs.curve_id.empty())
-        ComputeCurveId(mArgs);
-}
-Curve::Curve(CurveArgs&& args)
-    : mArgs(std::move(args))
-{
-    if (mArgs.curve_id.empty())
-        ComputeCurveId(mArgs);
-}
-
-bool Curve::ApplyDynamicState(const Environment& env, const DrawCall& draw, const DrawGeometryHandle& geometry,
-        Device& device, ProgramState& program, RasterState& raster) const
-{
-    // the inverse of the isotropic aspect ratio scaling is baked into the model matrix.
-    const auto model_matrix = GetCurveModelMatrix(*env.model_matrix, ComputeCurveAspectRatioBucket(env.model_matrix));
-
-    const auto& kModelViewMatrix  = (*env.view_matrix) * model_matrix;
-    const auto& kProjectionMatrix = *env.proj_matrix;
-    program.SetUniform("kProjectionMatrix", kProjectionMatrix);
-    program.SetUniform("kModelViewMatrix", kModelViewMatrix);
-    return true;
-}
-
- ShaderSource Curve::GetShader(const Environment& env, const Device& device) const
- {
-    // we're not supporting instancing yet
-    ASSERT(env.use_instancing == false);
-
-    return Drawable::CreateShader(env.use_instancing, false, device, Shader::Simple2D);
- }
- std::string Curve::GetShaderId(const Environment& env) const
- {
-    // we're not supporting instancing yet
-    ASSERT(env.use_instancing == false);
-
-    return Drawable::GetShaderId(env.use_instancing, false, Shader::Simple2D);
- }
- std::string Curve::GetShaderName(const Environment& env) const
- {
-    return Drawable::GetShaderName(env, Shader::Simple2D);
- }
-
-DrawGeometryHandle Curve::GetGeometry(const Environment& env, Device& device) const
-{
-    std::string id;
-    std::string name;
-
-    if (env.mesh_type == MeshType::Wireframe)
-    {
-        GFX_PAINT_ERROR("Curve wireframe is not yet supported.");
-        return DrawGeometryHandle::Null;
-    }
-    else if (env.mesh_type == MeshType::DebugMesh)
-    {
-        GFX_PAINT_ERROR("Curve debug mesh is not yet supported.");
-        return DrawGeometryHandle::Null;
-    }
-    else if (env.mesh_type == MeshType::PaintMesh)
-    {
-        id = mArgs.curve_id + "/" + std::to_string(ComputeCurveAspectRatioBucket(env.model_matrix));
-        name = mArgs.curve_name;
-    }
-
-    if (auto geometry = device.FindGeometry(id))
-        return geometry;
-
-    auto buffer = Construct(env);
-    if (buffer.IsNull())
-    {
-        if (!mArgs.make_fallback_on_fail)
-            return DrawGeometryHandle::Null;
-
-        return DrawGeometryHandle::CreateErrorGeometry(id,
-            base::FormatString("Failed to tessellate curve mesh '%1'", mArgs.curve_name),
-            base::FormatString("Curve '%1' fallback", mArgs.curve_name),
-            0, device);
-    }
-
-    Geometry::CreateArgs args;
-    args.buffer = buffer.TransferGeometryBuffer();
-    args.content_hash = 0; // we dont use this.
-    args.content_name = std::move(name);
-    args.usage = BufferUsage::Static;
-    auto geometry = device.CreateGeometry(id, std::move(args));
-    return DrawGeometryHandle { std::move(geometry) };
-}
-
-DrawGeometryBuffer Curve::Construct(const Environment& env) const
-{
-    if (env.mesh_type == MeshType::Wireframe)
-    {
-        // not yet supported.
-        return DrawGeometryBuffer::Null;
-    }
-    else if (env.mesh_type == MeshType::DebugMesh)
-    {
-        // not yet supported.
-        return DrawGeometryBuffer::Null;
-    }
-    else if (env.mesh_type == MeshType::PaintMesh)
-    {
-        std::string error;
-        GeometryBuffer buffer;
-        const auto aspect = GetCurveAspectScale(ComputeCurveAspectRatioBucket(env.model_matrix));
-        const auto points = ScaleCurvePoints(mArgs.points, aspect);
-        if (ConstructCurve(mArgs.curve_type,
-                           mArgs.joint_style, mArgs.end_cap_style, points,
-                           &buffer, &error))
-            return std::move(buffer);
-
-        if (mArgs.make_fallback_on_fail)
-        {
-            ERROR("Failed to tessellate curve. ");
-            ERROR("%1", error);
-        }
-        else
-        {
-            GFX_PAINT_ERROR("%1", error);
-        }
-        return DrawGeometryBuffer::Null;
-    }
-    else BUG("Missing mesh type handling.");
-    return DrawGeometryBuffer::Null;
-}
-
-Drawable::Type Curve::GetType() const
-{
-    return Type::Curve;
-}
-DrawPrimitive Curve::GetDrawPrimitive() const
-{
-    return DrawPrimitive::Triangles;
-}
-SpatialMode Curve::GetSpatialMode() const
 {
     return SpatialMode::Flat2D;
 }

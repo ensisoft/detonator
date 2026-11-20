@@ -20,33 +20,36 @@
 
 namespace gfx
 {
-    class Painter;
-    class Material;
-    class MaterialClass;
-    class MaterialInstance;
+    class CommandBuffer;
+    class CommandStream;
+    class Curve;
+    class CurveClass;
+    class Device;
     class Drawable;
     class DrawableClass;
-    class Device;
+    class Framebuffer;
+    class GenericShaderProgram;
+    class Geometry;
     class IBitmap;
     class IBitmapGenerator;
     class Image;
-    class Text;
-    class TextureMap;
-    class Texturesource;
-    class TexturePacker;
-    class Loader;
-    class Resource;
-    class Framebuffer;
-    class PolygonMeshClass;
-    class VertexStream;
-    class VertexBuffer;
-    class IndexStream;
     class IndexBuffer;
-    class CommandStream;
-    class CommandBuffer;
+    class IndexStream;
+    class Loader;
+    class Material;
+    class MaterialClass;
+    class MaterialInstance;
+    class Painter;
+    class PolygonMeshClass;
+    class PolygonMeshInstance;
+    class Resource;
+    class Text;
     class Texture;
-    class Geometry;
-    class GenericShaderProgram;
+    class TextureMap;
+    class TexturePacker;
+    class TextureSource;
+    class VertexBuffer;
+    class VertexStream;
 
 } // namespace
 
