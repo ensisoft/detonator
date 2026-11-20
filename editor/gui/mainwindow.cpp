@@ -2405,6 +2405,9 @@ void MainWindow::on_workspaceFilter_textChanged(const QString&)
 
 void MainWindow::on_actionPackageResources_triggered()
 {
+    if (!mWorkspace)
+        return;
+
     DlgPackage dlg(QApplication::activeWindow(), mSettings, *mWorkspace);
     dlg.exec();
 }
