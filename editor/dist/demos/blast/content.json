@@ -814,6 +814,7 @@
           "class": "Cb3Y2oN9HI",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -874,6 +875,7 @@
           "class": "oko2xvYgFb",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -934,6 +936,7 @@
           "class": "xNnMrUJ8Hr",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -994,6 +997,7 @@
           "class": "o3ZPeIQXur",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1054,6 +1058,7 @@
           "class": "HnZ3t3iXdj",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1114,6 +1119,7 @@
           "class": "u0mbwdv2NK",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1174,6 +1180,7 @@
           "class": "fgYIZfCb20",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1234,6 +1241,7 @@
           "class": "hIzDAYPqDy",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1316,6 +1324,7 @@
           "class": "ykMJAC3FE0",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "7pLg2qp4Pp",
             "flags": {
@@ -1370,6 +1379,7 @@
           "class": "n3mMdrlRa6",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "7pLg2qp4Pp",
             "flags": {
@@ -1528,6 +1538,7 @@
           "class": "Fbrm8OFsxE",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "FF0aZIpHbj",
             "flags": {
@@ -1615,6 +1626,7 @@
           "class": "f7sXmqsWbd",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "FF0aZIpHbj",
             "flags": {
@@ -1669,6 +1681,7 @@
           "class": "sOMLvM0RHG",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Gk8mjavP85",
             "flags": {
@@ -1723,6 +1736,7 @@
           "class": "6Dnw2fSTL0",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Gk8mjavP85",
             "flags": {
@@ -2101,6 +2115,7 @@
           "class": "aE1magu6a0",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -2395,6 +2410,7 @@
           "class": "UIG3lUtmPm",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -2529,6 +2545,7 @@
           "class": "n9QIMigZH2",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -2583,6 +2600,7 @@
           "class": "QnlQ7xD1kW",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "9o7zbhlIlp",
             "flags": {
@@ -2656,6 +2674,108 @@
       "tag": ""
     },
     {
+      "curves": [
+        {
+          "curve-class-id": "FHtHrarXk8",
+          "curve-data": {
+            "curve-data-flags": {
+              "UnitCoordinates": false
+            },
+            "curve-points": [
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": 2.0000038146972656,
+                  "y": 2.0,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              },
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": 108.0,
+                  "y": 53.000030517578125,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              },
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": 260.0,
+                  "y": 2.000030517578125,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              },
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": 302.0,
+                  "y": -396.99993896484375,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              },
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": 295.0,
+                  "y": -797.9998779296875,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              }
+            ]
+          },
+          "curve-end-cap-style": "Butt",
+          "curve-joint-style": "Bevel",
+          "curve-name": "Skin And Path Spline",
+          "curve-source": "User",
+          "curve-type": "CatmullRom"
+        }
+      ],
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": false,
@@ -2679,6 +2799,7 @@
           "class": "bhTMTzzFAN",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -2729,46 +2850,14 @@
           },
           "spline_mover": {
             "acceleration": 300.0,
+            "curve-id": "FHtHrarXk8",
             "flags": {
               "Enabled": true
             },
             "iteration-mode": "Once",
-            "path-coordinate-space": "Relative",
-            "path-curve-type": "CatmullRom",
+            "path-coordinate-space": "Local",
             "rotation-mode": "IgnoreSplineRotation",
-            "speed": 100.0,
-            "spline_points": [
-              {
-                "w": 0.0,
-                "x": 2.0000038146972656,
-                "y": 2.0,
-                "z": 0.0
-              },
-              {
-                "w": 0.0,
-                "x": 108.0,
-                "y": 53.000030517578125,
-                "z": 0.0
-              },
-              {
-                "w": 0.0,
-                "x": 260.0,
-                "y": 2.000030517578125,
-                "z": 0.0
-              },
-              {
-                "w": 0.0,
-                "x": 302.0,
-                "y": -396.99993896484375,
-                "z": 0.0
-              },
-              {
-                "w": 0.0,
-                "x": 295.0,
-                "y": -797.9998779296875,
-                "z": 0.0
-              }
-            ]
+            "speed": 100.0
           },
           "tag": ""
         },
@@ -2776,6 +2865,7 @@
           "class": "zaQ8SYuKGL",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -2850,6 +2940,7 @@
           "class": "6k4modG4Op",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "7pLg2qp4Pp",
             "flags": {
@@ -2977,6 +3068,108 @@
       ]
     },
     {
+      "curves": [
+        {
+          "curve-class-id": "XGJmNvoB3A",
+          "curve-data": {
+            "curve-data-flags": {
+              "UnitCoordinates": false
+            },
+            "curve-points": [
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": 2.0000038146972656,
+                  "y": 2.0,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              },
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": -93.49998474121094,
+                  "y": 55.00006103515625,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              },
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": -245.49996948242188,
+                  "y": 8.00006103515625,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              },
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": -250.49996948242188,
+                  "y": -450.99993896484375,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              },
+              {
+                "data": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "look-at": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                "position": {
+                  "x": -239.49998474121094,
+                  "y": -788.9999389648438,
+                  "z": 0.0
+                },
+                "width": 0.10000000149011612
+              }
+            ]
+          },
+          "curve-end-cap-style": "Butt",
+          "curve-joint-style": "Bevel",
+          "curve-name": "Skin And Path Spline",
+          "curve-source": "User",
+          "curve-type": "CatmullRom"
+        }
+      ],
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": false,
@@ -3000,6 +3193,7 @@
           "class": "Ka1W8DF1o1",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3050,46 +3244,14 @@
           },
           "spline_mover": {
             "acceleration": 300.0,
+            "curve-id": "XGJmNvoB3A",
             "flags": {
               "Enabled": true
             },
             "iteration-mode": "Once",
-            "path-coordinate-space": "Relative",
-            "path-curve-type": "CatmullRom",
+            "path-coordinate-space": "Local",
             "rotation-mode": "IgnoreSplineRotation",
-            "speed": 100.0,
-            "spline_points": [
-              {
-                "w": 0.0,
-                "x": 2.0000038146972656,
-                "y": 2.0,
-                "z": 0.0
-              },
-              {
-                "w": 0.0,
-                "x": -93.49998474121094,
-                "y": 55.00006103515625,
-                "z": 0.0
-              },
-              {
-                "w": 0.0,
-                "x": -245.49996948242188,
-                "y": 8.00006103515625,
-                "z": 0.0
-              },
-              {
-                "w": 0.0,
-                "x": -250.49996948242188,
-                "y": -450.99993896484375,
-                "z": 0.0
-              },
-              {
-                "w": 0.0,
-                "x": -239.49998474121094,
-                "y": -788.9999389648438,
-                "z": 0.0
-              }
-            ]
+            "speed": 100.0
           },
           "tag": ""
         },
@@ -3097,6 +3259,7 @@
           "class": "03o2vr1wCt",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -3171,6 +3334,7 @@
           "class": "s8eQNWqiSi",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "7pLg2qp4Pp",
             "flags": {
@@ -3321,6 +3485,7 @@
           "class": "p0MH0dy75P",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3412,6 +3577,7 @@
           "class": "4JdUSBRAGP",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3503,6 +3669,7 @@
           "class": "ljSKOdYzEC",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3703,6 +3870,7 @@
           "class": "6FUm4sZ0NR",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3859,6 +4027,7 @@
           "class": "5fYgMZDf5w",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "4Ckmwoylp6",
             "flags": {
@@ -3950,6 +4119,7 @@
           "class": "NFWxjou9hO",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4021,6 +4191,7 @@
           "class": "lHBrbuAqnw",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4167,6 +4338,7 @@
           "class": "Z7SHaUtGfj",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Gk8mjavP85",
             "flags": {
@@ -4221,6 +4393,7 @@
           "class": "j3Wb0lxQBu",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Gk8mjavP85",
             "flags": {
@@ -4348,6 +4521,7 @@
           "class": "diNKRKvSnD",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4402,6 +4576,7 @@
           "class": "RfPLX5xUST",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4467,6 +4642,7 @@
           "class": "0IlSslsFkG",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Ls3ehJz9Iy",
             "flags": {
@@ -4521,6 +4697,7 @@
           "class": "Ayzo8xI2vJ",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "nTHdhE0fNf",
             "flags": {
@@ -4936,6 +5113,7 @@
           "class": "HYWdnKUCFx",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5142,6 +5320,7 @@
           "class": "QxJjKiAP7G",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "9o7zbhlIlp",
             "flags": {
@@ -5299,6 +5478,7 @@
           "class": "pwdBMGRud0",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "YyvAdpWoTq",
             "flags": {
@@ -5353,6 +5533,7 @@
           "class": "GGIdUwPv7C",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5458,6 +5639,7 @@
           "class": "unyS0aUhWg",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Gk8mjavP85",
             "flags": {
@@ -5512,6 +5694,7 @@
           "class": "M75Yphs7Kn",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Gk8mjavP85",
             "flags": {
@@ -5617,6 +5800,7 @@
           "class": "CTphMwODQY",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5677,6 +5861,7 @@
           "class": "8IWgs8RFDB",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5759,6 +5944,7 @@
           "class": "0FvvESGlGx",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5819,6 +6005,7 @@
           "class": "hCbs63BXsX",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5879,6 +6066,7 @@
           "class": "q5RPmeNvCN",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5939,6 +6127,7 @@
           "class": "7iQg9nDYYh",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5999,6 +6188,7 @@
           "class": "dwImtNzeyg",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -6059,6 +6249,7 @@
           "class": "S5QqslPbvM",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -6119,6 +6310,7 @@
           "class": "v8kP5MiFGF",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -6179,6 +6371,7 @@
           "class": "YWhEsLKr6n",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -6239,6 +6432,7 @@
           "class": "2ryA5xPsXQ",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -6299,6 +6493,7 @@
           "class": "dI2WOwQwYP",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -6816,6 +7011,7 @@
           "class": "wDmwbPOryS",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -6981,6 +7177,7 @@
           "class": "kobmYT3r2j",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -7197,6 +7394,7 @@
           "class": "zP7K5Htw9Y",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -7311,6 +7509,7 @@
           "class": "8HaTDAeRBy",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "7pLg2qp4Pp",
             "flags": {
@@ -7365,6 +7564,7 @@
           "class": "7BCvPF2tI9",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "7pLg2qp4Pp",
             "flags": {
@@ -7485,6 +7685,7 @@
           "class": "iAuym7oymk",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "FF0aZIpHbj",
             "flags": {
@@ -7539,6 +7740,7 @@
           "class": "C2J67UABd1",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "FF0aZIpHbj",
             "flags": {
@@ -7604,6 +7806,7 @@
           "class": "CjTAaMiOQ9",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Gk8mjavP85",
             "flags": {
@@ -7658,6 +7861,7 @@
           "class": "fAPXzGijvk",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Gk8mjavP85",
             "flags": {
@@ -7741,6 +7945,7 @@
           "class": "yGFzBNQfQS",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "YyvAdpWoTq",
             "flags": {
@@ -7795,6 +8000,7 @@
           "class": "MhAEpRwQxw",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -7855,6 +8061,7 @@
           "class": "1FdrWNoWYW",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -7915,6 +8122,7 @@
           "class": "a5CFZu9GT1",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -8336,6 +8544,7 @@
           "class": "efpmnC1ICZ",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -8499,6 +8708,7 @@
           "class": "pfOmm2UnnY",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -8633,6 +8843,7 @@
           "class": "BH2l7AUDo8",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -8724,6 +8935,7 @@
           "class": "PBKj4sTrr2",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -8968,6 +9180,7 @@
           "class": "txntI159Im",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -9022,6 +9235,7 @@
           "class": "3fAUhBD7NI",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -9076,6 +9290,7 @@
           "class": "AivB35iCGR",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "7pLg2qp4Pp",
             "flags": {
@@ -9130,6 +9345,7 @@
           "class": "8jYxumsn78",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "7pLg2qp4Pp",
             "flags": {
@@ -9292,6 +9508,7 @@
           "class": "WOIwH6Bxgh",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -9621,6 +9838,7 @@
           "class": "hzppyC4noz",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "KLF0DsCfId",
             "flags": {
@@ -9794,6 +10012,7 @@
           "class": "fr2xovk88P",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "PEj5kFRA5A",
             "flags": {
@@ -10039,6 +10258,7 @@
           "class": "z5Hf9L3Qvp",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -10323,6 +10543,7 @@
           "class": "GUWXr35OAs",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -10425,6 +10646,7 @@
           "class": "rQ6aesNfz7",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -10479,6 +10701,7 @@
           "class": "tdyTsMj7k4",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -10555,6 +10778,7 @@
           "class": "7XD9UbCh33",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Ls3ehJz9Iy",
             "flags": {
@@ -10609,6 +10833,7 @@
           "class": "TDhC13DeWL",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "Ls3ehJz9Iy",
             "flags": {
@@ -10904,6 +11129,7 @@
           "class": "k4NoihTPrq",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -10995,6 +11221,7 @@
           "class": "TdZawTgkXO",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -11098,6 +11325,7 @@
           "class": "Y6j7hfxptg",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "PPXCoUzFFy",
             "flags": {
@@ -11216,6 +11444,7 @@
           "class": "3FFDF2AeTx",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -11270,6 +11499,7 @@
           "class": "HD1PD8eh87",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -11375,9 +11605,10 @@
       "active_texture_map": "tyqPlY1aC7",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -14831,9 +15062,10 @@
       "active_texture_map": "SwIrDueLiR",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -14923,9 +15155,10 @@
       "active_texture_map": "wAsLzMR2Zx",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -14990,9 +15223,10 @@
       "active_texture_map": "aCNHF9kxFK",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15070,9 +15304,10 @@
       "active_texture_map": "57frP7CeCj",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15139,9 +15374,10 @@
       "active_texture_map": "7v3lwjL0PK",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": true
       },
@@ -15206,9 +15442,10 @@
       "active_texture_map": "Or54nsWZ4C",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15273,9 +15510,10 @@
       "active_texture_map": "hGSQIep9Hf",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15371,9 +15609,10 @@
       "active_texture_map": "ivMsAaY3zt",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17401,9 +17640,10 @@
       "active_texture_map": "MHm1AOaSd2",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17507,9 +17747,10 @@
       "active_texture_map": "Oj8I2KKxyA",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17568,9 +17809,10 @@
       "active_texture_map": "lB6R4Xu92J",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17648,9 +17890,10 @@
       "active_texture_map": "SkDR40as46",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17715,9 +17958,10 @@
       "active_texture_map": "Yn37LoHDx1",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17821,9 +18065,10 @@
       "active_texture_map": "OIyKORo0Fu",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17882,9 +18127,10 @@
       "active_texture_map": "1RR6n5j5uF",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17949,9 +18195,10 @@
       "active_texture_map": "sLwRzKaXzM",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18010,9 +18257,10 @@
       "active_texture_map": "38nRsxHUy1",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18077,9 +18325,10 @@
       "active_texture_map": "MiywGgjvmB",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18157,9 +18406,10 @@
       "active_texture_map": "o9R6Heje5f",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18233,9 +18483,10 @@
       "active_texture_map": "lea2jzBD5L",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18331,9 +18582,10 @@
       "active_texture_map": "uAx4orUEKI",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18392,9 +18644,10 @@
       "active_texture_map": "gGIsf4Yh26",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18459,9 +18712,10 @@
       "active_texture_map": "d5pJBqjLM1",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18528,9 +18782,10 @@
       "active_texture_map": "76WowKa3mf",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18595,9 +18850,10 @@
       "active_texture_map": "I1k2fdwbZ6",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18693,9 +18949,10 @@
       "active_texture_map": "T7htKqeGxX",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -20966,7 +21223,7 @@
                         "h": 37.27000045776367,
                         "w": 40.90999984741211
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"mouse-over/text-horizontal-align\",\"value\":\"Center\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"hovered/text-size\",\"value\":24},{\"key\":\"hovered/text-horizontal-align\",\"value\":\"Center\"}]}",
                       "tab_index": 0,
                       "text": "x",
                       "type": "PushButton"
@@ -21181,6 +21438,7 @@
                       },
                       "id": "fSQBA6fkb1",
                       "name": "music_volume",
+                      "orientation": "Horizontal",
                       "position": {
                         "x": 200.0,
                         "y": 200.0
@@ -21189,7 +21447,7 @@
                         "h": 15.0,
                         "w": 300.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"pressed/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"mouse-over/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-background\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/Loading_Bar_3_2.png\",\"type\":\"Texture\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"pressed/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"hovered/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-background\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/Loading_Bar_3_2.png\",\"type\":\"Texture\"}]}",
                       "tab_index": 2,
                       "type": "Slider",
                       "value": 0.5
@@ -21255,6 +21513,7 @@
                       },
                       "id": "SYHjWAwIb2",
                       "name": "effects_volume",
+                      "orientation": "Horizontal",
                       "position": {
                         "x": 200.0,
                         "y": 300.0
@@ -21263,7 +21522,7 @@
                         "h": 15.0,
                         "w": 300.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"pressed/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"mouse-over/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-background\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/Loading_Bar_3_2.png\",\"type\":\"Texture\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"pressed/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"hovered/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-background\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/Loading_Bar_3_2.png\",\"type\":\"Texture\"}]}",
                       "tab_index": 3,
                       "type": "Slider",
                       "value": 0.5
@@ -21287,7 +21546,7 @@
                         "h": 37.27000045776367,
                         "w": 40.90999984741211
                       },
-                      "style": "{\"properties\":[{\"key\":\"mouse-over/text-horizontal-align\",\"value\":\"Center\"},{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"hovered/text-horizontal-align\",\"value\":\"Center\"},{\"key\":\"hovered/text-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
                       "tab_index": 4,
                       "text": "x",
                       "type": "PushButton"
@@ -21607,7 +21866,7 @@
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"hovered/text-size\",\"value\":24}]}",
                   "tab_index": 1,
                   "text": "credits",
                   "type": "PushButton"
@@ -21631,7 +21890,7 @@
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"hovered/text-size\",\"value\":24}]}",
                   "tab_index": 2,
                   "text": "settings",
                   "type": "PushButton"
@@ -21655,7 +21914,7 @@
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"hovered/text-size\",\"value\":24}]}",
                   "tab_index": 0,
                   "text": "exit",
                   "type": "PushButton"
@@ -21679,7 +21938,7 @@
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":26},{\"key\":\"mouse-over/text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":26},{\"key\":\"hovered/text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
                   "tab_index": 3,
                   "text": "play",
                   "type": "PushButton"

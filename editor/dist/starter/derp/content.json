@@ -211,6 +211,7 @@
           "class": "Q6Pq01QoEA",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -348,6 +349,7 @@
           "class": "0EZszTO4jB",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -478,6 +480,7 @@
           "class": "mqxbWFGIg9",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "e1zlPY8HTm",
             "flags": {
@@ -722,9 +725,10 @@
       "active_texture_map": "maq5SRRYzY",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -789,9 +793,10 @@
       "active_texture_map": "Fj66N4PDUG",
       "flags": {
         "BlendFrames": false,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -1061,9 +1066,10 @@
       "active_texture_map": "OzeFupRbZK",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -1128,9 +1134,10 @@
       "active_texture_map": "Wk7OL5MJyd",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
