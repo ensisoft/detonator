@@ -1913,6 +1913,12 @@ public:
                   buffer_object.name, buffer.buffer_bytes, buffer.buffer_offset, buffer_object.usage,
                   buffer_object.refcount, buffer.type);
         }
+        else if (buffer_object.usage == dev::BufferUsage::Dynamic)
+        {
+            VERBOSE("Free buffer data. [bo=%1, bytes=%2, offset=%3, type=%4, refs=%5, type=%6]",
+                  buffer_object.name, buffer.buffer_bytes, buffer.buffer_offset, buffer_object.usage,
+                  buffer_object.refcount, buffer.type);
+        }
     }
 
     void UploadBuffer(const dev::GraphicsBuffer& buffer, const void* data, size_t bytes) override
@@ -1927,10 +1933,15 @@ public:
         GL_CALL(glBindBuffer(GetEnum(buffer.type), buffer_object.name));
         GL_CALL(glBufferSubData(GetEnum(buffer.type), buffer.buffer_offset, bytes, data));
 
+        const int percent_full = 100.0 * static_cast<double>(buffer_object.offset) / static_cast<double>(buffer_object.capacity);
         if (buffer_object.usage == dev::BufferUsage::Static)
         {
-            const int percent_full = 100 * (double) buffer_object.offset / (double) buffer_object.capacity;
             DEBUG("Uploaded buffer data. [bo=%1, bytes=%2, offset=%3, full=%4%, usage=%5, type=%6]",
+                  buffer_object.name, bytes, buffer.buffer_offset, percent_full, buffer_object.usage, buffer.type);
+        }
+        else if (buffer_object.usage == dev::BufferUsage::Dynamic)
+        {
+            VERBOSE("Uploaded buffer data. [bo=%1, bytes=%2, offset=%3, full=%4%, usage=%5, type=%6]",
                   buffer_object.name, bytes, buffer.buffer_offset, percent_full, buffer_object.usage, buffer.type);
         }
     }

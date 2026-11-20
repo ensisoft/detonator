@@ -34,7 +34,8 @@ DeviceGeometry::~DeviceGeometry()
     }
     if (mUsage == gfx::BufferUsage::Static)
         DEBUG("Deleted geometry object. [name='%1']", mName);
-
+    else if (mUsage == gfx::BufferUsage::Dynamic)
+        VERBOSE("Deleted geometry object. [name='%1']", mName);
 }
 
 void DeviceGeometry::Upload() const
@@ -64,9 +65,9 @@ void DeviceGeometry::Upload() const
     {
         mVertexBuffer = mDevice->AllocateBuffer(vertex_bytes, mUsage, dev::BufferType::VertexBuffer);
         if (mUsage == gfx::BufferUsage::Static)
-        {
             DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
-        }
+        else if (mUsage == gfx::BufferUsage::Dynamic)
+            VERBOSE("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
     }
 
     mDevice->UploadBuffer(mVertexBuffer, vertex_ptr, vertex_bytes);
@@ -86,9 +87,9 @@ void DeviceGeometry::Upload() const
     {
         mIndexBuffer = mDevice->AllocateBuffer(index_bytes, mUsage, dev::BufferType::IndexBuffer);
         if (mUsage == gfx::BufferUsage::Static)
-        {
             DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, index_bytes, mUsage);
-        }
+        else if (mUsage == gfx::BufferUsage::Dynamic)
+            VERBOSE("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, index_bytes, mUsage);
     }
 
     mDevice->UploadBuffer(mIndexBuffer, index_ptr, index_bytes);
