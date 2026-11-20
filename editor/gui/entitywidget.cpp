@@ -91,6 +91,7 @@
 #include "editor/gui/clipboard.h"
 #include "editor/gui/playwindow.h"
 #include "editor/gui/translation.h"
+#include "engine/renderer.h"
 #include "graphics/curve.h"
 
 namespace {
@@ -1871,6 +1872,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
     mState.renderer.SetEditingMode(true);
+    mState.renderer.SetFlag(engine::Renderer::Flags::OverrideCurveAspectRatio, true);
     mState.view = &mUI;
     mState.spline_model = mSplineModel.get();
 

@@ -99,7 +99,6 @@ namespace game
 
         std::size_t GetHash() const noexcept;
         std::size_t GetCurveHash() const noexcept;
-        std::string GetCurveId(bool enable_id_caching) const noexcept;
 
         void IntoJson(data::Writer& writer) const;
         bool FromJson(const data::Reader& reader);
@@ -126,18 +125,13 @@ namespace game
     public:
         using Type = CurveClass::Type;
 
-        Curve(std::shared_ptr<const CurveClass> klass)
-            : mClass(std::move(klass))
-        {}
-        Curve(const CurveClass& klass)
-            : Curve(std::make_shared<CurveClass>(klass))
-        {}
-        Curve(CurveClass&& klass)
-            : Curve(std::make_shared<CurveClass>(std::move(klass)))
-        {}
+        Curve(std::shared_ptr<const CurveClass> klass);
+        Curve(const CurveClass& klass);
+        Curve(CurveClass&& klass);
+
         auto GetClassId() const
         { return mClass->GetClassId(); }
-        auto GetName() const
+        auto GetClassName() const
         { return mClass->GetName(); }
         auto GetCurveType() const noexcept
         { return mClass->GetCurveType(); }
@@ -149,9 +143,12 @@ namespace game
         { return mClass->HasWidthOverride(); }
         auto GetWidthOverride() const noexcept
         { return mClass->GetWidthOverride(); }
+        auto HasInstanceData() const noexcept
+        { return mInstanceCurve.has_value(); }
+        auto GetInstanceId() const noexcept
+        { return mInstanceId; }
 
         std::size_t GetCurveHash() const noexcept;
-        std::string GetCurveId(bool enable_id_caching) const;
 
         const auto& GetCurve() const noexcept
         {
@@ -195,7 +192,7 @@ namespace game
     private:
         std::shared_ptr<const CurveClass> mClass;
         std::optional<CurveData> mInstanceCurve;
-        mutable std::string mCurveId;
+        std::string mInstanceId;
 
     private:
         // these have to be shared ptr because if the curve has

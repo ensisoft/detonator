@@ -307,6 +307,7 @@ namespace game
         const ScriptVar* FindScriptVarById(const std::string& id) const;
 
         const Curve* FindCurveById(const std::string& id) const;
+        const Curve& GetCurve(size_t index) const;
 
         template<typename T>
         T GetVar(const std::string& name) const
@@ -401,9 +402,11 @@ namespace game
         const std::string& GetTag() const noexcept
         { return mInstanceTag; }
 
-        std::size_t GetNumNodes() const noexcept
+        auto GetNumCurves() const noexcept
+        { return mCurves.size(); }
+        auto GetNumNodes() const noexcept
         { return mNodes.size(); }
-        std::size_t GetNumJoints() const noexcept
+        auto GetNumJoints() const noexcept
         { return mJoints.size(); }
         auto GetRenderLayer() const noexcept
         { return mRenderLayer; }

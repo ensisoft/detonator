@@ -1705,7 +1705,7 @@ void unit_test_curve_polyline_tessellation()
         auto Tessellate = [&args](const std::vector<Point>& points, std::vector<glm::vec2>* positions) {
             auto curve_args = args;
             curve_args.points = points;
-            gfx::Curve curve(std::move(curve_args));
+            gfx::CurveInstance curve(std::move(curve_args));
             gfx::Drawable::Environment env;
             env.mesh_type = gfx::Drawable::MeshType::PaintMesh;
             auto geometry = curve.Construct(env);
@@ -2608,7 +2608,7 @@ void unit_test_curve_aspect_ratio()
             args.joint_style = gfx::CurveJointStyle::Miter;
             args.end_cap_style = gfx::CurveEndCapStyle::Butt;
             args.points = points;
-            curve = std::make_unique<gfx::Curve>(std::move(args));
+            curve = std::make_unique<gfx::CurveInstance>(std::move(args));
         }
 
         const glm::mat4 view_matrix(1.0f);
