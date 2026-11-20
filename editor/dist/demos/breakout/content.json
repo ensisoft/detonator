@@ -247,6 +247,7 @@
           "class": "BRTD8xxbwl",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -325,6 +326,7 @@
           "class": "ESN3M54I6j",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "yZllA8JJYo",
             "flags": {
@@ -379,6 +381,7 @@
           "class": "JFpPZIPERW",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "yZllA8JJYo",
             "flags": {
@@ -583,6 +586,7 @@
           "class": "EmqTxBzJEm",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -637,6 +641,7 @@
           "class": "w9atEDaYRN",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -691,6 +696,7 @@
           "class": "rK7eEMtkQf",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "fb4IaFw1R2",
             "flags": {
@@ -1296,6 +1302,7 @@
           "class": "PseXINzA2Q",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "5xCJbUrrKL",
             "flags": {
@@ -1361,6 +1368,7 @@
           "class": "nwSjgvWjoU",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "5xCJbUrrKL",
             "flags": {
@@ -1426,6 +1434,7 @@
           "class": "svrvsEZnfH",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "5xCJbUrrKL",
             "flags": {
@@ -1491,6 +1500,7 @@
           "class": "J5BMM4hBXC",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "5xCJbUrrKL",
             "flags": {
@@ -1556,6 +1566,7 @@
           "class": "aCadWfGAx7",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "5xCJbUrrKL",
             "flags": {
@@ -1678,6 +1689,7 @@
           "class": "iwdFQ6Isf0",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1756,6 +1768,7 @@
           "class": "kSxTUHLd2d",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -1854,6 +1867,7 @@
           "class": "f3zfn3lyPQ",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1994,6 +2008,7 @@
           "class": "8ApxuFjM8q",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -2137,6 +2152,7 @@
           "class": "zoQd2IkbRD",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -2297,6 +2313,7 @@
           "class": "Ez48JJPwlB",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -2405,6 +2422,7 @@
           "class": "Qv0PsreOKT",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -2548,6 +2566,7 @@
           "class": "omyQ6afIog",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -2626,6 +2645,7 @@
           "class": "bFTLN2fimL",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -2680,6 +2700,7 @@
           "class": "I5LlUuBW7O",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -2783,6 +2804,7 @@
           "class": "pDgWQNCf5A",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -2926,6 +2948,7 @@
           "class": "YmSfngBxpE",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "dn9XJGsQt0",
             "flags": {
@@ -3253,6 +3276,7 @@
           "class": "OwEjn76unJ",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3307,6 +3331,7 @@
           "class": "gW6NjEkLfo",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_isosceles_triangle",
             "flags": {
@@ -3405,6 +3430,7 @@
           "class": "gaM59OlYN3",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_isosceles_triangle",
             "flags": {
@@ -3459,6 +3485,7 @@
           "class": "DPQ1nWvM1N",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3513,6 +3540,7 @@
           "class": "TDYAovtIs3",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "z5W9266mJC",
             "flags": {
@@ -3785,6 +3813,7 @@
           "class": "rvstkGSTml",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -3967,6 +3996,7 @@
           "class": "Afa0MGoR0m",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -4032,6 +4062,7 @@
           "class": "Hj36beFq5o",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "xqp8TaU6I2",
             "flags": {
@@ -4086,6 +4117,7 @@
           "class": "SCDdF73ql8",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "xqp8TaU6I2",
             "flags": {
@@ -4140,6 +4172,7 @@
           "class": "BYTyMJ3yBu",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4205,6 +4238,7 @@
           "class": "q6QHm45637",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4675,6 +4709,7 @@
           "class": "RSlPfF89SX",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -4908,6 +4943,7 @@
           "class": "abydQXbENJ",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5023,6 +5059,7 @@
           "class": "C4PXv84PoK",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -5101,6 +5138,7 @@
           "class": "Udp7gxZBCi",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "yZllA8JJYo",
             "flags": {
@@ -5155,6 +5193,7 @@
           "class": "IOAkT7MOY2",
           "drawable_item": {
             "coordinate_space": "Scene",
+            "curve": "",
             "depth": 1.0,
             "drawable": "yZllA8JJYo",
             "flags": {
@@ -5319,9 +5358,10 @@
       "active_texture_map": "pnizt57sKg",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5450,9 +5490,10 @@
       "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5527,9 +5568,10 @@
       "active_texture_map": "5J61shS6l1",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5594,9 +5636,10 @@
       "active_texture_map": "j7yBedbaAe",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5661,9 +5704,10 @@
       "active_texture_map": "fOFCAJygD5",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5732,9 +5776,10 @@
       "active_texture_map": "lOSfwn7aeQ",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5799,9 +5844,10 @@
       "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5856,9 +5902,10 @@
       "active_texture_map": "CuMfAbA1vX",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5917,9 +5964,10 @@
       "active_texture_map": "bShNL7zgyN",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5984,9 +6032,10 @@
       "active_texture_map": "k8R5rsd2OF",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6051,9 +6100,10 @@
       "active_texture_map": "kiKZy8IlKw",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6112,9 +6162,10 @@
       "active_texture_map": "XRe2eOPx4n",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6210,9 +6261,10 @@
       "active_texture_map": "XzNky6nr9W",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6308,9 +6360,10 @@
       "active_texture_map": "sUgF0JEZzM",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6379,9 +6432,10 @@
       "active_texture_map": "jFPfGp8iD5",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6440,9 +6494,10 @@
       "active_texture_map": "aEs6Et7s3o",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6507,9 +6562,10 @@
       "active_texture_map": "j3UKqZEvI0",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6574,9 +6630,10 @@
       "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6598,9 +6655,10 @@
       "active_texture_map": "tIXNEkInuT",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6665,9 +6723,10 @@
       "active_texture_map": "iJ17HjKxC6",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -33718,6 +33777,7 @@
     {
       "content_hash_hi": 0,
       "content_hash_lo": 0,
+      "double_sided": false,
       "id": "yZllA8JJYo",
       "inline_data": {
         "byte_order": "LE",
@@ -33725,6 +33785,7 @@
         "index_buffer": "",
         "index_type": "Index16",
         "vertex_buffer": "AACAPjMzs74AAIA+MzOzPgAAgD5nZia/AACAPmdmJj8zMzM/Z2YmvzMzMz9nZiY/MzMzPzMzs74zMzM/MzOzPgAAgD8AAAC/AACAPwAAAD/sUTg/7FE4vuxROD/sUTg+7FE4P4brUb/sUTg/hutRPw==",
+        "vertex_flags": "AAAAAAAAAA==",
         "vertex_layout": {
           "attributes": [
             {
@@ -33934,6 +33995,7 @@
                       },
                       "id": "rIjMbQu29X",
                       "name": "powerup",
+                      "orientation": "Horizontal",
                       "position": {
                         "x": 42.0,
                         "y": 39.0
@@ -34092,7 +34154,7 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.21568627655506134,\"g\":0.21568627655506134,\"r\":0.9490196108818054}},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-size\",\"value\":28},{\"key\":\"text-line-height\",\"value\":1.2000000476837158},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg it.otf\"},{\"key\":\"text-blink\",\"value\":false},{\"key\":\"button-border-width\",\"value\":1.0},{\"key\":\"mouse-over/text-size\",\"value\":36}]}",
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.21568627655506134,\"g\":0.21568627655506134,\"r\":0.9490196108818054}},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-size\",\"value\":28},{\"key\":\"text-line-height\",\"value\":1.2000000476837158},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg it.otf\"},{\"key\":\"text-blink\",\"value\":false},{\"key\":\"button-border-width\",\"value\":1.0},{\"key\":\"hovered/text-size\",\"value\":36}]}",
                   "tab_index": 0,
                   "text": "exit",
                   "type": "PushButton"
@@ -34116,7 +34178,7 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"mouse-over/text-size\",\"value\":36},{\"key\":\"text-blink\",\"value\":false},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.24705882370471954,\"g\":0.8196078538894653,\"r\":0.650995671749115}},{\"key\":\"text-size\",\"value\":28},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg it.otf\"},{\"key\":\"text-line-height\",\"value\":1.2000000476837158},{\"key\":\"edit-text-size\",\"value\":28}]}",
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"hovered/text-size\",\"value\":36},{\"key\":\"text-blink\",\"value\":false},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.24705882370471954,\"g\":0.8196078538894653,\"r\":0.650995671749115}},{\"key\":\"text-size\",\"value\":28},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg it.otf\"},{\"key\":\"text-line-height\",\"value\":1.2000000476837158},{\"key\":\"edit-text-size\",\"value\":28}]}",
                   "tab_index": 1,
                   "text": "play",
                   "type": "PushButton"
